@@ -155,6 +155,7 @@ export default function CreateEventPage() {
   const [uploadedImageSrc, setUploadedImageSrc] = useState<string | null>(null);
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
   const [isDraggingModal, setIsDraggingModal] = useState(false);
+  const [imageUrlInput, setImageUrlInput] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const activeTheme = themes[currentThemeIdx];
@@ -325,9 +326,18 @@ export default function CreateEventPage() {
     }
   };
 
+  const handleUrlImageSubmit = () => {
+    if (!imageUrlInput.trim()) return;
+    setUploadedImageSrc(imageUrlInput.trim());
+    setImageDimensions({ width: 1200, height: 1200 });
+    setImageUrlInput('');
+    setIsUploadModalOpen(false);
+  };
+
   const handleRemoveImage = () => {
     setUploadedImageSrc(null);
     setImageDimensions(null);
+    setImageUrlInput('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -1173,6 +1183,36 @@ export default function CreateEventPage() {
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-semibold text-white">Click to Browse or Drag &amp; Drop</span>
                 <span className="text-xs text-neutral-400">PNG, JPG, WEBP up to 5MB</span>
+              </div>
+            </div>
+
+            {/* OR separator */}
+            <div className="flex items-center gap-3 my-1">
+              <div className="h-[1px] flex-1 bg-[#2e2e34]" />
+              <span className="text-[10px] uppercase font-mono text-neutral-500 tracking-wider">OR</span>
+              <div className="h-[1px] flex-1 bg-[#2e2e34]" />
+            </div>
+
+            {/* URL Input */}
+            <div className="flex flex-col gap-1.5 text-left">
+              <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Image URL</label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  placeholder="https://example.com/image.png"
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  className="flex-1 bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-xl px-3.5 py-2 text-xs text-white outline-none"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <button
+                  type="button"
+                  onClick={handleUrlImageSubmit}
+                  className="px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-md flex-shrink-0"
+                  style={{ color: 'black' }}
+                >
+                  Apply URL
+                </button>
               </div>
             </div>
 
