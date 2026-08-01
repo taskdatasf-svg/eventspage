@@ -33,41 +33,50 @@ interface RegUser {
   status?: string;
 }
 
-const headerBgColors = [
-  'bg-[#818cf8]',
-  'bg-[#fef08a]',
-  'bg-[#6ee7b7]',
-  'bg-[#fbcfe8]',
-  'bg-[#fed7aa]'
+// Colors removed for clean monochromatic look
+
+const themes = [
+  { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
+  { name: 'Quantum', bg: 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600', textColor: 'text-white', subText: '*BUILD THE UNKNOWN' },
+  { name: 'Warp', bg: 'bg-black border border-[#2e2e34]', textColor: 'text-white', subText: '*JOIN THE FUTURE' },
+  { name: 'Emoji', bg: 'bg-[#b497cf]', textColor: 'text-white', subText: '*STUDENT FORGE EVENTS' },
+  { name: 'Confetti', bg: 'bg-gradient-to-tr from-purple-600 to-pink-500', textColor: 'text-white', subText: '*PARTY TIME' },
+  { name: 'Pattern', bg: 'bg-gradient-to-tr from-indigo-600 to-teal-600', textColor: 'text-white', subText: '*PATTERN CREATION' },
+  { name: 'Seasonal', bg: 'bg-gradient-to-tr from-rose-500 to-amber-500', textColor: 'text-white', subText: '*CREATORS GATHERING' },
+  { name: 'PixelBlast', bg: 'bg-[#141416]', textColor: 'text-[#B497CF]', subText: '*PIXELBLAST INTERACTIVE' },
+  { name: 'Grainient', bg: 'bg-gradient-to-tr from-[#FF9FFC] via-[#5227FF] to-[#B497CF]', textColor: 'text-white', subText: '*GRAINIENT ANIMATED' }
 ];
 
-const getHighlightColor = (bgClass: string) => {
-  if (bgClass.includes('[#818cf8]')) return 'text-[#818cf8]';
-  if (bgClass.includes('[#fef08a]')) return 'text-[#fef08a]';
-  if (bgClass.includes('[#6ee7b7]')) return 'text-[#6ee7b7]';
-  if (bgClass.includes('[#fbcfe8]')) return 'text-[#fbcfe8]';
-  if (bgClass.includes('[#fed7aa]')) return 'text-[#fed7aa]';
-  return 'text-[#818cf8]';
-};
-
-const EventImage: React.FC<{ src?: string | null; title: string }> = ({ src, title }) => {
+const EventImage: React.FC<{ event: EventData }> = ({ event }) => {
   const [error, setError] = useState(false);
 
-  if (!src || error) {
+  if (event.coverImage && !error) {
     return (
-      <span className="font-extrabold text-white text-xs tracking-tighter uppercase select-none">
-        {title.charAt(0) || 'E'}
-      </span>
+      <img
+        src={event.coverImage}
+        alt={event.title}
+        onError={() => setError(true)}
+        className="w-full h-full object-cover"
+      />
     );
   }
 
+  const activeTheme = event.themeIdx !== undefined && themes[event.themeIdx]
+    ? themes[event.themeIdx]
+    : themes[0];
+
   return (
-    <img
-      src={src}
-      alt={title}
-      onError={() => setError(true)}
-      className="w-full h-full object-cover"
-    />
+    <div className={`w-full h-full relative overflow-hidden flex flex-col justify-between p-1.5 text-white bg-neutral-950/45 border border-white/10 rounded-md`}>
+      <div className={`absolute inset-0 z-0 ${activeTheme.bg}`} />
+      <div className="z-10 flex flex-col gap-0.5">
+        <h5 className="text-[5px] font-black uppercase leading-[0.95] tracking-tighter line-clamp-2">
+          {event.title}
+        </h5>
+      </div>
+      <div className="z-10 flex flex-col text-[4px] font-mono uppercase tracking-wider opacity-85 border-t border-white/20 pt-0.5">
+        <span>{event.startDate}</span>
+      </div>
+    </div>
   );
 };
 
@@ -427,28 +436,26 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-4">
-                    {myEvents.map((event, idx) => {
+                    {myEvents.map((event) => {
                       const regs = registrations[event.id] || [];
                       const isExpanded = expandedEventId === event.id;
                       const isDeleting = deleteConfirmId === event.id;
-                      const bgClass = headerBgColors[idx % headerBgColors.length];
-                      const highlightColor = getHighlightColor(bgClass);
                       return (
-                        <div key={event.id} className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl overflow-hidden animate-fade-in">
-                          <div className={`px-5 py-2 ${bgClass} flex items-center justify-between`}>
-                            <span className="text-[10px] font-mono font-bold text-black/60 uppercase tracking-wider">{event.ticketCode}</span>
-                            <span className="text-[10px] font-mono text-black/60">{event.startDate}</span>
+                        <div key={event.id} className="bg-[#1c1c1f] border border-[#2e2e34] rounded-xl overflow-hidden animate-fade-in">
+                          <div className="px-5 py-2.5 bg-[#222226] border-b border-[#2e2e34] flex items-center justify-between">
+                            <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider">{event.ticketCode}</span>
+                            <span className="text-[10px] font-mono text-neutral-400">{event.startDate}</span>
                           </div>
                           <div className="p-5 flex flex-col gap-4">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex items-center gap-4 flex-1 min-w-0">
                                 {/* Event Cover Logo Box */}
                                 <div className="w-12 h-12 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden select-none">
-                                  <EventImage src={event.coverImage} title={event.title} />
+                                  <EventImage event={event} />
                                 </div>
                                 
                                 <div className="flex-1 min-w-0">
-                                  <h3 className={`text-base font-bold ${highlightColor} truncate`}>{event.title}</h3>
+                                  <h3 className="text-base font-bold text-white truncate">{event.title}</h3>
                                   <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-neutral-400">
                                     <span className="flex items-center gap-1"><GoLocation className="w-3 h-3" />{event.location || 'Online'}</span>
                                     <span className="flex items-center gap-1"><GoCalendar className="w-3 h-3" />{event.startDate}{event.startTime && ` · ${event.startTime}`}</span>
@@ -499,7 +506,7 @@ export default function DashboardPage() {
                                           <div className="flex items-center gap-2">
                                             <p className="text-xs font-medium text-white">{reg.name || 'Anonymous'}</p>
                                             {reg.status === 'PENDING' ? (
-                                              <span className="text-[8px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
+                                              <span className="text-[8px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
                                                 Pending
                                               </span>
                                             ) : (
@@ -594,21 +601,19 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-4">
-                    {myTickets.map((ticket, idx) => {
-                      const bgClass = ticket.eventHeaderBg || headerBgColors[idx % headerBgColors.length];
-                      const highlightColor = getHighlightColor(bgClass);
+                    {myTickets.map((ticket) => {
                       return (
-                        <div key={ticket.id} className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4">
+                        <div key={ticket.id} className="bg-[#1c1c1f] border border-[#2e2e34] rounded-xl overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4">
                           <div className="flex items-center gap-4 min-w-0">
                             {/* Event header strip styling for logo block */}
-                            <div className={`w-12 h-12 rounded-xl ${bgClass} flex items-center justify-center flex-shrink-0 text-slate-950 text-sm font-black`}>
+                            <div className="w-12 h-12 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0 text-white text-sm font-black select-none">
                               {ticket.eventTitle.substring(0, 1).toUpperCase()}
                             </div>
                             <div className="flex flex-col min-w-0">
                               <div className="flex items-center gap-2">
-                                <h3 className={`text-sm font-bold ${highlightColor} truncate`}>{ticket.eventTitle}</h3>
+                                <h3 className="text-sm font-bold text-white truncate">{ticket.eventTitle}</h3>
                                 {ticket.status === 'PENDING' ? (
-                                  <span className="text-[8px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
+                                  <span className="text-[8px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
                                     Pending Approval
                                   </span>
                                 ) : (
@@ -1011,8 +1016,8 @@ export default function DashboardPage() {
               {/* Celebration Header */}
               {selectedTicket.status === 'PENDING' ? (
                 <div className="p-6 pb-5 flex flex-col items-center text-center gap-3 animate-fade-in">
-                  <span className="text-4xl text-amber-500 animate-pulse"><GoClock className="w-10 h-10" /></span>
-                  <h2 className="text-xl font-bold text-amber-500 tracking-tight">Pending Host Approval</h2>
+                  <span className="text-4xl text-rose-500 animate-pulse"><GoClock className="w-10 h-10" /></span>
+                  <h2 className="text-xl font-bold text-rose-500 tracking-tight">Pending Host Approval</h2>
                   <p className="text-xs text-neutral-400 max-w-[280px]">
                     Your details were sent to the organizer. We are checking and reviewing your details, we make sure to get updates of your ticket.
                   </p>
@@ -1049,7 +1054,7 @@ export default function DashboardPage() {
                     <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Ticket ID</span>
                     <span className="font-mono font-bold text-white truncate">
                       {selectedTicket.status === 'PENDING' ? (
-                        <span className="text-amber-500">PENDING APPROVAL</span>
+                        <span className="text-rose-500">PENDING APPROVAL</span>
                       ) : (
                         selectedTicket.ticketCode
                       )}
@@ -1127,7 +1132,7 @@ export default function DashboardPage() {
               <div className="px-6 pt-4 flex flex-col items-center gap-4">
                 {selectedTicket.status === 'PENDING' ? (
                   <div className="relative p-3 bg-white/5 rounded-xl border border-dashed border-[#2e2e34] w-[164px] h-[164px] flex flex-col items-center justify-center text-center select-none animate-pulse">
-                    <span className="text-2xl mb-1.5 text-amber-500"><GoClock className="w-6 h-6" /></span>
+                    <span className="text-2xl mb-1.5 text-rose-500"><GoClock className="w-6 h-6" /></span>
                     <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest leading-normal px-2">
                       Awaiting Approval
                     </span>

@@ -4,42 +4,49 @@ import React, { useEffect, useState } from 'react';
 import { GoLocation, GoCalendar, GoPlus, GoArrowRight } from 'react-icons/go';
 import { EventData } from '@/lib/eventsStore';
 
-const headerBgColors = [
-  'bg-[#818cf8]', // Soft Periwinkle Blue
-  'bg-[#fef08a]', // Soft Pastel Yellow
-  'bg-[#6ee7b7]', // Soft Pastel Mint Green
-  'bg-[#fbcfe8]', // Soft Pastel Pink
-  'bg-[#fed7aa]'  // Soft Pastel Peach
+const themes = [
+  { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
+  { name: 'Quantum', bg: 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600', textColor: 'text-white', subText: '*BUILD THE UNKNOWN' },
+  { name: 'Warp', bg: 'bg-black border border-[#2e2e34]', textColor: 'text-white', subText: '*JOIN THE FUTURE' },
+  { name: 'Emoji', bg: 'bg-[#b497cf]', textColor: 'text-white', subText: '*STUDENT FORGE EVENTS' },
+  { name: 'Confetti', bg: 'bg-gradient-to-tr from-purple-600 to-pink-500', textColor: 'text-white', subText: '*PARTY TIME' },
+  { name: 'Pattern', bg: 'bg-gradient-to-tr from-indigo-600 to-teal-600', textColor: 'text-white', subText: '*PATTERN CREATION' },
+  { name: 'Seasonal', bg: 'bg-gradient-to-tr from-rose-500 to-amber-500', textColor: 'text-white', subText: '*CREATORS GATHERING' },
+  { name: 'PixelBlast', bg: 'bg-[#141416]', textColor: 'text-[#B497CF]', subText: '*PIXELBLAST INTERACTIVE' },
+  { name: 'Grainient', bg: 'bg-gradient-to-tr from-[#FF9FFC] via-[#5227FF] to-[#B497CF]', textColor: 'text-white', subText: '*GRAINIENT ANIMATED' }
 ];
 
-const EventImage: React.FC<{ src?: string | null; title: string }> = ({ src, title }) => {
+const EventImage: React.FC<{ event: EventData }> = ({ event }) => {
   const [error, setError] = useState(false);
 
-  if (!src || error) {
+  if (event.coverImage && !error) {
     return (
-      <span className="font-extrabold text-white text-lg tracking-tighter uppercase select-none">
-        {title.charAt(0) || 'E'}
-      </span>
+      <img
+        src={event.coverImage}
+        alt={event.title}
+        onError={() => setError(true)}
+        className="w-full h-full object-cover"
+      />
     );
   }
 
-  return (
-    <img
-      src={src}
-      alt={title}
-      onError={() => setError(true)}
-      className="w-full h-full object-cover"
-    />
-  );
-};
+  const activeTheme = event.themeIdx !== undefined && themes[event.themeIdx]
+    ? themes[event.themeIdx]
+    : themes[0];
 
-const getHighlightColor = (bgClass: string) => {
-  if (bgClass.includes('[#818cf8]')) return 'text-[#818cf8]';
-  if (bgClass.includes('[#fef08a]')) return 'text-[#fef08a]';
-  if (bgClass.includes('[#6ee7b7]')) return 'text-[#6ee7b7]';
-  if (bgClass.includes('[#fbcfe8]')) return 'text-[#fbcfe8]';
-  if (bgClass.includes('[#fed7aa]')) return 'text-[#fed7aa]';
-  return 'text-[#818cf8]';
+  return (
+    <div className={`w-full h-full relative overflow-hidden flex flex-col justify-between p-2 text-white bg-neutral-950/45 border border-white/10 rounded-md`}>
+      <div className={`absolute inset-0 z-0 ${activeTheme.bg}`} />
+      <div className="z-10 flex flex-col gap-0.5">
+        <h5 className="text-[7px] font-black uppercase leading-[0.95] tracking-tighter line-clamp-3">
+          {event.title}
+        </h5>
+      </div>
+      <div className="z-10 flex flex-col text-[5px] font-mono uppercase tracking-wider opacity-85 border-t border-white/20 pt-1">
+        <span>{event.startDate}</span>
+      </div>
+    </div>
+  );
 };
 
 const EventsList: React.FC = () => {
@@ -65,14 +72,6 @@ const EventsList: React.FC = () => {
           <h2 className="text-lg sm:text-xl font-semibold text-[#f4f4f5] tracking-tight">
             Upcoming Events
           </h2>
-
-          <a
-            href="/create-event"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-md transition-all duration-200 cursor-pointer shadow-sm"
-          >
-            <GoPlus className="w-3.5 h-3.5 text-neutral-300" />
-            <span>Create Event</span>
-          </a>
         </div>
 
         {/* Loading Skeleton */}
@@ -104,66 +103,56 @@ const EventsList: React.FC = () => {
           </div>
         ) : (
           /* Real Published Events List */
-          <div className="flex flex-col gap-4">
-            {events.map((event, idx) => {
-              const bgClass = headerBgColors[idx % headerBgColors.length];
-              const highlightColor = getHighlightColor(bgClass);
-
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {events.map((event) => {
               return (
                 <div
                   key={event.id}
-                  className="group relative flex flex-col rounded-2xl overflow-hidden shadow-xl border border-[#2e2e34] hover:border-neutral-500/50 transition-all duration-300"
+                  onClick={() => window.location.href = `/events/${event.id}`}
+                  className="group bg-[#222226] hover:bg-[#2c2c32] border border-[#333339] hover:border-neutral-500/30 rounded-md transition-all duration-200 p-4 flex items-center gap-4 cursor-pointer"
                 >
-                  {/* Top Solid Soft Color Header Banner Strip */}
-                  <div className={`px-5 py-2.5 ${bgClass} text-slate-950 font-mono text-xs font-semibold flex items-center justify-between select-none`}>
-                    <span>{event.ticketCode}</span>
-                    <span>{event.startDate}</span>
+                  {/* Left Side: Image */}
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#161618] border border-[#333339] rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden select-none">
+                    <EventImage event={event} />
                   </div>
 
-                  {/* Main Ticket Card Body */}
-                  <div className="bg-[#1c1c1f] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-                    
-                    {/* Left Side: Logo Badge, Subtitle & Info */}
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      
-                      {/* Event Cover / Logo Box */}
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#222226] border border-[#2e2e34] rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden select-none group-hover:scale-105 transition-transform duration-200">
-                        <EventImage src={event.coverImage} title={event.title} />
-                      </div>
-
-                      {/* Clean Text Stack */}
-                      <div className="flex flex-col gap-0.5 min-w-0 flex-1 justify-center">
-                        <span className="text-xs text-[#9a9aa0] font-normal truncate">
-                          {event.organizer || 'Infinity Event Organizer'}
+                  {/* Right Side: basic content */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[8px] font-mono bg-[#161618] border border-[#333339] px-1.5 py-0.5 rounded text-neutral-400">
+                          {event.ticketCode}
                         </span>
+                        <span className="text-[9px] text-neutral-400 font-mono">
+                          {event.startDate}
+                        </span>
+                      </div>
+                      
+                      <h4 className="text-sm font-bold text-white group-hover:text-neutral-200 transition-colors truncate mt-1">
+                        {event.title}
+                      </h4>
 
-                        <h4 className={`text-base sm:text-lg font-bold ${highlightColor} transition-colors truncate leading-tight`}>
-                          {event.title}
-                        </h4>
+                      <span className="text-[11px] text-neutral-400 font-normal truncate">
+                        By {event.organizer || 'Infinity Event Organizer'}
+                      </span>
 
-                        <div className="flex items-center gap-1 text-xs text-[#8a8a90] font-normal truncate pt-0.5">
-                          <GoLocation className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
-                          <span className="truncate">{event.location || 'Online'}</span>
-                        </div>
+                      <div className="flex items-center gap-1 text-[11px] text-neutral-500 font-normal truncate mt-1">
+                        <GoLocation className="w-3 h-3 flex-shrink-0 text-neutral-400" />
+                        <span className="truncate">{event.location || 'Online'}</span>
                       </div>
                     </div>
 
-                    {/* Right Side: Price & Action Button */}
-                    <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 border-[#28282d] pt-3 sm:pt-0">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] uppercase font-mono text-neutral-400">Ticket Price</span>
-                        <span className={`text-lg font-extrabold ${highlightColor}`}>{event.price || 'Free'}</span>
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#333339]/50">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-[8px] uppercase font-mono text-neutral-500">Price:</span>
+                        <span className="text-xs font-bold text-white">{event.price || 'Free'}</span>
                       </div>
 
-                      <a
-                        href={`/events/${event.id}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-md border border-[#333339] transition-all duration-200 cursor-pointer shadow-sm"
-                      >
-                        <span>View Detail</span>
-                        <GoArrowRight className="w-3.5 h-3.5 text-neutral-300" />
-                      </a>
+                      <div className="inline-flex items-center gap-1 text-[10px] text-neutral-400 group-hover:text-white transition-colors">
+                        <span>Details</span>
+                        <GoArrowRight className="w-2.5 h-2.5" />
+                      </div>
                     </div>
-
                   </div>
                 </div>
               );

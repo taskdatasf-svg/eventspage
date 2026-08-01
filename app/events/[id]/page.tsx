@@ -4,8 +4,31 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PixelBlast from '@/components/PixelBlast';
+import Grainient from '@/components/Grainient';
 import { EventData } from '@/lib/eventsStore';
 import { GoCalendar, GoLocation, GoTag, GoPeople, GoArrowLeft, GoPerson, GoShieldCheck, GoClock, GoCheck } from 'react-icons/go';
+
+const themes = [
+  { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
+  { name: 'Quantum', bg: 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600', textColor: 'text-white', subText: '*BUILD THE UNKNOWN' },
+  { name: 'Warp', bg: 'bg-black border border-[#2e2e34]', textColor: 'text-white', subText: '*JOIN THE FUTURE' },
+  { name: 'Emoji', bg: 'bg-[#b497cf]', textColor: 'text-white', subText: '*STUDENT FORGE EVENTS' },
+  { name: 'Confetti', bg: 'bg-gradient-to-tr from-purple-600 to-pink-500', textColor: 'text-white', subText: '*PARTY TIME' },
+  { name: 'Pattern', bg: 'bg-gradient-to-tr from-indigo-600 to-teal-600', textColor: 'text-white', subText: '*PATTERN CREATION' },
+  { name: 'Seasonal', bg: 'bg-gradient-to-tr from-rose-500 to-amber-500', textColor: 'text-white', subText: '*CREATORS GATHERING' },
+  { name: 'PixelBlast', bg: 'bg-[#141416]', textColor: 'text-[#B497CF]', subText: '*PIXELBLAST INTERACTIVE' },
+  { name: 'Grainient', bg: 'bg-transparent', textColor: 'text-[#FF9FFC]', subText: '*GRAINIENT ANIMATED' }
+];
+
+const getPageFontFamilyClass = (fontName: string | undefined) => {
+  switch (fontName) {
+    case 'Serif': return 'font-serif';
+    case 'Mono': return 'font-mono';
+    case 'Display': return 'font-sans font-bold';
+    default: return 'font-sans';
+  }
+};
 
 const getHighlightColor = (bgClass: string) => {
   if (!bgClass) return 'text-[#818cf8]';
@@ -128,10 +151,66 @@ export default function EventDetailPage() {
   const highlightColor = getHighlightColor(event.headerBg);
 
   return (
-    <main className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
+    <main className={`min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased relative overflow-hidden ${getPageFontFamilyClass(event.font)}`}>
+      {/* Ambient Page Background Glow based on theme */}
+      {!event.coverImage && event.themeIdx !== undefined && themes[event.themeIdx] && (
+        event.themeIdx === 7 ? (
+          <div className="fixed inset-0 z-0 opacity-90 pointer-events-none">
+            <PixelBlast
+              variant="circle"
+              pixelSize={6}
+              color="#B497CF"
+              patternScale={3}
+              patternDensity={1.2}
+              pixelSizeJitter={0.5}
+              enableRipples
+              rippleSpeed={0.4}
+              rippleThickness={0.12}
+              rippleIntensityScale={1.5}
+              liquid
+              liquidStrength={0.12}
+              liquidRadius={1.2}
+              liquidWobbleSpeed={5}
+              speed={0.6}
+              edgeFade={0.25}
+              transparent
+            />
+          </div>
+        ) : event.themeIdx === 8 ? (
+          <div className="fixed inset-0 z-0 pointer-events-none">
+            <Grainient
+              color1="#FF9FFC"
+              color2="#5227FF"
+              color3="#B497CF"
+              timeSpeed={0.25}
+              colorBalance={0.0}
+              warpStrength={1.0}
+              warpFrequency={5.0}
+              warpSpeed={2.0}
+              warpAmplitude={50.0}
+              blendAngle={0.0}
+              blendSoftness={0.05}
+              rotationAmount={500.0}
+              noiseScale={2.0}
+              grainAmount={0.1}
+              grainScale={2.0}
+              grainAnimated={false}
+              contrast={1.5}
+              gamma={1.0}
+              saturation={1.0}
+              centerX={0.0}
+              centerY={0.0}
+              zoom={0.9}
+            />
+          </div>
+        ) : (
+          <div className={`fixed inset-0 z-0 opacity-90 pointer-events-none ${themes[event.themeIdx].bg}`} />
+        )
+      )}
+
       <Navbar />
 
-      <div className="w-full max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 flex-1 flex flex-col gap-6">
+      <div className="w-full max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 flex-1 flex flex-col gap-6 relative z-10">
         
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-[#8a8a90] font-normal pb-4 border-b border-[#2e2e34] mb-4">
@@ -149,7 +228,11 @@ export default function EventDetailPage() {
           <div className="lg:col-span-8 flex flex-col gap-6">
             
             {/* Styled Event Cover Image - Square 1:1 (1200×1200) */}
-            <div className="w-full aspect-square rounded-2xl overflow-hidden border border-[#2e2e34] relative bg-black shadow-2xl">
+            <div className={`w-full aspect-square rounded-2xl overflow-hidden relative shadow-2xl ${
+              event.coverImage 
+                ? 'bg-black border border-[#2e2e34]' 
+                : 'bg-neutral-950/45 backdrop-blur-md border border-white/10 text-white'
+            }`}>
               {event.coverImage ? (
                 <img
                   src={event.coverImage}
@@ -160,18 +243,18 @@ export default function EventDetailPage() {
                   style={{ imageRendering: 'auto' }}
                 />
               ) : (
-                <div className={`w-full h-full ${event.headerBg || 'bg-[#ffe600]'} flex flex-col justify-between p-8 sm:p-12 text-black`}>
-                  <div className="flex flex-col gap-3">
-                    <span className="text-[10px] font-mono uppercase tracking-wider font-extrabold text-black/50">
+                <div className="w-full h-full flex flex-col justify-between p-8 sm:p-12 relative overflow-hidden text-white">
+                  <div className="flex flex-col gap-3 z-10">
+                    <span className="text-[10px] font-mono uppercase tracking-wider font-extrabold opacity-60">
                       {event.calendarType || 'Student Forge Gathering'}
                     </span>
                     <h2 className="text-3xl sm:text-5xl font-black uppercase leading-[0.9] tracking-tighter line-clamp-5">
                       {event.title}
                     </h2>
                   </div>
-                  <div className="flex flex-col gap-1 pt-6 border-t border-black/10">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-black/50">{event.startDate} · {event.startTime}</span>
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-black/50 truncate">{event.location}</span>
+                  <div className="flex flex-col gap-1 pt-6 border-t border-current/10 z-10">
+                    <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">{event.startDate} · {event.startTime}</span>
+                    <span className="text-[10px] font-mono uppercase tracking-widest opacity-60 truncate">{event.location}</span>
                   </div>
                 </div>
               )}

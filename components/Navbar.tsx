@@ -63,9 +63,9 @@ export default function Navbar() {
     <div className="sticky top-0 z-40 flex flex-col">
 
       {/* Sticky Announcement Banner — TOP */}
-      <div className="w-full bg-blue-600 border-b border-blue-500">
-        <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-center">
-          <span className="text-xs sm:text-sm font-semibold text-white font-sans tracking-normal">
+      <div className="w-full bg-blue-600 border-b border-blue-500 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-center">
+          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white font-sans tracking-tight whitespace-nowrap">
             This platform is currently in early access &mdash; public launch coming soon.
           </span>
         </div>
@@ -94,25 +94,17 @@ export default function Navbar() {
               Home
             </a>
             <a
-              href="/events"
+              href="/explore"
               className="px-3 py-1.5 text-neutral-300 hover:text-white rounded-md transition-colors"
             >
-              Events
+              Explore
             </a>
           </div>
         </div>
 
-        {/* Right Side: Create Event Button, Bell Icon, Circle Profile Button */}
+        {/* Right Side: Bell Icon, Circle Profile Button */}
         <div className="flex items-center gap-3">
           
-          {/* Create Event Action Button — matches hero button style */}
-          <a
-            href="/create-event"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-md border border-[#333339] transition-all duration-200 cursor-pointer"
-          >
-            <GoPlus className="w-3.5 h-3.5 text-neutral-300" />
-            <span>Create Event</span>
-          </a>
 
           {/* Clean Bell Notification Button & Popover */}
           <div className="relative" ref={bellRef}>

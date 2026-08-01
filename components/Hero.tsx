@@ -14,6 +14,14 @@ const Hero: React.FC<HeroProps> = ({
   subtitle = 'Host, discover, and scale technical hackathons, summits, and workshops across global university chapters.',
   onExploreClick
 }) => {
+  const handleExploreClick = () => {
+    if (onExploreClick) {
+      onExploreClick();
+    } else {
+      window.location.href = '/explore';
+    }
+  };
+
   const handleHostEventClick = () => {
     window.location.href = '/create-event';
   };
@@ -51,7 +59,7 @@ const Hero: React.FC<HeroProps> = ({
         {/* Hero Action Buttons */}
         <div className="pt-2 flex items-center justify-center gap-3">
           <button
-            onClick={onExploreClick}
+            onClick={handleExploreClick}
             type="button"
             className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] hover:bg-[#2c2c32] text-white text-xs sm:text-sm font-normal rounded-md border border-[#333339] transition-all duration-200 cursor-pointer"
           >

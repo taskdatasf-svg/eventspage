@@ -22,8 +22,8 @@ const Footer: React.FC = () => {
               />
             </a>
 
-            <a href="#discover" className="hover:text-white transition-colors">
-              Discover
+            <a href="/explore" className="hover:text-white transition-colors">
+              Explore
             </a>
             <a href="#pricing" className="hover:text-white transition-colors">
               Pricing

@@ -17,6 +17,8 @@ export interface EventData {
   visibility: string;
   coverImage?: string | null;
   headerBg: string;
+  font: string;
+  themeIdx?: number;
   customFields?: string | null;
   speakers?: string | null;
   createdAt: string;

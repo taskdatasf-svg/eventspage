@@ -37,6 +37,7 @@ export async function POST(request: Request) {
         coverImage: body.coverImage || null,
         headerBg: body.headerBg || 'bg-[#818cf8]',
         themeIdx: body.themeIdx ?? 0,
+        font: body.font || 'Default',
         customFields: body.customFields || null,
         speakers: body.speakers || null,
       },

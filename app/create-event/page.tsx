@@ -3,15 +3,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PixelBlast from '@/components/PixelBlast';
+import Grainient from '@/components/Grainient';
 import { GoCalendar, GoGlobe, GoLocation, GoTag, GoPeople, GoCheck, GoUpload, GoTrash, GoX, GoInfo, GoSearch, GoPlus } from 'react-icons/go';
 
 
 const themes = [
-  { name: 'Minimal Yellow', bg: 'bg-[#ffe600]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
-  { name: 'Dark Emerald', bg: 'bg-gradient-to-tr from-emerald-600 to-teal-900', textColor: 'text-white', subText: '*BUILD THE UNKNOWN' },
-  { name: 'Cyber Neon', bg: 'bg-gradient-to-tr from-purple-600 to-pink-500', textColor: 'text-white', subText: '*JOIN THE FUTURE' },
-  { name: 'Soft Lavender', bg: 'bg-gradient-to-tr from-indigo-500 to-purple-600', textColor: 'text-white', subText: '*STUDENT FORGE EVENTS' },
-  { name: 'Sunset Rose', bg: 'bg-gradient-to-tr from-rose-500 to-amber-500', textColor: 'text-white', subText: '*CREATORS GATHERING' }
+  { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
+  { name: 'Quantum', bg: 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600', textColor: 'text-white', subText: '*BUILD THE UNKNOWN' },
+  { name: 'Warp', bg: 'bg-black border border-[#2e2e34]', textColor: 'text-white', subText: '*JOIN THE FUTURE' },
+  { name: 'Emoji', bg: 'bg-[#b497cf]', textColor: 'text-white', subText: '*STUDENT FORGE EVENTS' },
+  { name: 'Confetti', bg: 'bg-gradient-to-tr from-purple-600 to-pink-500', textColor: 'text-white', subText: '*PARTY TIME' },
+  { name: 'Pattern', bg: 'bg-gradient-to-tr from-indigo-600 to-teal-600', textColor: 'text-white', subText: '*PATTERN CREATION' },
+  { name: 'Seasonal', bg: 'bg-gradient-to-tr from-rose-500 to-amber-500', textColor: 'text-white', subText: '*CREATORS GATHERING' },
+  { name: 'PixelBlast', bg: 'bg-[#141416]', textColor: 'text-[#B497CF]', subText: '*PIXELBLAST INTERACTIVE' },
+  { name: 'Grainient', bg: 'bg-transparent', textColor: 'text-[#FF9FFC]', subText: '*GRAINIENT ANIMATED' }
 ];
 
 const headerBgOptions = [
@@ -156,6 +162,14 @@ export default function CreateEventPage() {
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
   const [isDraggingModal, setIsDraggingModal] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');
+  const [tempImageSrc, setTempImageSrc] = useState<string | null>(null);
+  const [tempFilename, setTempFilename] = useState<string | null>(null);
+
+  // Bottom Sheet Theme Customizer States
+  const [isThemeDrawerOpen, setIsThemeDrawerOpen] = useState(false);
+  const [currentFont, setCurrentFont] = useState('Default');
+  const [currentCustomColor, setCurrentCustomColor] = useState('None');
+  const [currentDisplayMode, setCurrentDisplayMode] = useState('Auto');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const activeTheme = themes[currentThemeIdx];
@@ -248,8 +262,69 @@ export default function CreateEventPage() {
     }
   };
 
+  const getCustomColorBg = (colorName: string) => {
+    switch (colorName) {
+      case 'Gold': return 'bg-amber-600/35 border-amber-500/40 text-white';
+      case 'Emerald': return 'bg-emerald-600/35 border-emerald-500/40 text-white';
+      case 'Purple': return 'bg-purple-600/35 border-purple-500/40 text-white';
+      case 'Indigo': return 'bg-indigo-600/35 border-indigo-500/40 text-white';
+      case 'Rose': return 'bg-rose-600/35 border-rose-500/40 text-white';
+      default: return 'bg-neutral-950/40 border-white/10 text-white';
+    }
+  };
+
+  const getFontFamilyClass = (fontName: string) => {
+    switch (fontName) {
+      case 'Serif': return 'font-serif';
+      case 'Mono': return 'font-mono tracking-normal';
+      case 'Display': return 'font-bold tracking-tight';
+      default: return 'font-black tracking-tighter';
+    }
+  };
+
+  const getDotColor = (colorName: string) => {
+    switch (colorName) {
+      case 'Gold': return 'bg-[#d97706]';
+      case 'Emerald': return 'bg-[#059669]';
+      case 'Purple': return 'bg-[#7c3aed]';
+      case 'Indigo': return 'bg-[#4f46e5]';
+      case 'Rose': return 'bg-[#e11d48]';
+      default: return 'bg-neutral-600';
+    }
+  };
+
   const handleShuffleTheme = () => {
     setCurrentThemeIdx((prev) => (prev + 1) % themes.length);
+  };
+
+  const handleOpenUploadModal = () => {
+    if (uploadedImageSrc) {
+      if (uploadedImageSrc.startsWith('http')) {
+        setImageUrlInput(uploadedImageSrc);
+        setTempImageSrc(null);
+      } else {
+        setTempImageSrc(uploadedImageSrc);
+        setImageUrlInput('');
+      }
+    } else {
+      setTempImageSrc(null);
+      setImageUrlInput('');
+    }
+    setTempFilename(null);
+    setIsUploadModalOpen(true);
+  };
+
+  const handleSaveBanner = () => {
+    if (imageUrlInput.trim()) {
+      setUploadedImageSrc(imageUrlInput.trim());
+      setImageDimensions({ width: 1200, height: 1200 });
+    } else if (tempImageSrc) {
+      setUploadedImageSrc(tempImageSrc);
+    } else {
+      setUploadedImageSrc(null);
+      setImageDimensions(null);
+    }
+    setIsUploadModalOpen(false);
   };
 
   const processImageFile = (file: File) => {
@@ -258,7 +333,8 @@ export default function CreateEventPage() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
-      setUploadedImageSrc(base64);
+      setTempImageSrc(base64);
+      setTempFilename(file.name);
 
       const img = new Image();
       img.onload = () => {
@@ -270,8 +346,6 @@ export default function CreateEventPage() {
       img.src = base64;
     };
     reader.readAsDataURL(file);
-
-    setIsUploadModalOpen(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -326,16 +400,10 @@ export default function CreateEventPage() {
     }
   };
 
-  const handleUrlImageSubmit = () => {
-    if (!imageUrlInput.trim()) return;
-    setUploadedImageSrc(imageUrlInput.trim());
-    setImageDimensions({ width: 1200, height: 1200 });
-    setImageUrlInput('');
-    setIsUploadModalOpen(false);
-  };
-
   const handleRemoveImage = () => {
     setUploadedImageSrc(null);
+    setTempImageSrc(null);
+    setTempFilename(null);
     setImageDimensions(null);
     setImageUrlInput('');
     if (fileInputRef.current) {
@@ -378,6 +446,7 @@ export default function CreateEventPage() {
       coverImage: uploadedImageSrc,
       headerBg: headerBgOptions[currentThemeIdx % headerBgOptions.length],
       themeIdx: currentThemeIdx,
+      font: currentFont,
       customFields: customFields.length > 0 ? JSON.stringify(customFields) : null,
       speakers: speakers.length > 0 ? JSON.stringify(speakers) : null,
     };
@@ -415,10 +484,66 @@ export default function CreateEventPage() {
   const filteredAll = filterTz(allTimezonesList);
 
   return (
-    <main className="relative min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
+    <main className={`relative min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased ${getFontFamilyClass(currentFont)}`}>
+      {/* Ambient Page Background Glow based on theme */}
+      {!uploadedImageSrc && currentCustomColor === 'None' && (
+        currentThemeIdx === 7 ? (
+          <div className="fixed inset-0 z-0 opacity-90 pointer-events-none">
+            <PixelBlast
+              variant="circle"
+              pixelSize={6}
+              color="#B497CF"
+              patternScale={3}
+              patternDensity={1.2}
+              pixelSizeJitter={0.5}
+              enableRipples
+              rippleSpeed={0.4}
+              rippleThickness={0.12}
+              rippleIntensityScale={1.5}
+              liquid
+              liquidStrength={0.12}
+              liquidRadius={1.2}
+              liquidWobbleSpeed={5}
+              speed={0.6}
+              edgeFade={0.25}
+              transparent
+            />
+          </div>
+        ) : currentThemeIdx === 8 ? (
+          <div className="fixed inset-0 z-0 pointer-events-none">
+            <Grainient
+              color1="#FF9FFC"
+              color2="#5227FF"
+              color3="#B497CF"
+              timeSpeed={0.25}
+              colorBalance={0.0}
+              warpStrength={1.0}
+              warpFrequency={5.0}
+              warpSpeed={2.0}
+              warpAmplitude={50.0}
+              blendAngle={0.0}
+              blendSoftness={0.05}
+              rotationAmount={500.0}
+              noiseScale={2.0}
+              grainAmount={0.1}
+              grainScale={2.0}
+              grainAnimated={false}
+              contrast={1.5}
+              gamma={1.0}
+              saturation={1.0}
+              centerX={0.0}
+              centerY={0.0}
+              zoom={0.9}
+            />
+          </div>
+        ) : (
+          <div className={`fixed inset-0 z-0 opacity-90 pointer-events-none ${activeTheme.bg}`} />
+        )
+      )}
+
       <Navbar />
 
-      <div className="w-full max-w-5xl mx-auto py-8 sm:py-12 px-4 sm:px-8 flex-1 flex flex-col justify-center">
+      <div className="w-full max-w-5xl mx-auto py-8 sm:py-12 px-4 sm:px-8 flex-1 flex flex-col justify-center relative z-10">
         
         {/* Page Top Breadcrumb Navigation & Title */}
         <div className="flex items-center justify-between border-b border-[#2e2e34] pb-5 mb-8">
@@ -465,19 +590,94 @@ export default function CreateEventPage() {
               {/* Poster Canvas Card */}
               <div
                 className={`w-full max-w-sm aspect-square ${
-                  uploadedImageSrc ? 'bg-black' : `${activeTheme.bg} ${activeTheme.textColor}`
-                } rounded-2xl p-7 flex flex-col justify-between shadow-2xl relative transition-all duration-300 overflow-hidden select-none group border border-[#2e2e34]`}
+                  uploadedImageSrc
+                    ? 'bg-black border-[#2e2e34]'
+                    : currentCustomColor !== 'None'
+                    ? `${getCustomColorBg(currentCustomColor)} backdrop-blur-md border`
+                    : (activeTheme.name === 'PixelBlast' || activeTheme.name === 'Grainient')
+                    ? 'bg-neutral-950/15 backdrop-blur-md border border-white/10 text-white'
+                    : 'bg-neutral-950/45 backdrop-blur-md border border-white/10 text-white'
+                } rounded-2xl p-7 flex flex-col justify-between shadow-2xl relative transition-all duration-300 overflow-hidden select-none group`}
               >
+                {/* PixelBlast Component Integration if Theme is Selected */}
+                {!uploadedImageSrc && currentCustomColor === 'None' && activeTheme.name === 'PixelBlast' && (
+                  <div className="absolute inset-0 z-0">
+                    <PixelBlast
+                      variant="circle"
+                      pixelSize={6}
+                      color="#B497CF"
+                      patternScale={3}
+                      patternDensity={1.2}
+                      pixelSizeJitter={0.5}
+                      enableRipples
+                      rippleSpeed={0.4}
+                      rippleThickness={0.12}
+                      rippleIntensityScale={1.5}
+                      liquid
+                      liquidStrength={0.12}
+                      liquidRadius={1.2}
+                      liquidWobbleSpeed={5}
+                      speed={0.6}
+                      edgeFade={0.25}
+                      transparent
+                    />
+                  </div>
+                )}
+
+                {/* Grainient Component Integration if Theme is Selected */}
+                {!uploadedImageSrc && currentCustomColor === 'None' && activeTheme.name === 'Grainient' && (
+                  <div className="absolute inset-0 z-0">
+                    <Grainient
+                      color1="#FF9FFC"
+                      color2="#5227FF"
+                      color3="#B497CF"
+                      timeSpeed={0.25}
+                      colorBalance={0.0}
+                      warpStrength={1.0}
+                      warpFrequency={5.0}
+                      warpSpeed={2.0}
+                      warpAmplitude={50.0}
+                      blendAngle={0.0}
+                      blendSoftness={0.05}
+                      rotationAmount={500.0}
+                      noiseScale={2.0}
+                      grainAmount={0.1}
+                      grainScale={2.0}
+                      grainAnimated={false}
+                      contrast={1.5}
+                      gamma={1.0}
+                      saturation={1.0}
+                      centerX={0.0}
+                      centerY={0.0}
+                      zoom={0.9}
+                    />
+                  </div>
+                )}
+
+                {/* Floating Camera Button Overlay to Open Modal */}
+                <button
+                  type="button"
+                  onClick={handleOpenUploadModal}
+                  className="absolute top-4 right-4 z-20 w-8.5 h-8.5 rounded-lg bg-black/60 hover:bg-black/85 border border-[#333339] text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow hover:scale-105"
+                  title="Upload / Change Cover Banner"
+                >
+                  <svg className="w-4 h-4 text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316A2.192 2.192 0 0015.613 4H8.387c-.502 0-.965.267-1.218.7l-.342.544z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+
                 {uploadedImageSrc ? (
                   <img
                     src={uploadedImageSrc}
                     alt="Uploaded Event Banner"
-                    className="absolute inset-0 w-full h-full object-cover object-center z-10 transition-transform duration-300 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover object-center z-10 transition-transform duration-300 group-hover:scale-105 cursor-pointer"
+                    onClick={handleOpenUploadModal}
                   />
                 ) : (
                   <>
                     <div className="flex flex-col gap-1 z-10">
-                      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase leading-[0.95] tracking-tighter">
+                      <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-black uppercase leading-[0.95] tracking-tighter ${getFontFamilyClass(currentFont)}`}>
                         {eventName ? (
                           <span className="line-clamp-4">{eventName}</span>
                         ) : (
@@ -498,36 +698,60 @@ export default function CreateEventPage() {
                         <span className="text-[9px] font-mono font-bold uppercase tracking-wider opacity-90">
                           {activeTheme.subText}
                         </span>
-
-                        <button
-                          type="button"
-                          onClick={handleShuffleTheme}
-                          className="w-7.5 h-7.5 rounded-full bg-black/80 text-white hover:bg-black flex items-center justify-center transition-transform hover:scale-105 cursor-pointer shadow"
-                          title="Shuffle Theme Style"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                        </button>
                       </div>
                     </div>
                   </>
                 )}
               </div>
 
-              {/* Upload Button opening Spec Popup Modal */}
-              <div className="w-full max-w-sm flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsUploadModalOpen(true)}
-                  className="w-full py-3 bg-[#222226] border border-[#2e2e34] hover:bg-[#2c2c32] hover:border-[#44444e] text-white text-xs font-medium rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm group"
-                >
-                  <GoUpload className="w-4 h-4 text-neutral-300 group-hover:scale-110 transition-transform" />
-                  <span>Upload Cover Photo / Banner</span>
-                </button>
+              {/* Theme Selector UI */}
+              <div className="w-full max-w-sm flex flex-col gap-3">
+                <div className="flex items-center gap-3 w-full">
+                  
+                  {/* Dropdown theme card selector triggers custom drawer */}
+                  <div
+                    onClick={() => setIsThemeDrawerOpen(true)}
+                    className="flex-1 bg-[#222226] border border-[#333339] hover:border-neutral-500/30 rounded-lg px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-[#2c2c32] transition-all select-none relative group"
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* Theme Icon Block */}
+                      <div className="w-8.5 h-6 bg-[#161618] border border-[#333339] rounded flex items-center justify-center text-[10px] text-neutral-400 flex-shrink-0">
+                        <svg className="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <line x1="9" y1="3" x2="9" y2="21" />
+                        </svg>
+                      </div>
+                      
+                      <div className="flex flex-col text-left">
+                        <span className="text-[9px] text-neutral-500 uppercase font-mono tracking-wider">Theme</span>
+                        <span className="text-xs font-semibold text-white truncate max-w-[130px]">{activeTheme.name}</span>
+                      </div>
+                    </div>
 
+                    <div className="text-neutral-400">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Shuffle Button */}
+                  <button
+                    type="button"
+                    onClick={handleShuffleTheme}
+                    className="w-12 h-12 bg-[#222226] border border-[#333339] hover:border-neutral-500/30 hover:bg-[#2c2c32] text-white flex items-center justify-center rounded-lg transition-all cursor-pointer flex-shrink-0"
+                    title="Shuffle Theme Style"
+                  >
+                    <svg className="w-4 h-4 text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
+
+                </div>
+
+                {/* Banner details & Remove button if uploaded cover image is set */}
                 {uploadedImageSrc && imageDimensions && (
-                  <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-xl px-3.5 py-2 flex items-center justify-between text-xs font-mono text-neutral-300">
+                  <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-lg px-3.5 py-2 flex items-center justify-between text-xs font-mono text-neutral-300">
                     <div className="flex items-center gap-2 text-neutral-300 text-[11px]">
                       <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
                       <span>{imageDimensions.width} × {imageDimensions.height} px</span>
@@ -1141,7 +1365,7 @@ export default function CreateEventPage() {
       {/* Recommended Banner Specs Popup Modal */}
       {isUploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-          <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl max-w-md w-full p-6 flex flex-col gap-5 shadow-2xl relative">
+          <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl max-w-xl w-full p-8 flex flex-col gap-6 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-[#2e2e34] pb-4">
               <div className="flex items-center gap-2">
                 <GoUpload className="w-5 h-5 text-neutral-300" />
@@ -1157,7 +1381,7 @@ export default function CreateEventPage() {
             </div>
 
             <div className="bg-[#222226] border border-[#2e2e34] rounded-xl p-4 flex items-start gap-3">
-              <GoInfo className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <GoInfo className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
               <div className="flex flex-col gap-1 text-xs">
                 <span className="font-semibold text-white">Recommended Banner Size</span>
                 <p className="text-[#a1a1aa] leading-relaxed">
@@ -1166,25 +1390,49 @@ export default function CreateEventPage() {
               </div>
             </div>
 
-            <div
-              onDragOver={handleModalDragOver}
-              onDragLeave={handleModalDragLeave}
-              onDrop={handleModalDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center gap-3 cursor-pointer transition-all duration-200 ${
-                isDraggingModal
-                  ? 'border-white bg-white/5'
-                  : 'border-[#333339] hover:border-white/50 bg-[#141416]'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-full bg-[#222226] text-neutral-300 flex items-center justify-center border border-[#2e2e34]">
-                <GoUpload className="w-6 h-6" />
+            {tempImageSrc ? (
+              <div className="border border-[#2e2e34] bg-[#222226] rounded-xl p-8 flex flex-col items-center justify-center text-center gap-3 relative">
+                <div className="w-14 h-14 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20">
+                  <GoCheck className="w-8 h-8" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-semibold text-white">Local Image Selected</span>
+                  <span className="text-xs text-neutral-400 font-mono max-w-[280px] truncate">
+                    {tempFilename || 'image_payload.png'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTempImageSrc(null);
+                    setTempFilename(null);
+                  }}
+                  className="mt-1 text-xs text-rose-400 hover:text-rose-300 font-semibold cursor-pointer"
+                >
+                  Remove File
+                </button>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-sm font-semibold text-white">Click to Browse or Drag &amp; Drop</span>
-                <span className="text-xs text-neutral-400">PNG, JPG, WEBP up to 5MB</span>
+            ) : (
+              <div
+                onDragOver={handleModalDragOver}
+                onDragLeave={handleModalDragLeave}
+                onDrop={handleModalDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center gap-3 cursor-pointer transition-all duration-200 ${
+                  isDraggingModal
+                    ? 'border-rose-500 bg-rose-500/5'
+                    : 'border-[#333339] hover:border-neutral-500/50 bg-[#141416]'
+                }`}
+              >
+                <div className="w-12 h-12 rounded-full bg-[#222226] text-neutral-300 flex items-center justify-center border border-[#2e2e34]">
+                  <GoUpload className="w-6 h-6" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-semibold text-white">Click to Browse or Drag &amp; Drop</span>
+                  <span className="text-xs text-neutral-400">PNG, JPG, WEBP up to 5MB</span>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* OR separator */}
             <div className="flex items-center gap-3 my-1">
@@ -1195,44 +1443,185 @@ export default function CreateEventPage() {
 
             {/* URL Input */}
             <div className="flex flex-col gap-1.5 text-left">
-              <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Image URL</label>
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  placeholder="https://example.com/image.png"
-                  value={imageUrlInput}
-                  onChange={(e) => setImageUrlInput(e.target.value)}
-                  className="flex-1 bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-xl px-3.5 py-2 text-xs text-white outline-none"
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <button
-                  type="button"
-                  onClick={handleUrlImageSubmit}
-                  className="px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-md flex-shrink-0"
-                  style={{ color: 'black' }}
-                >
-                  Apply URL
-                </button>
-              </div>
+              <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Image URL (Optional)</label>
+              <input
+                type="url"
+                placeholder="https://example.com/image.png"
+                value={imageUrlInput}
+                onChange={(e) => setImageUrlInput(e.target.value)}
+                className="w-full bg-[#222226] border border-[#2e2e34] focus:border-rose-500/50 rounded-xl px-3.5 py-3 text-xs text-white outline-none transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-3 pt-3">
               <button
                 type="button"
                 onClick={() => setIsUploadModalOpen(false)}
-                className="px-4 py-2 bg-[#222226] hover:bg-[#2a2a30] text-neutral-300 text-xs font-medium rounded-xl border border-[#2e2e34] transition-colors cursor-pointer"
+                className="px-5 py-2.5 bg-[#222226] hover:bg-[#2a2a30] text-neutral-300 text-xs font-semibold rounded-xl border border-[#2e2e34] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
 
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="px-5 py-2 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-md"
+                onClick={handleSaveBanner}
+                className="px-6 py-2.5 bg-white hover:bg-neutral-200 text-black text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-md"
+                style={{ color: 'black' }}
               >
-                Choose File
+                Save Banner
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Theme Customization Drawer */}
+      {isThemeDrawerOpen && (
+        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity duration-300 animate-fade-in">
+          {/* Clickable overlay to close drawer */}
+          <div className="absolute inset-0 cursor-pointer" onClick={() => setIsThemeDrawerOpen(false)} />
+          
+          {/* Drawer Panel */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#141416] border-t border-[#2e2e34] rounded-t-3xl pb-8 pt-4 px-6 flex flex-col gap-6 shadow-2xl animate-slide-up transform translate-y-0 transition-transform duration-300 max-w-5xl mx-auto">
+            
+            {/* Drag indicator/handle */}
+            <div className="w-12 h-1.5 bg-[#333339] rounded-full mx-auto my-1 cursor-pointer" onClick={() => setIsThemeDrawerOpen(false)} />
+
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono uppercase text-neutral-400 tracking-wider">Customize Event Theme</span>
+              <button
+                type="button"
+                onClick={() => setIsThemeDrawerOpen(false)}
+                className="text-xs font-semibold text-neutral-500 hover:text-white transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* Horizontal Scroll list of theme card options */}
+            <div className="flex items-center gap-4 overflow-x-auto py-2 px-1 scrollbar-thin">
+              {themes.map((theme, idx) => {
+                const isActive = currentThemeIdx === idx;
+                return (
+                  <div
+                    key={theme.name}
+                    onClick={() => setCurrentThemeIdx(idx)}
+                    className="flex flex-col items-center gap-1.5 flex-shrink-0 group cursor-pointer"
+                  >
+                    <div
+                      className={`w-[76px] h-[52px] rounded-xl flex items-center justify-center transition-all bg-[#1c1c1f] ${
+                        isActive
+                          ? 'border-2 border-white scale-105 shadow-md shadow-white/5'
+                          : 'border border-[#2e2e34] hover:border-neutral-400/30'
+                      }`}
+                    >
+                      <div className={`w-[66px] h-[42px] rounded-lg overflow-hidden flex items-center justify-center ${theme.bg}`}>
+                        <div className="w-full h-full p-1.5 flex justify-between gap-1 items-center bg-black/10">
+                          <div className="w-3.5 h-3.5 bg-white/95 rounded flex-shrink-0" />
+                          <div className="flex-1 flex flex-col gap-0.5">
+                            <div className="h-[2px] w-full bg-white/40 rounded-full" />
+                            <div className="h-[2px] w-[80%] bg-white/40 rounded-full" />
+                            <div className="h-[2px] w-[90%] bg-white/40 rounded-full" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] text-center transition-colors font-semibold ${
+                        isActive ? 'text-white' : 'text-[#8a8a90] group-hover:text-neutral-200'
+                      }`}
+                    >
+                      {theme.name.split(' ')[0]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Selector Pills Row */}
+            <div className="flex flex-wrap items-center gap-3 justify-center border-t border-[#2e2e34] pt-5">
+              
+              {/* Colour Selector */}
+              <div className="flex items-center gap-2 bg-[#222226] hover:bg-[#2c2c32] border border-[#333339] rounded-full px-4 py-1.5 text-xs text-neutral-300 cursor-pointer select-none transition-colors relative">
+                <span className={`w-2.5 h-2.5 rounded-full ${currentCustomColor !== 'None' ? getDotColor(currentCustomColor) : 'bg-[#ffe600]'}`} />
+                <span>Colour</span>
+                <span className="text-white font-medium ml-1.5">{currentCustomColor}</span>
+                <svg className="w-3.5 h-3.5 text-neutral-500 ml-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+                <select
+                  value={currentCustomColor}
+                  onChange={(e) => setCurrentCustomColor(e.target.value)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                >
+                  <option value="None">Default</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Emerald">Emerald</option>
+                  <option value="Purple">Purple</option>
+                  <option value="Indigo">Indigo</option>
+                  <option value="Rose">Rose</option>
+                </select>
+              </div>
+
+              {/* Style Selector */}
+              <div className="flex items-center gap-2 bg-[#222226] hover:bg-[#2c2c32] border border-[#333339] rounded-full px-4 py-1.5 text-xs text-neutral-300 cursor-pointer select-none transition-colors relative opacity-60">
+                <span className="w-2.5 h-2.5 rounded-full bg-neutral-600" />
+                <span>Style</span>
+                <span className="text-white font-medium ml-1.5">-</span>
+                <svg className="w-3.5 h-3.5 text-neutral-500 ml-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+                <select
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  disabled
+                >
+                  <option>-</option>
+                </select>
+              </div>
+
+              {/* Font Selector */}
+              <div className="flex items-center gap-2 bg-[#222226] hover:bg-[#2c2c32] border border-[#333339] rounded-full px-4 py-1.5 text-xs text-neutral-300 cursor-pointer select-none transition-colors relative">
+                <span className="text-[10px] font-mono font-bold text-neutral-400">Ag</span>
+                <span>Font</span>
+                <span className="text-white font-medium ml-1.5">{currentFont}</span>
+                <svg className="w-3.5 h-3.5 text-neutral-500 ml-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+                <select
+                  value={currentFont}
+                  onChange={(e) => setCurrentFont(e.target.value)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                >
+                  <option value="Default">Default</option>
+                  <option value="Serif">Serif</option>
+                  <option value="Mono">Mono</option>
+                  <option value="Display">Display</option>
+                </select>
+              </div>
+
+              {/* Display Selector */}
+              <div className="flex items-center gap-2 bg-[#222226] hover:bg-[#2c2c32] border border-[#333339] rounded-full px-4 py-1.5 text-xs text-neutral-300 cursor-pointer select-none transition-colors relative">
+                <span className="w-2.5 h-2.5 rounded-full border border-neutral-400 bg-neutral-400/30" />
+                <span>Display</span>
+                <span className="text-white font-medium ml-1.5">{currentDisplayMode}</span>
+                <svg className="w-3.5 h-3.5 text-neutral-500 ml-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+                <select
+                  value={currentDisplayMode}
+                  onChange={(e) => setCurrentDisplayMode(e.target.value)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                >
+                  <option value="Auto">Auto</option>
+                  <option value="Light">Light</option>
+                  <option value="Dark">Dark</option>
+                </select>
+              </div>
+
+            </div>
+
           </div>
         </div>
       )}

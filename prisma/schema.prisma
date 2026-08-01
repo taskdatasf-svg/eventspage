@@ -35,6 +35,7 @@ model Event {
   coverImage      String?
   themeIdx        Int      @default(0)
   headerBg        String   @default("bg-[#818cf8]")
+  font            String?  @default("Default")
   customFields    String?
   speakers        String?
   createdAt       DateTime @default(now())
