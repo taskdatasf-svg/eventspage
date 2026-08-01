@@ -1,0 +1,56 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id              String   @id @default(cuid())
+  ticketCode      String
+  title           String
+  organizer       String?  @default("Infinity Event Organizer")
+  location        String?
+  description     String?
+  startDate       String
+  startTime       String
+  endDate         String?
+  endTime         String?
+  price           String   @default("Free")
+  requireApproval Boolean  @default(false)
+  capacity        String   @default("Unlimited")
+  calendarType    String   @default("Personal Calendar")
+  visibility      String   @default("Public")
+  coverImage      String?
+  themeIdx        Int      @default(0)
+  headerBg        String   @default("bg-[#818cf8]")
+  customFields    String?
+  speakers        String?
+  createdAt       DateTime @default(now())
+}
+
+model Registration {
+  id         String   @id @default(cuid())
+  eventId    String
+  eventTitle String
+  name       String
+  email      String
+  phone      String?
+  ticketCode String   @unique
+  answers            String?
+  paymentAccountName String?
+  paymentMethod      String?
+  paymentTxnId       String?
+  createdAt          DateTime @default(now())
+}
