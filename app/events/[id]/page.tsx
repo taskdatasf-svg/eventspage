@@ -7,6 +7,17 @@ import Footer from '@/components/Footer';
 import { EventData } from '@/lib/eventsStore';
 import { GoCalendar, GoLocation, GoTag, GoPeople, GoArrowLeft, GoPerson, GoShieldCheck, GoClock, GoCheck } from 'react-icons/go';
 
+const getHighlightColor = (bgClass: string) => {
+  if (!bgClass) return 'text-[#818cf8]';
+  const clean = bgClass.toLowerCase();
+  if (clean.includes('818cf8')) return 'text-[#818cf8]';
+  if (clean.includes('fef08a') || clean.includes('ffe600')) return 'text-[#ffe600]';
+  if (clean.includes('6ee7b7')) return 'text-[#6ee7b7]';
+  if (clean.includes('fbcfe8')) return 'text-[#fbcfe8]';
+  if (clean.includes('fed7aa')) return 'text-[#fed7aa]';
+  return 'text-[#ffe600]';
+};
+
 export default function EventDetailPage() {
   const params = useParams();
   const id = params?.id as string;
@@ -113,6 +124,8 @@ export default function EventDetailPage() {
       </main>
     );
   }
+  
+  const highlightColor = getHighlightColor(event.headerBg);
 
   return (
     <main className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
@@ -175,13 +188,18 @@ export default function EventDetailPage() {
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                {event.title}
+                {event.title.split(' ').map((word, i) => {
+                  if (i % 2 === 1) {
+                    return <span key={i} className={highlightColor}>{word} </span>;
+                  }
+                  return <span key={i}>{word} </span>;
+                })}
               </h1>
             </div>
 
             {/* Event Description Section */}
             <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col gap-3.5 shadow-sm">
-              <h3 className="text-xs uppercase font-mono text-neutral-400 tracking-wider">About the Event</h3>
+              <h3 className={`text-xs uppercase font-mono tracking-wider ${highlightColor}`}>About the Event</h3>
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">
                   {event.description 
@@ -208,7 +226,7 @@ export default function EventDetailPage() {
                 if (parsedSpeakers.length === 0) return null;
                 return (
                   <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col gap-4 shadow-sm animate-fade-in">
-                    <h3 className="text-xs uppercase font-mono text-neutral-400 tracking-wider">Speakers</h3>
+                    <h3 className={`text-xs uppercase font-mono tracking-wider ${highlightColor}`}>Speakers</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {parsedSpeakers.map((sp, idx) => (
                         <div key={idx} className="bg-[#222226] border border-[#2e2e34] rounded-xl p-3.5 flex items-center gap-3">
@@ -249,7 +267,7 @@ export default function EventDetailPage() {
               <div className="px-5 pt-5 pb-4 border-b border-[#2e2e34] flex items-end justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Admission Price</span>
-                  <span className="text-3xl font-black text-white leading-none">{event.price || 'Free'}</span>
+                  <span className={`text-3xl font-black leading-none ${highlightColor}`}>{event.price || 'Free'}</span>
                 </div>
                 <span className="text-[9px] font-mono uppercase tracking-wider bg-[#222226] border border-[#333339] text-neutral-400 px-2 py-1 rounded-md">
                   {event.visibility || 'Public'}
@@ -302,7 +320,7 @@ export default function EventDetailPage() {
               {/* Date & Time row */}
               <div className="px-5 py-4 flex items-center gap-4 border-b border-[#2e2e34]">
                 <div className="w-9 h-9 rounded-xl bg-[#222226] border border-[#2e2e34] flex flex-col items-center justify-center text-center flex-shrink-0">
-                  <GoCalendar className="w-4 h-4 text-neutral-300" />
+                  <GoCalendar className={`w-4 h-4 ${highlightColor}`} />
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Date &amp; Time</span>
@@ -316,7 +334,7 @@ export default function EventDetailPage() {
               {/* Location row */}
               <div className="px-5 py-4 flex items-start gap-4 border-b border-[#2e2e34]">
                 <div className="w-9 h-9 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <GoLocation className="w-4 h-4 text-neutral-300" />
+                  <GoLocation className={`w-4 h-4 ${highlightColor}`} />
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Location</span>
@@ -327,7 +345,7 @@ export default function EventDetailPage() {
               {/* Organizer row */}
               <div className="px-5 py-4 flex items-center gap-4 border-b border-[#2e2e34]">
                 <div className="w-9 h-9 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0">
-                  <GoPerson className="w-4 h-4 text-neutral-300" />
+                  <GoPerson className={`w-4 h-4 ${highlightColor}`} />
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Organizer</span>
@@ -338,7 +356,7 @@ export default function EventDetailPage() {
               {/* Capacity row */}
               <div className="px-5 py-4 flex items-center gap-4">
                 <div className="w-9 h-9 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0">
-                  <GoPeople className="w-4 h-4 text-neutral-300" />
+                  <GoPeople className={`w-4 h-4 ${highlightColor}`} />
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Capacity</span>
