@@ -103,7 +103,9 @@ export async function sendEventMail({ to, subject, event, registration, type, or
 
     // Generate header banner
     let headerBannerHtml = '';
-    if (event.coverImage) {
+    const isImageBase64 = event.coverImage && (event.coverImage.startsWith('data:') || event.coverImage.length > 1000);
+    
+    if (event.coverImage && !isImageBase64) {
       headerBannerHtml = `
         <div style="width: 100%; height: 180px; overflow: hidden; position: relative;">
           <img src="${event.coverImage}" alt="${event.title}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
