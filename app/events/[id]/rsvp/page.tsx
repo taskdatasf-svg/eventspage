@@ -8,7 +8,7 @@ import { EventData } from '@/lib/eventsStore';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
-  GoPerson, GoMail, GoDeviceMobile, GoTag
+  GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock
 } from 'react-icons/go';
 
 const isEventFree = (price: string) => {
@@ -462,7 +462,7 @@ export default function RSVPPage() {
               {/* Celebration Top Header */}
               {ticket.status === 'PENDING' ? (
                 <div className="p-6 pb-5 flex flex-col items-center text-center gap-3 animate-fade-in">
-                  <span className="text-4xl">⏳</span>
+                  <span className="text-4xl text-amber-500 animate-pulse"><GoClock className="w-10 h-10" /></span>
                   <h2 className="text-xl font-bold text-amber-500 tracking-tight">Pending Host Approval</h2>
                   <p className="text-xs text-neutral-400 max-w-[280px]">
                     Your details were sent to the organizer. We are checking and reviewing your details, we make sure to get updates of your ticket.
@@ -470,7 +470,7 @@ export default function RSVPPage() {
                 </div>
               ) : (
                 <div className="p-6 pb-5 flex flex-col items-center text-center gap-3">
-                  <span className="text-4xl">🎉</span>
+                  <span className="text-4xl text-emerald-500"><GoCheck className="w-10 h-10" /></span>
                   <h2 className="text-xl font-bold text-white tracking-tight">Thank you</h2>
                   <p className="text-xs text-neutral-400 max-w-[280px]">Your registration has been processed successfully.</p>
                 </div>
@@ -578,7 +578,7 @@ export default function RSVPPage() {
               <div className="px-6 pt-4 flex flex-col items-center gap-4">
                 {ticket.status === 'PENDING' ? (
                   <div className="relative p-3 bg-white/5 rounded-xl border border-dashed border-[#2e2e34] w-[164px] h-[164px] flex flex-col items-center justify-center text-center select-none animate-pulse">
-                    <span className="text-2xl mb-1">⏳</span>
+                    <span className="text-2xl mb-1.5 text-amber-500"><GoClock className="w-6 h-6" /></span>
                     <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest leading-normal px-2">
                       Awaiting Approval
                     </span>
