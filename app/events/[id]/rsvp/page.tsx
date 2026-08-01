@@ -49,17 +49,7 @@ export default function RSVPPage() {
     : [];
 
   useEffect(() => {
-    if (id) {
-      setLoading(true);
-      fetch(`/api/events/${id}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.event) setEvent(data.event);
-        })
-        .catch((err) => console.error(err))
-        .finally(() => setLoading(false));
-    }
-
+    let emailCheck: string | null = null;
     try {
       const stored = localStorage.getItem('student_forge_user');
       if (stored) {
@@ -67,9 +57,36 @@ export default function RSVPPage() {
         setUser(u);
         setName(u.name || '');
         setEmail(u.email || '');
+        emailCheck = u.email || null;
       }
     } catch (e) {
       console.error(e);
+    }
+
+    if (id) {
+      setLoading(true);
+      fetch(`/api/events/${id}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.event) {
+            setEvent(data.event);
+            // Check if user is already registered for this event to load ticket directly
+            if (emailCheck) {
+              fetch(`/api/events/${id}/register`)
+                .then((r) => r.json())
+                .then((regData) => {
+                  const regs = regData.registrations || [];
+                  const userReg = regs.find((r: any) => r.email === emailCheck);
+                  if (userReg) {
+                    setTicket(userReg);
+                  }
+                })
+                .catch((err) => console.error(err));
+            }
+          }
+        })
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
     }
   }, [id]);
 
@@ -443,11 +460,21 @@ export default function RSVPPage() {
             <div className="w-full bg-[#1c1c1f] border-t border-x border-[#2e2e34] rounded-t-2xl shadow-2xl relative pb-6">
               
               {/* Celebration Top Header */}
-              <div className="p-6 pb-5 flex flex-col items-center text-center gap-3">
-                <span className="text-4xl">🎉</span>
-                <h2 className="text-xl font-bold text-white tracking-tight">Thank you</h2>
-                <p className="text-xs text-neutral-400 max-w-[280px]">Your registration has been processed successfully.</p>
-              </div>
+              {ticket.status === 'PENDING' ? (
+                <div className="p-6 pb-5 flex flex-col items-center text-center gap-3 animate-fade-in">
+                  <span className="text-4xl">⏳</span>
+                  <h2 className="text-xl font-bold text-amber-500 tracking-tight">Pending Host Approval</h2>
+                  <p className="text-xs text-neutral-400 max-w-[280px]">
+                    Your details were sent to the organizer. We are checking and reviewing your details, we make sure to get updates of your ticket.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-6 pb-5 flex flex-col items-center text-center gap-3">
+                  <span className="text-4xl">🎉</span>
+                  <h2 className="text-xl font-bold text-white tracking-tight">Thank you</h2>
+                  <p className="text-xs text-neutral-400 max-w-[280px]">Your registration has been processed successfully.</p>
+                </div>
+              )}
 
               {/* Dashed Separator Line with custom cutout notches */}
               <div className="relative w-full my-2">
@@ -471,7 +498,13 @@ export default function RSVPPage() {
                 <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Ticket ID</span>
-                    <span className="font-mono font-bold text-white truncate">{ticket.ticketCode}</span>
+                    <span className="font-mono font-bold text-white truncate">
+                      {ticket.status === 'PENDING' ? (
+                        <span className="text-amber-500">PENDING APPROVAL</span>
+                      ) : (
+                        ticket.ticketCode
+                      )}
+                    </span>
                   </div>
                   <div className="flex flex-col gap-1 text-right">
                     <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Amount</span>
@@ -543,17 +576,31 @@ export default function RSVPPage() {
 
               {/* QR Code section */}
               <div className="px-6 pt-4 flex flex-col items-center gap-4">
-                <div className="p-3 bg-white rounded-xl shadow-xl flex items-center justify-center select-none">
-                  <QRCodeSVG
-                    value={ticket.ticketCode}
-                    size={140}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                    level="L"
-                    includeMargin={false}
-                  />
-                </div>
-                <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">Presenter Pass QR Code</span>
+                {ticket.status === 'PENDING' ? (
+                  <div className="relative p-3 bg-white/5 rounded-xl border border-dashed border-[#2e2e34] w-[164px] h-[164px] flex flex-col items-center justify-center text-center select-none animate-pulse">
+                    <span className="text-2xl mb-1">⏳</span>
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest leading-normal px-2">
+                      Awaiting Approval
+                    </span>
+                    <span className="text-[8px] text-neutral-500 mt-1 max-w-[130px]">
+                      Pass will be generated once organizer approves.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-white rounded-xl shadow-xl flex items-center justify-center select-none">
+                    <QRCodeSVG
+                      value={ticket.ticketCode}
+                      size={140}
+                      bgColor="#ffffff"
+                      fgColor="#000000"
+                      level="L"
+                      includeMargin={false}
+                    />
+                  </div>
+                )}
+                <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">
+                  {ticket.status === 'PENDING' ? 'Ticket Pass Status' : 'Presenter Pass QR Code'}
+                </span>
               </div>
 
               {/* Scalloped Bottom Edge circles */}

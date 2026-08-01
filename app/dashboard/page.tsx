@@ -29,6 +29,7 @@ interface RegUser {
   paymentAccountName?: string | null;
   paymentMethod?: string | null;
   paymentTxnId?: string | null;
+  status?: string;
 }
 
 const headerBgColors = [
@@ -103,10 +104,35 @@ export default function DashboardPage() {
   const [editNewSpeakerImage, setEditNewSpeakerImage] = useState<string | null>(null);
   const [isDraggingEditSpeaker, setIsDraggingEditSpeaker] = useState(false);
 
-  // Ticket verification states
   const [verifyCode, setVerifyCode] = useState('');
   const [verifiedReg, setVerifiedReg] = useState<RegUser | null>(null);
   const [verifyError, setVerifyError] = useState('');
+  const [approvingIds, setApprovingIds] = useState<Record<string, boolean>>({});
+
+  const handleApproveUser = async (eventId: string, regId: string | undefined) => {
+    if (!regId) return;
+    setApprovingIds(prev => ({ ...prev, [regId]: true }));
+    try {
+      const res = await fetch(`/api/registrations/${regId}/approve`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        setRegistrations(prev => {
+          const list = prev[eventId] || [];
+          const updatedList = list.map(r => r.id === regId ? { ...r, status: 'APPROVED' } : r);
+          return { ...prev, [eventId]: updatedList };
+        });
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to approve registration');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error. Please try again.');
+    } finally {
+      setApprovingIds(prev => ({ ...prev, [regId]: false }));
+    }
+  };
 
   // Auth guard and read tab param
   useEffect(() => {
@@ -469,7 +495,18 @@ export default function DashboardPage() {
                                       <div className="flex items-center gap-3">
                                         <div className="w-7 h-7 rounded-full bg-[#2e2e34] flex items-center justify-center text-[10px] font-bold">{reg.name?.substring(0, 2).toUpperCase() || 'U'}</div>
                                         <div>
-                                          <p className="text-xs font-medium text-white">{reg.name || 'Anonymous'}</p>
+                                          <div className="flex items-center gap-2">
+                                            <p className="text-xs font-medium text-white">{reg.name || 'Anonymous'}</p>
+                                            {reg.status === 'PENDING' ? (
+                                              <span className="text-[8px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
+                                                Pending
+                                              </span>
+                                            ) : (
+                                              <span className="text-[8px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono font-semibold">
+                                                Approved
+                                              </span>
+                                            )}
+                                          </div>
                                           <p className="text-[10px] text-neutral-400 font-mono">{reg.email}</p>
                                           
                                           {/* Render Custom RSVP Answers in Admin Panel */}
@@ -502,7 +539,19 @@ export default function DashboardPage() {
                                           )}
                                         </div>
                                       </div>
-                                      <span className="text-[9px] font-mono bg-[#1c1c1f] border border-[#2e2e34] px-2 py-0.5 rounded text-neutral-400">{reg.ticketCode}</span>
+                                      <div className="flex items-center gap-2.5">
+                                        {reg.status === 'PENDING' && (
+                                          <button
+                                            onClick={() => handleApproveUser(event.id, reg.id)}
+                                            disabled={approvingIds[reg.id || '']}
+                                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white text-[10px] font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1"
+                                            style={{ color: 'white' }}
+                                          >
+                                            {approvingIds[reg.id || ''] ? 'Approving...' : 'Approve'}
+                                          </button>
+                                        )}
+                                        <span className="text-[9px] font-mono bg-[#1c1c1f] border border-[#2e2e34] px-2 py-0.5 rounded text-neutral-400">{reg.ticketCode}</span>
+                                      </div>
                                     </div>
                                   ))
                                 )}
@@ -555,7 +604,18 @@ export default function DashboardPage() {
                               {ticket.eventTitle.substring(0, 1).toUpperCase()}
                             </div>
                             <div className="flex flex-col min-w-0">
-                              <h3 className={`text-sm font-bold ${highlightColor} truncate`}>{ticket.eventTitle}</h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className={`text-sm font-bold ${highlightColor} truncate`}>{ticket.eventTitle}</h3>
+                                {ticket.status === 'PENDING' ? (
+                                  <span className="text-[8px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
+                                    Pending Approval
+                                  </span>
+                                ) : (
+                                  <span className="text-[8px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono font-semibold">
+                                    Confirmed
+                                  </span>
+                                )}
+                              </div>
                               <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] text-neutral-400">
                                 <span className="flex items-center gap-1"><GoCalendar className="w-3 h-3" />{ticket.eventStartDate} at {ticket.eventStartTime}</span>
                                 <span className="flex items-center gap-1 truncate max-w-[150px] sm:max-w-none"><GoLocation className="w-3 h-3" />{ticket.eventLocation}</span>
@@ -566,7 +626,9 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#2e2e34] pt-3 sm:pt-0">
                           <div className="flex flex-col">
                             <span className="text-[9px] uppercase font-mono text-neutral-500">Ticket ID</span>
-                            <span className="text-xs font-mono font-semibold text-neutral-300">{ticket.ticketCode}</span>
+                            <span className="text-xs font-mono font-semibold text-neutral-300">
+                              {ticket.status === 'PENDING' ? 'PENDING' : ticket.ticketCode}
+                            </span>
                           </div>
                           <button
                             onClick={() => setSelectedTicket(ticket)}
@@ -946,11 +1008,21 @@ export default function DashboardPage() {
             <div className="w-full bg-[#1c1c1f] border-t border-x border-[#2e2e34] rounded-t-2xl shadow-2xl relative pb-6">
               
               {/* Celebration Header */}
-              <div className="p-6 pb-5 flex flex-col items-center text-center gap-3">
-                <span className="text-4xl">🎉</span>
-                <h2 className="text-xl font-bold text-white tracking-tight">Thank you</h2>
-                <p className="text-xs text-neutral-400 max-w-[280px]">Your registration has been processed successfully.</p>
-              </div>
+              {selectedTicket.status === 'PENDING' ? (
+                <div className="p-6 pb-5 flex flex-col items-center text-center gap-3 animate-fade-in">
+                  <span className="text-4xl">⏳</span>
+                  <h2 className="text-xl font-bold text-amber-500 tracking-tight">Pending Host Approval</h2>
+                  <p className="text-xs text-neutral-400 max-w-[280px]">
+                    Your details were sent to the organizer. We are checking and reviewing your details, we make sure to get updates of your ticket.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-6 pb-5 flex flex-col items-center text-center gap-3">
+                  <span className="text-4xl">🎉</span>
+                  <h2 className="text-xl font-bold text-white tracking-tight">Thank you</h2>
+                  <p className="text-xs text-neutral-400 max-w-[280px]">Your registration has been processed successfully.</p>
+                </div>
+              )}
 
               {/* Dashed Separator Line with custom cutout notches */}
               <div className="relative w-full my-2">
@@ -974,7 +1046,13 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
                   <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Ticket ID</span>
-                    <span className="font-mono font-bold text-white truncate">{selectedTicket.ticketCode}</span>
+                    <span className="font-mono font-bold text-white truncate">
+                      {selectedTicket.status === 'PENDING' ? (
+                        <span className="text-amber-500">PENDING APPROVAL</span>
+                      ) : (
+                        selectedTicket.ticketCode
+                      )}
+                    </span>
                   </div>
                   <div className="flex flex-col gap-1 text-right">
                     <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Amount</span>
@@ -1046,17 +1124,31 @@ export default function DashboardPage() {
 
               {/* QR Code section */}
               <div className="px-6 pt-4 flex flex-col items-center gap-4">
-                <div className="p-3 bg-white rounded-xl shadow-xl flex items-center justify-center select-none">
-                  <QRCodeSVG
-                    value={selectedTicket.ticketCode}
-                    size={140}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                    level="L"
-                    includeMargin={false}
-                  />
-                </div>
-                <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">Presenter Pass QR Code</span>
+                {selectedTicket.status === 'PENDING' ? (
+                  <div className="relative p-3 bg-white/5 rounded-xl border border-dashed border-[#2e2e34] w-[164px] h-[164px] flex flex-col items-center justify-center text-center select-none animate-pulse">
+                    <span className="text-2xl mb-1">⏳</span>
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest leading-normal px-2">
+                      Awaiting Approval
+                    </span>
+                    <span className="text-[8px] text-neutral-500 mt-1 max-w-[130px]">
+                      Pass will be generated once organizer approves.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-white rounded-xl shadow-xl flex items-center justify-center select-none">
+                    <QRCodeSVG
+                      value={selectedTicket.ticketCode}
+                      size={140}
+                      bgColor="#ffffff"
+                      fgColor="#000000"
+                      level="L"
+                      includeMargin={false}
+                    />
+                  </div>
+                )}
+                <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">
+                  {selectedTicket.status === 'PENDING' ? 'Ticket Pass Status' : 'Presenter Pass QR Code'}
+                </span>
               </div>
 
               {/* Scalloped Bottom Edge circles */}

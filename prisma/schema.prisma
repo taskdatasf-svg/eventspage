@@ -52,5 +52,6 @@ model Registration {
   paymentAccountName String?
   paymentMethod      String?
   paymentTxnId       String?
+  status     String   @default("APPROVED")
   createdAt          DateTime @default(now())
 }
