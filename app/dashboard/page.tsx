@@ -6,7 +6,7 @@ import {
   GoCalendar, GoLocation, GoPeople,
   GoTrash, GoPencil, GoCheck, GoX,
   GoChevronDown, GoChevronUp, GoSignOut,
-  GoEye, GoPlus, GoArrowLeft, GoShield, GoTag,
+  GoEye, GoPlus, GoArrowLeft, GoShield, GoTag, GoDeviceCameraVideo,
   GoClock
 } from 'react-icons/go';
 import { EventData } from '@/lib/eventsStore';
@@ -448,6 +448,13 @@ export default function DashboardPage() {
             <GoCheck className="w-4 h-4 flex-shrink-0" />Verify Ticket Pass
           </button>
 
+          <a
+            href="/dashboard/scanner"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#222226] transition-all"
+          >
+            <GoDeviceCameraVideo className="w-4 h-4 flex-shrink-0 text-[#ffec27]" />Live Ticket Scanner
+          </a>
+
           <div className="mt-auto pt-6 border-t border-[#2e2e34] flex flex-col gap-1">
             <a href="/create-event" className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-neutral-400 hover:text-white hover:bg-[#222226] transition-all">
               <GoPlus className="w-4 h-4" />Create New Event
@@ -545,14 +552,13 @@ export default function DashboardPage() {
 
                             <div className="border-t border-[#2e2e34] pt-3 flex items-center justify-between">
                               <span className="text-[10px] uppercase font-mono text-neutral-500 tracking-wider">Registered Users ({regs.length})</span>
-                              <button
-                                type="button"
-                                onClick={() => setAttendeesModalEventId(event.id)}
-                                className="px-3 py-1.5 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] hover:border-neutral-500/30 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                              <a
+                                href={`/dashboard/event-attendees/${event.id}`}
+                                className="px-3 py-1.5 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] hover:border-neutral-500/30 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 text-white"
+                                style={{ color: 'white' }}
                               >
                                 <span>Show Attendees</span>
-                                <GoChevronDown className="w-3.5 h-3.5" />
-                              </button>
+                              </a>
                             </div>
                           </div>
                         </div>
@@ -750,143 +756,6 @@ export default function DashboardPage() {
       </div>
 
 
-      {/* Attendees Modal Overlay */}
-      {(() => {
-        if (!attendeesModalEventId) return null;
-        const event = myEvents.find(e => e.id === attendeesModalEventId);
-        if (!event) return null;
-        const regs = registrations[event.id] || [];
-
-        return (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col overflow-hidden max-h-[85vh]">
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4.5 border-b border-[#2e2e34]">
-                <div>
-                  <h2 className="text-base font-bold text-white">Event Attendees</h2>
-                  <p className="text-[11px] text-neutral-400 mt-0.5 font-medium">
-                    Managing guest list for <span className="text-white font-semibold">"{event.title}"</span>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setAttendeesModalEventId(null)}
-                  className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#2c2c32] transition-all cursor-pointer"
-                >
-                  <GoX className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Toolbar */}
-              <div className="px-6 py-3.5 bg-[#222226]/50 border-b border-[#2e2e34] flex items-center justify-between gap-3 flex-wrap">
-                <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider font-semibold">Attendance Tools</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => triggerImportFile('PDF', event.id)}
-                    className="px-3.5 py-2 bg-[#1c1c1f] hover:bg-neutral-800 text-neutral-200 hover:text-white text-xs font-semibold rounded-xl border border-[#2e2e34] transition-all cursor-pointer shadow-sm"
-                  >
-                    Import PDF
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => triggerImportFile('XLS', event.id)}
-                    className="px-3.5 py-2 bg-[#1c1c1f] hover:bg-neutral-800 text-neutral-200 hover:text-white text-xs font-semibold rounded-xl border border-[#2e2e34] transition-all cursor-pointer shadow-sm"
-                  >
-                    Import XLS
-                  </button>
-                </div>
-              </div>
-
-              {/* Roster list */}
-              <div className="p-6 flex-1 overflow-y-auto flex flex-col gap-3 min-h-0">
-                {regs.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center text-center py-12 gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#222226] border border-[#2e2e34] flex items-center justify-center text-neutral-500">
-                      <GoPeople className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">No registered users yet</p>
-                      <p className="text-xs text-neutral-500 mt-1">Attendees imported or registered will appear here.</p>
-                    </div>
-                  </div>
-                ) : (
-                  regs.map((reg, i) => (
-                    <div key={i} className="flex items-center justify-between bg-[#222226] border border-[#2e2e34] rounded-xl px-4 py-3 shadow-xs">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-8 h-8 rounded-full bg-[#2e2e34] border border-[#3e3e46] flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                          {reg.name?.substring(0, 2).toUpperCase() || 'U'}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-xs font-bold text-white truncate max-w-[180px]">{reg.name || 'Anonymous'}</p>
-                            {reg.status === 'PENDING' ? (
-                              <span className="text-[8px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
-                                Pending
-                              </span>
-                            ) : (
-                              <span className="text-[8px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono font-semibold">
-                                Approved
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-neutral-400 font-mono truncate">{reg.email}</p>
-                          
-                          {/* Render Custom RSVP Answers */}
-                          {reg.answers && (() => {
-                            try {
-                              const parsedAns = JSON.parse(reg.answers);
-                              return (
-                                <div className="flex flex-wrap gap-1.5 mt-1.5">
-                                  {Object.entries(parsedAns).map(([k, v]) => (
-                                    <span key={k} className="text-[9px] bg-[#1c1c1f] text-neutral-300 px-1.5 py-0.5 rounded border border-[#2e2e34]">
-                                      <strong>{k}:</strong> {typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)}
-                                    </span>
-                                  ))}
-                                </div>
-                              );
-                            } catch {
-                              return null;
-                            }
-                          })()}
-
-                          {/* Render payment details */}
-                          {reg.paymentTxnId && (
-                            <div className="flex flex-wrap gap-1.5 mt-1.5">
-                              <span className="text-[9px] bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono">
-                                Paid via {reg.paymentMethod} ({reg.paymentAccountName})
-                              </span>
-                              <span className="text-[9px] bg-neutral-800 text-neutral-400 border border-[#2e2e34] px-1.5 py-0.5 rounded font-mono">
-                                Txn: {reg.paymentTxnId}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2.5 flex-shrink-0 ml-3">
-                        {reg.status === 'PENDING' && (
-                          <button
-                            onClick={() => handleApproveUser(event.id, reg.id)}
-                            disabled={approvingIds[reg.id || '']}
-                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
-                            style={{ color: 'white' }}
-                          >
-                            {approvingIds[reg.id || ''] ? 'Approving...' : 'Approve'}
-                          </button>
-                        )}
-                        <span className="text-[9px] font-mono bg-[#1c1c1f] border border-[#2e2e34] px-2.5 py-1 rounded text-neutral-400 shadow-inner">
-                          {reg.ticketCode}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 }
