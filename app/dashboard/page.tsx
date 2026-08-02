@@ -89,6 +89,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState<Record<string, RegUser[]>>({});
   const [importTarget, setImportTarget] = useState<{ type: 'PDF' | 'XLS'; eventId: string } | null>(null);
+  const [attendeesModalEventId, setAttendeesModalEventId] = useState<string | null>(null);
   const importFileInputRef = useRef<HTMLInputElement>(null);
   
   // My tickets tab states
@@ -523,9 +524,9 @@ export default function DashboardPage() {
                                 <a href={`/events/${event.id}`} title="View" className="p-1.5 rounded-md bg-[#222226] border border-[#2e2e34] text-neutral-400 hover:text-white hover:bg-[#2c2c32] transition-all">
                                   <GoEye className="w-3.5 h-3.5" />
                                 </a>
-                                <button title="Edit" onClick={() => handleEditOpen(event)} className="p-1.5 rounded-md bg-[#222226] border border-[#2e2e34] text-neutral-400 hover:text-white hover:bg-[#2c2c32] transition-all cursor-pointer">
+                                <a href={`/edit-event/${event.id}`} title="Edit" className="p-1.5 rounded-md bg-[#222226] border border-[#2e2e34] text-neutral-400 hover:text-white hover:bg-[#2c2c32] transition-all cursor-pointer">
                                   <GoPencil className="w-3.5 h-3.5" />
-                                </button>
+                                </a>
                                 <button title="Delete" onClick={() => setDeleteConfirmId(isDeleting ? null : event.id)} className="p-1.5 rounded-md bg-[#222226] border border-[#2e2e34] text-rose-400 hover:bg-rose-900/30 hover:border-rose-500/40 transition-all cursor-pointer">
                                   <GoTrash className="w-3.5 h-3.5" />
                                 </button>
@@ -546,107 +547,13 @@ export default function DashboardPage() {
                               <span className="text-[10px] uppercase font-mono text-neutral-500 tracking-wider">Registered Users ({regs.length})</span>
                               <button
                                 type="button"
-                                onClick={() => setExpandedEventId(isExpanded ? null : event.id)}
+                                onClick={() => setAttendeesModalEventId(event.id)}
                                 className="px-3 py-1.5 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] hover:border-neutral-500/30 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
                               >
-                                <span>{isExpanded ? 'Hide Attendees' : 'Show Attendees'}</span>
-                                {isExpanded ? <GoChevronUp className="w-3.5 h-3.5" /> : <GoChevronDown className="w-3.5 h-3.5" />}
+                                <span>Show Attendees</span>
+                                <GoChevronDown className="w-3.5 h-3.5" />
                               </button>
                             </div>
-
-                            {isExpanded && (
-                              <div className="flex flex-col gap-3 animate-fade-in">
-                                {/* Import Actions Bar */}
-                                <div className="flex items-center justify-between gap-3 bg-[#222226]/50 border border-[#2e2e34] rounded-xl p-3 flex-wrap">
-                                  <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider font-semibold">Attendance Tools</span>
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => triggerImportFile('PDF', event.id)}
-                                      className="px-3 py-1.5 bg-[#1c1c1f] hover:bg-neutral-800 text-neutral-200 hover:text-white text-[11px] font-semibold rounded-lg border border-[#2e2e34] transition-all cursor-pointer"
-                                    >
-                                      Import PDF
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => triggerImportFile('XLS', event.id)}
-                                      className="px-3 py-1.5 bg-[#1c1c1f] hover:bg-neutral-800 text-neutral-200 hover:text-white text-[11px] font-semibold rounded-lg border border-[#2e2e34] transition-all cursor-pointer"
-                                    >
-                                      Import XLS
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {regs.length === 0 ? (
-                                  <p className="text-xs text-neutral-500 py-2 text-center">No registered users yet.</p>
-                                ) : (
-                                  regs.map((reg, i) => (
-                                    <div key={i} className="flex items-center justify-between bg-[#222226] border border-[#2e2e34] rounded-xl px-4 py-2.5">
-                                      <div className="flex items-center gap-3">
-                                        <div className="w-7 h-7 rounded-full bg-[#2e2e34] flex items-center justify-center text-[10px] font-bold">{reg.name?.substring(0, 2).toUpperCase() || 'U'}</div>
-                                        <div>
-                                          <div className="flex items-center gap-2">
-                                            <p className="text-xs font-medium text-white">{reg.name || 'Anonymous'}</p>
-                                            {reg.status === 'PENDING' ? (
-                                              <span className="text-[8px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
-                                                Pending
-                                              </span>
-                                            ) : (
-                                              <span className="text-[8px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono font-semibold">
-                                                Approved
-                                              </span>
-                                            )}
-                                          </div>
-                                          <p className="text-[10px] text-neutral-400 font-mono">{reg.email}</p>
-                                          
-                                          {/* Render Custom RSVP Answers in Admin Panel */}
-                                          {reg.answers && (() => {
-                                            try {
-                                              const parsedAns = JSON.parse(reg.answers);
-                                              return (
-                                                <div className="flex flex-wrap gap-1.5 mt-1">
-                                                  {Object.entries(parsedAns).map(([k, v]) => (
-                                                    <span key={k} className="text-[9px] bg-[#2d2d34] text-neutral-300 px-1.5 py-0.5 rounded border border-[#3e3e46]">
-                                                      <strong>{k}:</strong> {typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)}
-                                                    </span>
-                                                  ))}
-                                                </div>
-                                              );
-                                            } catch {
-                                              return null;
-                                            }
-                                          })()}
-                                          {/* Render payment details in host panel */}
-                                          {reg.paymentTxnId && (
-                                            <div className="flex flex-wrap gap-1.5 mt-1">
-                                              <span className="text-[9px] bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono">
-                                                Paid via {reg.paymentMethod} ({reg.paymentAccountName})
-                                              </span>
-                                              <span className="text-[9px] bg-neutral-800 text-neutral-400 border border-[#2e2e34] px-1.5 py-0.5 rounded font-mono">
-                                                Txn: {reg.paymentTxnId}
-                                              </span>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-2.5">
-                                        {reg.status === 'PENDING' && (
-                                          <button
-                                            onClick={() => handleApproveUser(event.id, reg.id)}
-                                            disabled={approvingIds[reg.id || '']}
-                                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white text-[10px] font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1"
-                                            style={{ color: 'white' }}
-                                          >
-                                            {approvingIds[reg.id || ''] ? 'Approving...' : 'Approve'}
-                                          </button>
-                                        )}
-                                        <span className="text-[9px] font-mono bg-[#1c1c1f] border border-[#2e2e34] px-2 py-0.5 rounded text-neutral-400">{reg.ticketCode}</span>
-                                      </div>
-                                    </div>
-                                  ))
-                                )}
-                              </div>
-                            )}
                           </div>
                         </div>
                       );
@@ -842,243 +749,6 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      {/* Edit Modal */}
-      {editingEvent && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl w-full max-w-lg shadow-2xl flex flex-col overflow-hidden animate-fade-in">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#2e2e34]">
-              <h2 className="text-sm font-bold text-white">Edit Event</h2>
-              <button onClick={() => setEditingEvent(null)} className="p-1.5 rounded-md text-neutral-400 hover:text-white hover:bg-[#2c2c32] transition-all cursor-pointer"><GoX className="w-4 h-4" /></button>
-            </div>
-            
-            <div className="p-5 flex flex-col gap-4 overflow-y-auto max-h-[65vh]">
-              {/* Event standard parameters */}
-              {[
-                { key: 'title', label: 'Event Title' },
-                { key: 'location', label: 'Location' },
-                { key: 'startDate', label: 'Start Date' },
-                { key: 'startTime', label: 'Start Time' },
-                { key: 'endTime', label: 'End Time' },
-                { key: 'price', label: 'Price' },
-                { key: 'capacity', label: 'Capacity' },
-              ].map(({ key, label }) => (
-                <div key={key} className="flex flex-col gap-1.5">
-                  <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">{label}</label>
-                  <input type="text" value={(editForm as any)[key] ?? ''} onChange={(e) => setEditForm((p) => ({ ...p, [key]: e.target.value }))}
-                    className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors" />
-                </div>
-              ))}
-              
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Description</label>
-                <textarea rows={3} value={editForm.description ?? ''} onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
-                  className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors resize-none" />
-              </div>
-
-              {/* RSVP Custom fields management inside edit modal */}
-              <div className="border-t border-[#2e2e34] pt-4 flex flex-col gap-3">
-                <label className="text-xs font-semibold text-white">RSVP Custom Fields</label>
-                
-                {editCustomFields.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    {editCustomFields.map((field, idx) => (
-                      <div key={idx} className="flex items-center justify-between bg-[#222226] border border-[#2e2e34] rounded-lg px-3 py-2 text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-white">{field.name}</span>
-                          <span className="text-[10px] text-neutral-500 font-mono">({field.type})</span>
-                          {field.required && (
-                            <span className="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded">Required</span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setEditCustomFields(editCustomFields.filter((_, i) => i !== idx))}
-                          className="p-1 text-neutral-400 hover:text-rose-400 transition-colors cursor-pointer rounded"
-                        >
-                          <GoTrash className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add dynamic field form inside modal */}
-                <div className="flex flex-col gap-2 bg-[#222226] border border-[#2e2e34] p-3 rounded-xl mt-1">
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                    <div className="sm:col-span-6">
-                      <input
-                        type="text"
-                        placeholder="New Question / Field"
-                        value={editNewFieldName}
-                        onChange={(e) => setEditNewFieldName(e.target.value)}
-                        className="w-full bg-[#1c1c1f] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-1.5 text-xs text-white outline-none"
-                      />
-                    </div>
-                    
-                    <div className="sm:col-span-3">
-                      <select
-                        value={editNewFieldType}
-                        onChange={(e) => setEditNewFieldType(e.target.value as 'text' | 'checkbox')}
-                        className="w-full bg-[#1c1c1f] border border-[#2e2e34] rounded-md px-2 py-1.5 text-xs text-neutral-300 outline-none cursor-pointer"
-                      >
-                        <option value="text" className="bg-[#1c1c1f]">Short text</option>
-                        <option value="checkbox" className="bg-[#1c1c1f]">Checkbox</option>
-                      </select>
-                    </div>
-
-                    <div className="sm:col-span-3 flex items-center gap-1.5 pl-1">
-                      <input
-                        type="checkbox"
-                        id="edit-field-req"
-                        checked={editNewFieldRequired}
-                        onChange={(e) => setEditNewFieldRequired(e.target.checked)}
-                        className="rounded border-[#2e2e34] bg-[#1c1c1f] text-white focus:ring-0 cursor-pointer"
-                      />
-                      <label htmlFor="edit-field-req" className="text-[10px] text-neutral-300 cursor-pointer">Required</label>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!editNewFieldName.trim()) return;
-                      setEditCustomFields([...editCustomFields, { name: editNewFieldName.trim(), type: editNewFieldType, required: editNewFieldRequired }]);
-                      setEditNewFieldName('');
-                      setEditNewFieldRequired(false);
-                    }}
-                    className="w-full py-1.5 bg-[#1c1c1f] hover:bg-[#25252a] text-white text-xs font-semibold rounded-md border border-[#333339] transition-all cursor-pointer flex items-center justify-center gap-1"
-                  >
-                    <GoPlus className="w-3.5 h-3.5" /> Add RSVP Question
-                  </button>
-                </div>
-              </div>
-
-              {/* RSVP Speakers management inside edit modal */}
-              <div className="border-t border-[#2e2e34] pt-4 flex flex-col gap-3">
-                <label className="text-xs font-semibold text-white">Event Speakers</label>
-                
-                {editSpeakers.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    {editSpeakers.map((sp, idx) => (
-                      <div key={idx} className="flex items-center justify-between bg-[#222226] border border-[#2e2e34] rounded-lg px-3 py-2 text-xs">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          {sp.image ? (
-                            <img
-                              src={sp.image}
-                              alt={sp.name}
-                              className="w-8 h-8 rounded-full object-cover border border-[#3e3e46] flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-[#2d2d34] border border-[#3e3e46] flex items-center justify-center font-bold text-[#ffec27] text-[10px] flex-shrink-0 select-none">
-                              {sp.name.substring(0, 1).toUpperCase()}
-                            </div>
-                          )}
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-semibold text-white truncate">{sp.name}</span>
-                            <span className="text-[10px] text-neutral-400 font-mono truncate">{sp.role}</span>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setEditSpeakers(editSpeakers.filter((_, i) => i !== idx))}
-                          className="p-1 text-neutral-400 hover:text-rose-400 transition-colors cursor-pointer rounded"
-                        >
-                          <GoTrash className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add dynamic speaker form inside modal */}
-                <div className="flex flex-col gap-3.5 bg-[#222226] border border-[#2e2e34] p-3.5 rounded-xl mt-1">
-                  
-                  <div className="flex flex-col sm:flex-row gap-3 items-center">
-                    
-                    {/* Drag & Drop Photo Area */}
-                    <div 
-                      onDragOver={(e) => { e.preventDefault(); setIsDraggingEditSpeaker(true); }}
-                      onDragLeave={() => setIsDraggingEditSpeaker(false)}
-                      onDrop={handleEditSpeakerImageDrop}
-                      onClick={() => document.getElementById('edit-speaker-photo-file')?.click()}
-                      className={`w-16 h-16 rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden flex-shrink-0 ${
-                        editNewSpeakerImage 
-                          ? 'border-emerald-500 bg-[#1c1c1f]' 
-                          : isDraggingEditSpeaker 
-                          ? 'border-white bg-[#2a2a30]' 
-                          : 'border-[#2e2e34] bg-[#1c1c1f] hover:border-neutral-500'
-                      }`}
-                    >
-                      {editNewSpeakerImage ? (
-                        <>
-                          <img src={editNewSpeakerImage} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex items-center justify-center text-[8px] text-rose-400 font-semibold transition-opacity">
-                            Change
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex flex-col items-center text-center p-1 leading-tight select-none">
-                          <span className="text-neutral-500 text-[9px]">Drag photo</span>
-                          <span className="text-neutral-600 text-[7px] mt-0.5 font-mono">or browse</span>
-                        </div>
-                      )}
-                      <input
-                        type="file"
-                        id="edit-speaker-photo-file"
-                        accept="image/*"
-                        onChange={handleEditSpeakerImageChange}
-                        className="hidden"
-                      />
-                    </div>
-
-                    {/* Inputs Column */}
-                    <div className="flex-1 w-full flex flex-col gap-2">
-                      <input
-                        type="text"
-                        placeholder="Speaker's Full Name"
-                        value={editNewSpeakerName}
-                        onChange={(e) => setEditNewSpeakerName(e.target.value)}
-                        className="w-full bg-[#1c1c1f] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-1.5 text-xs text-white outline-none"
-                      />
-                      
-                      <input
-                        type="text"
-                        placeholder="Speaker's Role / Title (e.g. Founder)"
-                        value={editNewSpeakerRole}
-                        onChange={(e) => setEditNewSpeakerRole(e.target.value)}
-                        className="w-full bg-[#1c1c1f] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-1.5 text-xs text-white outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!editNewSpeakerName.trim() || !editNewSpeakerRole.trim()) return;
-                      setEditSpeakers([...editSpeakers, { name: editNewSpeakerName.trim(), role: editNewSpeakerRole.trim(), image: editNewSpeakerImage }]);
-                      setEditNewSpeakerName('');
-                      setEditNewSpeakerRole('');
-                      setEditNewSpeakerImage(null);
-                    }}
-                    className="w-full py-1.5 bg-[#1c1c1f] hover:bg-[#25252a] text-white text-xs font-semibold rounded-md border border-[#333339] transition-all cursor-pointer flex items-center justify-center gap-1"
-                  >
-                    <GoPlus className="w-3.5 h-3.5" /> Add Speaker
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-            <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-[#2e2e34]">
-              <button onClick={() => setEditingEvent(null)} className="px-4 py-2 text-xs text-neutral-300 bg-[#222226] border border-[#2e2e34] rounded-md hover:bg-[#2c2c32] transition-all cursor-pointer">Cancel</button>
-              <button onClick={handleEditSave} disabled={saving} className="px-4 py-2 text-xs font-semibold bg-white text-black rounded-md hover:bg-neutral-100 transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-60">
-                <GoCheck className="w-3.5 h-3.5" />{saving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Ticket Pass Premium Dark Modal */}
       {selectedTicket && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -1253,6 +923,143 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      {/* Attendees Modal Overlay */}
+      {(() => {
+        if (!attendeesModalEventId) return null;
+        const event = myEvents.find(e => e.id === attendeesModalEventId);
+        if (!event) return null;
+        const regs = registrations[event.id] || [];
+
+        return (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col overflow-hidden max-h-[85vh]">
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4.5 border-b border-[#2e2e34]">
+                <div>
+                  <h2 className="text-base font-bold text-white">Event Attendees</h2>
+                  <p className="text-[11px] text-neutral-400 mt-0.5 font-medium">
+                    Managing guest list for <span className="text-white font-semibold">"{event.title}"</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAttendeesModalEventId(null)}
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-[#2c2c32] transition-all cursor-pointer"
+                >
+                  <GoX className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Toolbar */}
+              <div className="px-6 py-3.5 bg-[#222226]/50 border-b border-[#2e2e34] flex items-center justify-between gap-3 flex-wrap">
+                <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider font-semibold">Attendance Tools</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => triggerImportFile('PDF', event.id)}
+                    className="px-3.5 py-2 bg-[#1c1c1f] hover:bg-neutral-800 text-neutral-200 hover:text-white text-xs font-semibold rounded-xl border border-[#2e2e34] transition-all cursor-pointer shadow-sm"
+                  >
+                    Import PDF
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => triggerImportFile('XLS', event.id)}
+                    className="px-3.5 py-2 bg-[#1c1c1f] hover:bg-neutral-800 text-neutral-200 hover:text-white text-xs font-semibold rounded-xl border border-[#2e2e34] transition-all cursor-pointer shadow-sm"
+                  >
+                    Import XLS
+                  </button>
+                </div>
+              </div>
+
+              {/* Roster list */}
+              <div className="p-6 flex-1 overflow-y-auto flex flex-col gap-3 min-h-0">
+                {regs.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center text-center py-12 gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[#222226] border border-[#2e2e34] flex items-center justify-center text-neutral-500">
+                      <GoPeople className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">No registered users yet</p>
+                      <p className="text-xs text-neutral-500 mt-1">Attendees imported or registered will appear here.</p>
+                    </div>
+                  </div>
+                ) : (
+                  regs.map((reg, i) => (
+                    <div key={i} className="flex items-center justify-between bg-[#222226] border border-[#2e2e34] rounded-xl px-4 py-3 shadow-xs">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-8 h-8 rounded-full bg-[#2e2e34] border border-[#3e3e46] flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                          {reg.name?.substring(0, 2).toUpperCase() || 'U'}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-xs font-bold text-white truncate max-w-[180px]">{reg.name || 'Anonymous'}</p>
+                            {reg.status === 'PENDING' ? (
+                              <span className="text-[8px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
+                                Pending
+                              </span>
+                            ) : (
+                              <span className="text-[8px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono font-semibold">
+                                Approved
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-neutral-400 font-mono truncate">{reg.email}</p>
+                          
+                          {/* Render Custom RSVP Answers */}
+                          {reg.answers && (() => {
+                            try {
+                              const parsedAns = JSON.parse(reg.answers);
+                              return (
+                                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                  {Object.entries(parsedAns).map(([k, v]) => (
+                                    <span key={k} className="text-[9px] bg-[#1c1c1f] text-neutral-300 px-1.5 py-0.5 rounded border border-[#2e2e34]">
+                                      <strong>{k}:</strong> {typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)}
+                                    </span>
+                                  ))}
+                                </div>
+                              );
+                            } catch {
+                              return null;
+                            }
+                          })()}
+
+                          {/* Render payment details */}
+                          {reg.paymentTxnId && (
+                            <div className="flex flex-wrap gap-1.5 mt-1.5">
+                              <span className="text-[9px] bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono">
+                                Paid via {reg.paymentMethod} ({reg.paymentAccountName})
+                              </span>
+                              <span className="text-[9px] bg-neutral-800 text-neutral-400 border border-[#2e2e34] px-1.5 py-0.5 rounded font-mono">
+                                Txn: {reg.paymentTxnId}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2.5 flex-shrink-0 ml-3">
+                        {reg.status === 'PENDING' && (
+                          <button
+                            onClick={() => handleApproveUser(event.id, reg.id)}
+                            disabled={approvingIds[reg.id || '']}
+                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
+                            style={{ color: 'white' }}
+                          >
+                            {approvingIds[reg.id || ''] ? 'Approving...' : 'Approve'}
+                          </button>
+                        )}
+                        <span className="text-[9px] font-mono bg-[#1c1c1f] border border-[#2e2e34] px-2.5 py-1 rounded text-neutral-400 shadow-inner">
+                          {reg.ticketCode}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

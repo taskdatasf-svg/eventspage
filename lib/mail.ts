@@ -147,7 +147,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
             <!-- Icon and Status -->
             <div style="text-align: center; margin-bottom: 20px;">
               <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">
-                ${isPending ? 'RSVP Pending Approval' : 'RSVP Confirmed'}
+                ${isPending ? 'RSVP Pending Approval' : 'Registration Successful!'}
               </h2>
               <p style="margin: 6px 0 0 0; color: #a1a1aa; font-size: 13px; line-height: 1.5;">
                 ${isPending 
@@ -168,7 +168,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
                   Date: ${event.startDate} &middot; ${event.startTime}
                 </p>
                 <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 12px;">
-                  Location: ${event.location || 'Online'}
+                  Address of Event: <span style="color: #ffffff; font-weight: 500;">${event.location || 'Online'}</span>
                 </p>
                 <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 12px;">
                   Price: <strong style="color: #ffffff;">${event.price}</strong>
@@ -198,6 +198,18 @@ export async function sendEventMail({ to, subject, event, registration, type, or
               <!-- RSVP Answers & Payment (if any) -->
               ${answersHtml}
               ${paymentHtml}
+
+              <!-- Scannable Entry Pass QR Code -->
+              ${!isPending ? `
+              <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #2e2e34;">
+                <p style="margin: 0 0 8px 0; font-size: 10px; font-family: monospace; color: #8a8a90; text-transform: uppercase; letter-spacing: 1.5px;">Entry Pass QR Code</p>
+                <div style="display: inline-block; background-color: #ffffff; padding: 10px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: center;">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(registration.ticketCode)}" alt="Ticket QR Code" style="width: 150px; height: 150px; display: block; margin: 0 auto;" />
+                </div>
+                <p style="margin: 6px 0 0 0; font-family: monospace; font-size: 12px; color: #ffffff; font-weight: bold; letter-spacing: 1px;">${registration.ticketCode}</p>
+                <p style="margin: 4px 0 0 0; font-size: 10px; color: #a1a1aa; line-height: 1.4;">Present this QR code to the organizer at the entrance for verification.</p>
+              </div>
+              ` : ''}
             </div>
 
             <!-- View ticket pass CTA -->
@@ -209,9 +221,8 @@ export async function sendEventMail({ to, subject, event, registration, type, or
 
           </div>
 
-          <!-- Footer with Event Logo -->
+          <!-- Footer without Logo -->
           <div style="background-color: #161618; border-top: 1px solid #2e2e34; padding: 20px; text-align: center;">
-            <img src="https://ik.imagekit.io/dypkhqxip/events%20loho" alt="Student Forge Logo" style="height: 28px; width: auto; object-fit: contain; border: 0; outline: none; margin: 0 auto 8px auto; display: block;" />
             <p style="margin: 0; font-size: 10px; font-family: monospace; color: #52525b; text-transform: uppercase; letter-spacing: 2px;">
               Student Forge Events Platform
             </p>
