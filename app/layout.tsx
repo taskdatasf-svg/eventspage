@@ -60,8 +60,18 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
+        {/* Cookiebot Consent Script */}
+        <script
+          id="Cookiebot"
+          src="https://consent.cookiebot.com/uc.js"
+          data-cbid="a1514766-7f6a-4019-9781-9e8a9e737583"
+          data-blockingmode="auto"
+          type="text/javascript"
+          async
+        />
         {/* Google tag (gtag.js) */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-0EBKZ76ZHP"

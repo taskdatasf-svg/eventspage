@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
-    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; connect-src 'self' https://challenges.cloudflare.com https://nominatim.openstreetmap.org; img-src 'self' data: https://ik.imagekit.io https://*.openstreetmap.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self' https://challenges.cloudflare.com;",
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.cookiebot.com; connect-src 'self' https://challenges.cloudflare.com https://nominatim.openstreetmap.org https://*.cookiebot.com; img-src 'self' data: https://ik.imagekit.io https://*.openstreetmap.org https://*.cookiebot.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.cookiebot.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self' https://challenges.cloudflare.com https://*.cookiebot.com;",
   },
   {
     key: "X-Frame-Options",

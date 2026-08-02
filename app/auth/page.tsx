@@ -90,12 +90,17 @@ export default function AuthPage() {
       return;
     }
 
+    if (!turnstileToken) {
+      setError('Please complete the security verification check.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name || email.split('@')[0], email, password })
+        body: JSON.stringify({ name: name || email.split('@')[0], email, password, turnstileToken })
       });
       const data = await res.json();
 
@@ -548,10 +553,13 @@ export default function AuthPage() {
                     </div>
                   </div>
 
+                  {/* Turnstile Widget */}
+                  <TurnstileWidget onVerify={setTurnstileToken} />
+
                   <button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
+                    disabled={isLoading || !turnstileToken}
+                    className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-60 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
                   >
                     {isLoading ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Complete Sign Up'}
                   </button>
