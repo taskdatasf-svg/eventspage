@@ -25,6 +25,7 @@ export default function RSVPPage() {
   const [event, setEvent] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [downloading, setDownloading] = useState(false);
 
   // Flow step state: 'form' | 'payment' | 'confirm-txn'
   const [rsvpStep, setRsvpStep] = useState<'form' | 'payment' | 'confirm-txn'>('form');
@@ -97,6 +98,43 @@ export default function RSVPPage() {
         .finally(() => setLoading(false));
     }
   }, [id]);
+
+  const downloadPDF = () => {
+    if (!ticket) return;
+    const element = document.getElementById('ticket-pdf-export-container');
+    if (!element) return;
+    
+    setDownloading(true);
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.async = true;
+    script.onload = () => {
+      const opt = {
+        margin:       0.2,
+        filename:     `ticket-${ticket.ticketCode}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+      };
+      
+      (window as any).html2pdf()
+        .from(element)
+        .set(opt)
+        .save()
+        .then(() => {
+          setDownloading(false);
+        })
+        .catch((err: any) => {
+          console.error(err);
+          setDownloading(false);
+        });
+    };
+    script.onerror = () => {
+      alert('Failed to load PDF library. Please try again.');
+      setDownloading(false);
+    };
+    document.body.appendChild(script);
+  };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -642,6 +680,18 @@ export default function RSVPPage() {
 
             </div>
 
+            {/* Download PDF button */}
+            {ticket.status !== 'PENDING' && (
+              <button
+                onClick={downloadPDF}
+                disabled={downloading}
+                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-800 text-white font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-indigo-500/20 mb-2"
+                style={{ color: 'white' }}
+              >
+                <span>{downloading ? 'Generating PDF...' : 'Download Ticket (PDF)'}</span>
+              </button>
+            )}
+
             {/* Back action */}
             <a
               href={`/events/${event.id}`}
@@ -654,6 +704,118 @@ export default function RSVPPage() {
         )}
 
       </div>
+
+      {/* Hidden container formatted for Landscape PDF Ticket Print */}
+      {ticket && event && (
+        <div 
+          id="ticket-pdf-export-container"
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: '-9999px',
+            width: '800px',
+            backgroundColor: '#f3f4f6',
+            color: '#000000',
+            fontFamily: 'sans-serif',
+            border: '2px solid #d1d5db',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxSizing: 'border-box'
+          }}
+        >
+          {/* Header Bar */}
+          <div 
+            style={{
+              backgroundColor: '#ffffff',
+              height: '65px',
+              padding: '0 24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '4px solid #009cde',
+              boxSizing: 'border-box'
+            }}
+          >
+            <span style={{ color: '#009cde', fontSize: '20px', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
+              This is your ticket
+            </span>
+            <img 
+              src="https://ik.imagekit.io/dypkhqxip/events%20loho" 
+              alt="Logo" 
+              style={{ height: '32px', width: 'auto', objectFit: 'contain', display: 'block' }} 
+            />
+          </div>
+
+          {/* Ticket Body Content */}
+          <div 
+            style={{
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              gap: '24px',
+              backgroundColor: '#f3f4f6',
+              boxSizing: 'border-box'
+            }}
+          >
+            {/* Left Info Column */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', boxSizing: 'border-box', minWidth: '0' }}>
+              <span style={{ fontSize: '10px', fontWeight: '600', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                {event.organizer || "Infinity Event Organizer"}
+              </span>
+              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#000000', lineHeight: '1.3', margin: '0 0 16px 0', fontFamily: 'sans-serif' }}>
+                {event.title}
+              </h2>
+              
+              <div style={{ fontSize: '11px', color: '#1f2937', marginBottom: '4px' }}>
+                Venue: <span style={{ fontWeight: '600' }}>{event.location || 'Online'}</span>
+              </div>
+              <div style={{ fontSize: '11px', color: '#000000', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '24px' }}>
+                Date &amp; Time: {event.startDate} &middot; {event.startTime}
+              </div>
+
+              {/* Bottom metadata details row */}
+              <div style={{ display: 'flex', flexDirection: 'row', gap: '24px', marginTop: 'auto', borderTop: '1px solid #e5e7eb', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '8px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' }}>Issued To</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#000000' }}>{ticket.name}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '8px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' }}>Ticket ID</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#000000', fontFamily: 'monospace' }}>{ticket.ticketCode}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '8px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' }}>Price</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#000000' }}>{event.price || 'Free'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right QR Code Column */}
+            <div 
+              style={{
+                width: '210px',
+                height: '210px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e5e7eb',
+                borderRadius: '12px',
+                padding: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                flexShrink: 0
+              }}
+            >
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(ticket.ticketCode)}`} 
+                alt="Ticket QR Code" 
+                style={{ width: '180px', height: '180px', display: 'block' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </main>
