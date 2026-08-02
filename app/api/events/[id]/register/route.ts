@@ -12,7 +12,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       answers,
       paymentAccountName,
       paymentMethod,
-      paymentTxnId
+      paymentTxnId,
+      turnstileToken
     } = await request.json();
 
     if (!name || !email) {
@@ -31,6 +32,26 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
     if (existing) {
       return NextResponse.json({ success: true, registration: existing, alreadyRegistered: true });
+    }
+
+    if (!turnstileToken) {
+      return NextResponse.json({ error: 'Please complete the security verification check' }, { status: 400 });
+    }
+
+    // Verify Cloudflare Turnstile token
+    const verifyUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+    const verifyRes = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: process.env.TURNSTILE_SECRET_KEY,
+        response: turnstileToken,
+      }),
+    });
+
+    const verifyData = await verifyRes.json();
+    if (!verifyData.success) {
+      return NextResponse.json({ error: 'Security verification failed. Please try again.' }, { status: 400 });
     }
 
     // Generate unique ticket code

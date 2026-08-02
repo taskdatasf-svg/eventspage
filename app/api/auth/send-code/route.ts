@@ -1,15 +1,26 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const { email, checkUserExists } = await request.json();
 
     if (!email || !email.includes('@')) {
       return NextResponse.json(
         { error: 'Please enter a valid email address' },
         { status: 400 }
       );
+    }
+
+    if (checkUserExists) {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        return NextResponse.json(
+          { error: 'No account found with this email address' },
+          { status: 404 }
+        );
+      }
     }
 
     // Generate a random 6-digit verification code

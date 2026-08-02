@@ -10,6 +10,7 @@ import {
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
   GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock
 } from 'react-icons/go';
+import TurnstileWidget from '@/components/TurnstileWidget';
 
 const isEventFree = (price: string) => {
   const clean = price.trim().toLowerCase();
@@ -27,6 +28,7 @@ export default function RSVPPage() {
 
   // Flow step state: 'form' | 'payment' | 'confirm-txn'
   const [rsvpStep, setRsvpStep] = useState<'form' | 'payment' | 'confirm-txn'>('form');
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   // Form states
   const [name, setName] = useState('');
@@ -106,9 +108,14 @@ export default function RSVPPage() {
     }
 
     if (event && isEventFree(event.price)) {
+      if (!turnstileToken) {
+        alert('Please complete the security verification.');
+        return;
+      }
       submitRegistration();
     } else {
       setRsvpStep('payment');
+      setTurnstileToken('');
     }
   };
 
@@ -125,7 +132,8 @@ export default function RSVPPage() {
           answers,
           paymentAccountName: paymentAccountName || null,
           paymentMethod: paymentMethod || null,
-          paymentTxnId: paymentTxnId || null
+          paymentTxnId: paymentTxnId || null,
+          turnstileToken
         }),
       });
       const data = await res.json();
@@ -146,6 +154,10 @@ export default function RSVPPage() {
     e.preventDefault();
     if (!paymentAccountName.trim() || !paymentTxnId.trim()) {
       alert('Please fill out all verification details.');
+      return;
+    }
+    if (!turnstileToken) {
+      alert('Please complete the security verification.');
       return;
     }
     submitRegistration();
@@ -181,7 +193,7 @@ export default function RSVPPage() {
 
   // Generate a mock payment QR code content (UPI format containing amount and descriptor)
   const numericPrice = event.price.replace(/[^0-9.]/g, '') || '0';
-  const qrPaymentValue = `upi://pay?pa=studentforge@okaxis&pn=Student%20Forge%20Events&am=${numericPrice}&cu=INR&tn=RSVP%20${encodeURIComponent(event.title.substring(0, 15))}`;
+  const qrPaymentValue = `upi://pay?pa=6302933597@hdfc&pn=Student%20Forge%20Events&am=${numericPrice}&cu=INR&tn=RSVP%20${encodeURIComponent(event.title.substring(0, 15))}`;
 
   return (
     <main className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
@@ -294,10 +306,15 @@ export default function RSVPPage() {
                       </div>
                     ))}
 
+                    {/* Turnstile Widget for Free Events */}
+                    {event && isEventFree(event.price) && (
+                      <TurnstileWidget onVerify={setTurnstileToken} />
+                    )}
+
                     {/* Submit button */}
                     <button
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || (event && isEventFree(event.price) ? !turnstileToken : false)}
                       className="mt-2 w-full py-3 bg-white text-black hover:bg-neutral-100 disabled:opacity-60 font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-2"
                       style={{ color: 'black' }}
                     >
@@ -310,7 +327,7 @@ export default function RSVPPage() {
               {rsvpStep === 'payment' && (
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
-                    <button onClick={() => setRsvpStep('form')} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
+                    <button onClick={() => { setRsvpStep('form'); setTurnstileToken(''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
                       <GoArrowLeft className="w-3.5 h-3.5" /> Back to RSVP Form
                     </button>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Scan &amp; Pay</h1>
@@ -339,7 +356,8 @@ export default function RSVPPage() {
 
                     <div className="flex flex-col gap-1 max-w-sm">
                       <p className="text-xs text-neutral-300 font-semibold">Scan QR using GPay, PhonePe, UPI or Bank App</p>
-                      <p className="text-[10px] text-neutral-500 font-mono">Once scanning and paying is done, click the button below to add payment transaction details for host approval.</p>
+                      <p className="text-xs text-neutral-400 font-mono">UPI ID: <strong className="text-white select-all">6302933597@hdfc</strong></p>
+                      <p className="text-[10px] text-neutral-500 font-mono mt-1">Once scanning and paying is done, click the button below to add payment transaction details for host approval.</p>
                     </div>
 
                     <button
@@ -356,7 +374,7 @@ export default function RSVPPage() {
               {rsvpStep === 'confirm-txn' && (
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
-                    <button onClick={() => setRsvpStep('payment')} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
+                    <button onClick={() => { setRsvpStep('payment'); setTurnstileToken(''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
                       <GoArrowLeft className="w-3.5 h-3.5" /> Back to Payment Scan
                     </button>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Confirm Transaction</h1>
@@ -412,9 +430,12 @@ export default function RSVPPage() {
                       />
                     </div>
 
+                    {/* Turnstile Widget for Paid Events */}
+                    <TurnstileWidget onVerify={setTurnstileToken} />
+
                     <button
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || !turnstileToken}
                       className="mt-2 w-full py-3 bg-white text-black hover:bg-neutral-100 disabled:opacity-60 font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
                       style={{ color: 'black' }}
                     >
