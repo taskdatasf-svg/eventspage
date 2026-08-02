@@ -2,9 +2,25 @@
 
 import React from 'react';
 
-const Footer: React.FC = () => {
+export interface FooterProps {
+  isLight?: boolean;
+}
+
+const Footer: React.FC<FooterProps> = ({ isLight = false }) => {
+  const bgClass = isLight ? 'bg-transparent' : 'bg-[#161618]';
+  const textClass = isLight ? 'text-neutral-700' : 'text-[#8a8a90]';
+  const borderClass = isLight ? 'border-t border-neutral-400/20' : 'border-t border-[#222226]';
+  const subBorderClass = isLight ? 'border-t border-neutral-400/10' : 'border-t border-[#26262a]';
+  const linkHoverClass = isLight ? 'hover:text-black' : 'hover:text-white';
+  const subTextClass = isLight ? 'text-neutral-600' : 'text-[#71717a]';
+  const poweredByClass = isLight ? 'text-neutral-800' : 'text-[#a1a1aa]';
+  const poweredLinkClass = isLight ? 'text-neutral-900 hover:text-emerald-600' : 'text-white hover:text-emerald-400';
+  const iconClass = isLight 
+    ? 'bg-neutral-100 border border-neutral-300/60 hover:bg-neutral-200 text-neutral-600 hover:text-black' 
+    : 'bg-[#222226] border border-[#2e2e34] hover:bg-[#2a2a30] hover:border-[#44444a] text-neutral-400 hover:text-white';
+
   return (
-    <footer className="w-full bg-[#161618] text-[#8a8a90] py-12 px-4 sm:px-8 lg:px-12 border-t border-[#222226]">
+    <footer className={`w-full py-12 px-4 sm:px-8 lg:px-12 z-10 relative ${bgClass} ${textClass} ${borderClass}`}>
       <div className="max-w-6xl mx-auto flex flex-col gap-8">
         
         {/* Top Footer Navigation Row */}
@@ -17,15 +33,15 @@ const Footer: React.FC = () => {
               <img
                 src="https://ik.imagekit.io/dypkhqxip/events%20loho"
                 alt="Student Forge Events"
-                className="h-8 w-auto object-contain select-none opacity-80 hover:opacity-100 transition-opacity"
+                className={`h-8 w-auto object-contain select-none opacity-80 hover:opacity-100 transition-opacity ${isLight ? 'invert brightness-50' : ''}`}
                 draggable={false}
               />
             </a>
 
-            <a href="/explore" className="hover:text-white transition-colors">
+            <a href="/explore" className={`transition-colors ${linkHoverClass}`}>
               Explore
             </a>
-            <a href="/help" className="hover:text-white transition-colors">
+            <a href="/help" className={`transition-colors ${linkHoverClass}`}>
               Help
             </a>
           </div>
@@ -37,7 +53,7 @@ const Footer: React.FC = () => {
               href="https://www.instagram.com/studentforge/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-8 h-8 rounded-lg bg-[#222226] border border-[#2e2e34] hover:bg-[#2a2a30] hover:border-[#44444a] text-neutral-400 hover:text-white flex items-center justify-center transition-all duration-200 shadow-sm group"
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm group ${iconClass}`}
               aria-label="Instagram"
             >
               <svg className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -50,7 +66,7 @@ const Footer: React.FC = () => {
             {/* Email / Mail */}
             <a
               href="mailto:info@studentforge.in"
-              className="w-8 h-8 rounded-lg bg-[#222226] border border-[#2e2e34] hover:bg-[#2a2a30] hover:border-[#44444a] text-neutral-400 hover:text-white flex items-center justify-center transition-all duration-200 shadow-sm group"
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm group ${iconClass}`}
               aria-label="Email"
             >
               <svg className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -62,18 +78,18 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Sub-Footer: Copyright & Powered by Studio Redlix */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#71717a] border-t border-[#26262a] pt-6 font-normal">
+        <div className={`flex flex-col sm:flex-row items-center justify-between gap-3 border-t pt-6 font-normal ${subTextClass} ${subBorderClass}`}>
           <div>
             © {new Date().getFullYear()} Student Forge Technologies Private Limited. All rights reserved.
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-[#a1a1aa]">
+          <div className={`flex items-center gap-1.5 text-xs ${poweredByClass}`}>
             <span>Powered by</span>
             <a
               href="https://www.redlix.co.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-white tracking-wide hover:text-emerald-400 transition-colors cursor-pointer"
+              className={`font-semibold tracking-wide transition-colors cursor-pointer ${poweredLinkClass}`}
             >
               Studio Redlix
             </a>

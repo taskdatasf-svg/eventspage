@@ -9,15 +9,15 @@ import { GoCalendar, GoGlobe, GoLocation, GoTag, GoPeople, GoCheck, GoUpload, Go
 
 
 const themes = [
-  { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
-  { name: 'Quantum', bg: 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600', textColor: 'text-white', subText: '*BUILD THE UNKNOWN' },
-  { name: 'Warp', bg: 'bg-black border border-[#2e2e34]', textColor: 'text-white', subText: '*JOIN THE FUTURE' },
-  { name: 'Emoji', bg: 'bg-[#b497cf]', textColor: 'text-white', subText: '*STUDENT FORGE EVENTS' },
-  { name: 'Confetti', bg: 'bg-gradient-to-tr from-purple-600 to-pink-500', textColor: 'text-white', subText: '*PARTY TIME' },
-  { name: 'Pattern', bg: 'bg-gradient-to-tr from-indigo-600 to-teal-600', textColor: 'text-white', subText: '*PATTERN CREATION' },
-  { name: 'Seasonal', bg: 'bg-gradient-to-tr from-rose-500 to-amber-500', textColor: 'text-white', subText: '*CREATORS GATHERING' },
-  { name: 'PixelBlast', bg: 'bg-[#141416]', textColor: 'text-[#B497CF]', subText: '*PIXELBLAST INTERACTIVE' },
-  { name: 'Grainient', bg: 'bg-transparent', textColor: 'text-[#FF9FFC]', subText: '*GRAINIENT ANIMATED' }
+  { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE', isLight: true },
+  { name: 'Quantum', bg: 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600', textColor: 'text-white', subText: '*BUILD THE UNKNOWN', isLight: false },
+  { name: 'Warp', bg: 'bg-black border border-[#2e2e34]', textColor: 'text-white', subText: '*JOIN THE FUTURE', isLight: false },
+  { name: 'Emoji', bg: 'bg-[#b497cf]', textColor: 'text-white', subText: '*STUDENT FORGE EVENTS', isLight: true },
+  { name: 'Confetti', bg: 'bg-gradient-to-tr from-purple-600 to-pink-500', textColor: 'text-white', subText: '*PARTY TIME', isLight: false },
+  { name: 'Pattern', bg: 'bg-gradient-to-tr from-indigo-600 to-teal-600', textColor: 'text-white', subText: '*PATTERN CREATION', isLight: false },
+  { name: 'Seasonal', bg: 'bg-gradient-to-tr from-rose-500 to-amber-500', textColor: 'text-white', subText: '*CREATORS GATHERING', isLight: false },
+  { name: 'PixelBlast', bg: 'bg-[#141416]', textColor: 'text-[#B497CF]', subText: '*PIXELBLAST INTERACTIVE', isLight: false },
+  { name: 'Grainient', bg: 'bg-transparent', textColor: 'text-[#FF9FFC]', subText: '*GRAINIENT ANIMATED', isLight: false }
 ];
 
 const headerBgOptions = [
@@ -173,6 +173,7 @@ export default function CreateEventPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const activeTheme = themes[currentThemeIdx];
+  const isLightBg = !uploadedImageSrc && currentCustomColor === 'None' && !!activeTheme.isLight;
 
   // Protect route: user must be authenticated to host/create an event
   useEffect(() => {
@@ -546,17 +547,17 @@ export default function CreateEventPage() {
       <div className="w-full max-w-5xl mx-auto py-8 sm:py-12 px-4 sm:px-8 flex-1 flex flex-col justify-center relative z-10">
         
         {/* Page Top Breadcrumb Navigation & Title */}
-        <div className="flex items-center justify-between border-b border-[#2e2e34] pb-5 mb-8">
+        <div className={`flex items-center justify-between border-b pb-5 mb-8 ${isLightBg ? 'border-neutral-400/30' : 'border-[#2e2e34]'}`}>
           <div className="flex flex-col gap-1.5">
-            <nav className="flex items-center gap-2 text-xs text-[#8a8a90] font-normal">
-              <a href="/" className="hover:text-white transition-colors">Home</a>
+            <nav className={`flex items-center gap-2 text-xs font-normal ${isLightBg ? 'text-neutral-700' : 'text-[#8a8a90]'}`}>
+              <a href="/" className={`transition-colors ${isLightBg ? 'hover:text-black' : 'hover:text-white'}`}>Home</a>
               <span>/</span>
-              <a href="/events" className="hover:text-white transition-colors">Events</a>
+              <a href="/events" className={`transition-colors ${isLightBg ? 'hover:text-black' : 'hover:text-white'}`}>Events</a>
               <span>/</span>
-              <span className="text-white font-medium">Create Event</span>
+              <span className={`font-medium ${isLightBg ? 'text-neutral-900 font-semibold' : 'text-white'}`}>Create Event</span>
             </nav>
 
-            <h1 className="text-xl sm:text-2xl font-semibold text-[#f4f4f5] tracking-tight">
+            <h1 className={`text-xl sm:text-2xl font-semibold tracking-tight ${isLightBg ? 'text-neutral-900' : 'text-[#f4f4f5]'}`}>
               Create an Event
             </h1>
           </div>
@@ -1080,7 +1081,7 @@ export default function CreateEventPage() {
 
               {/* Section 4: Event Options */}
               <div className="flex flex-col gap-2">
-                <span className="text-sm font-semibold text-[#f4f4f5]">
+                <span className={`text-sm font-semibold ${isLightBg ? 'text-neutral-900' : 'text-[#f4f4f5]'}`}>
                   Event Options
                 </span>
 
@@ -1148,7 +1149,7 @@ export default function CreateEventPage() {
 
               {/* Section 5: RSVP Form Custom Fields */}
               <div className="flex flex-col gap-2">
-                <span className="text-sm font-semibold text-[#f4f4f5]">
+                <span className={`text-sm font-semibold ${isLightBg ? 'text-neutral-900' : 'text-[#f4f4f5]'}`}>
                   RSVP Custom Fields
                 </span>
                 
@@ -1626,7 +1627,7 @@ export default function CreateEventPage() {
         </div>
       )}
 
-      <Footer />
+      <Footer isLight={isLightBg} />
     </main>
   );
 }
