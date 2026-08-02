@@ -27,6 +27,21 @@ export default function RSVPPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [downloading, setDownloading] = useState(false);
+  const [logoBase64, setLogoBase64] = useState<string>('');
+
+  useEffect(() => {
+    const logoUrl = 'https://ik.imagekit.io/dypkhqxip/events%20loho';
+    fetch(logoUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setLogoBase64(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(err => console.error('Failed to convert logo to base64:', err));
+  }, []);
 
   // Flow step state: 'form' | 'payment' | 'confirm-txn'
   const [rsvpStep, setRsvpStep] = useState<'form' | 'payment' | 'confirm-txn'>('form');
@@ -762,7 +777,7 @@ export default function RSVPPage() {
               This is your ticket
             </span>
             <img 
-              src="https://ik.imagekit.io/dypkhqxip/events%20loho" 
+              src={logoBase64 || "https://ik.imagekit.io/dypkhqxip/events%20loho"} 
               alt="Logo" 
               style={{ height: '32px', width: 'auto', objectFit: 'contain', display: 'block' }} 
             />
@@ -829,10 +844,13 @@ export default function RSVPPage() {
                 flexShrink: 0
               }}
             >
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(ticket.ticketCode)}`} 
-                alt="Ticket QR Code" 
-                style={{ width: '180px', height: '180px', display: 'block' }}
+              <QRCodeSVG
+                value={ticket.ticketCode}
+                size={180}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                level="L"
+                includeMargin={false}
               />
             </div>
           </div>

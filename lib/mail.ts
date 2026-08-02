@@ -101,16 +101,65 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       `;
     }
 
-    // Generate header banner
+    // Generate header banner and check attachments
     let headerBannerHtml = '';
-    const isImageUrl = event.coverImage && (event.coverImage.startsWith('http://') || event.coverImage.startsWith('https://'));
-    
-    if (event.coverImage && isImageUrl) {
-      headerBannerHtml = `
-        <div style="width: 100%; text-align: center; background-color: #1c1c1f;">
-          <img src="${event.coverImage}" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
-        </div>
-      `;
+    const attachments: any[] = [];
+
+    // QR Code CID attachment
+    if (type !== 'PENDING') {
+      try {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(registration.ticketCode)}`;
+        const qrRes = await fetch(qrUrl);
+        if (qrRes.ok) {
+          const qrArrayBuffer = await qrRes.arrayBuffer();
+          attachments.push({
+            filename: 'qrcode.png',
+            content: Buffer.from(qrArrayBuffer),
+            cid: 'ticket-qrcode'
+          });
+        }
+      } catch (err) {
+        console.error('Failed to pre-fetch email QR code buffer:', err);
+      }
+    }
+
+    if (event.coverImage) {
+      let bannerSrc = event.coverImage;
+      if (bannerSrc.startsWith('/')) {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        bannerSrc = `${baseUrl}${bannerSrc}`;
+      }
+      
+      // Attempt to attach the cover image as CID to bypass mail client blocking
+      try {
+        const coverRes = await fetch(bannerSrc);
+        if (coverRes.ok) {
+          const coverArrayBuffer = await coverRes.arrayBuffer();
+          attachments.push({
+            filename: 'coverimage.jpg',
+            content: Buffer.from(coverArrayBuffer),
+            cid: 'event-cover'
+          });
+          headerBannerHtml = `
+            <div style="width: 100%; text-align: center; background-color: #1c1c1f;">
+              <img src="cid:event-cover" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
+            </div>
+          `;
+        } else {
+          headerBannerHtml = `
+            <div style="width: 100%; text-align: center; background-color: #1c1c1f;">
+              <img src="${bannerSrc}" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Failed to attach cover as CID, falling back to absolute URL:', err);
+        headerBannerHtml = `
+          <div style="width: 100%; text-align: center; background-color: #1c1c1f;">
+            <img src="${bannerSrc}" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
+          </div>
+        `;
+      }
     } else {
       // Sleek minimal grayscale gradient banner
       headerBannerHtml = `
@@ -204,7 +253,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
               <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #2e2e34;">
                 <p style="margin: 0 0 8px 0; font-size: 10px; font-family: monospace; color: #8a8a90; text-transform: uppercase; letter-spacing: 1.5px;">Entry Pass QR Code</p>
                 <div style="display: inline-block; background-color: #ffffff; padding: 10px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: center;">
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(registration.ticketCode)}" alt="Ticket QR Code" style="width: 150px; height: 150px; display: block; margin: 0 auto;" />
+                  <img src="cid:ticket-qrcode" alt="Ticket QR Code" style="width: 150px; height: 150px; display: block; margin: 0 auto;" />
                 </div>
                 <p style="margin: 6px 0 0 0; font-family: monospace; font-size: 12px; color: #ffffff; font-weight: bold; letter-spacing: 1px;">${registration.ticketCode}</p>
                 <p style="margin: 4px 0 0 0; font-size: 10px; color: #a1a1aa; line-height: 1.4;">Present this QR code to the organizer at the entrance for verification.</p>
@@ -239,7 +288,8 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       text: isPending 
         ? `Pending Approval: Your details for ${event.title} were sent to the organizer.` 
         : `Confirmed: Your RSVP for ${event.title} is successful! Ticket Code: ${registration.ticketCode}`,
-      html: mailHtml
+      html: mailHtml,
+      attachments
     };
 
     await transporter.sendMail(mailOptions);
