@@ -625,14 +625,14 @@ export default function DashboardPage() {
                               {ticket.status === 'PENDING' ? 'PENDING' : ticket.ticketCode}
                             </span>
                           </div>
-                          <button
-                            onClick={() => setSelectedTicket(ticket)}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-bold rounded-md transition-all cursor-pointer shadow-sm"
+                          <a
+                            href={`/events/${ticket.eventId}/rsvp`}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-bold rounded-md transition-all cursor-pointer shadow-sm text-black"
                             style={{ color: 'black' }}
                           >
                             <GoEye className="w-3.5 h-3.5" />
                             <span>View Pass</span>
-                          </button>
+                          </a>
                         </div>
                       </div>
                     );
@@ -749,180 +749,7 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      {/* Ticket Pass Premium Dark Modal */}
-      {selectedTicket && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-md w-full flex flex-col items-center gap-4 animate-fade-in">
-            
-            {/* Close button at top right */}
-            <button
-              onClick={() => setSelectedTicket(null)}
-              className="absolute -top-12 right-0 p-2 text-neutral-400 hover:text-white transition-colors cursor-pointer bg-[#1c1c1f]/80 backdrop-blur rounded-full border border-[#2e2e34]"
-            >
-              <GoX className="w-5 h-5" />
-            </button>
 
-            {/* Ticket Card Container */}
-            <div className="w-full bg-[#1c1c1f] border-t border-x border-[#2e2e34] rounded-t-2xl shadow-2xl relative pb-6">
-              
-              {/* Celebration Header */}
-              {selectedTicket.status === 'PENDING' ? (
-                <div className="p-6 pb-5 flex flex-col items-center text-center gap-3 animate-fade-in">
-                  <span className="text-4xl text-rose-500 animate-pulse"><GoClock className="w-10 h-10" /></span>
-                  <h2 className="text-xl font-bold text-rose-500 tracking-tight">Pending Host Approval</h2>
-                  <p className="text-xs text-neutral-400 max-w-[280px]">
-                    Your details were sent to the organizer. We are checking and reviewing your details, we make sure to get updates of your ticket.
-                  </p>
-                </div>
-              ) : (
-                <div className="p-6 pb-5 flex flex-col items-center text-center gap-3">
-                  <span className="text-4xl text-emerald-500"><GoCheck className="w-10 h-10" /></span>
-                  <h2 className="text-xl font-bold text-white tracking-tight">Thank you</h2>
-                  <p className="text-xs text-neutral-400 max-w-[280px]">Your registration has been processed successfully.</p>
-                </div>
-              )}
-
-              {/* Dashed Separator Line with custom cutout notches */}
-              <div className="relative w-full my-2">
-                {/* Left Notch */}
-                <div className="absolute -left-[1.5px] -top-3 w-[3px] h-6 bg-[#161618] z-10" />
-                <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-[#161618] border border-[#2e2e34] z-20" />
-                <div className="absolute left-0 -top-3 w-3 h-6 bg-[#1c1c1f] z-30" />
-
-                {/* Right Notch */}
-                <div className="absolute -right-[1.5px] -top-3 w-[3px] h-6 bg-[#161618] z-10" />
-                <div className="absolute -right-3 -top-3 w-6 h-6 rounded-full bg-[#161618] border border-[#2e2e34] z-20" />
-                <div className="absolute right-0 -top-3 w-3 h-6 bg-[#1c1c1f] z-30" />
-
-                <div className="w-full border-t border-dashed border-[#2e2e34]" />
-              </div>
-
-              {/* Ticket details body */}
-              <div className="px-6 py-4 flex flex-col gap-5">
-                
-                {/* Meta details grid */}
-                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Ticket ID</span>
-                    <span className="font-mono font-bold text-white truncate">
-                      {selectedTicket.status === 'PENDING' ? (
-                        <span className="text-rose-500">PENDING APPROVAL</span>
-                      ) : (
-                        selectedTicket.ticketCode
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1 text-right">
-                    <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Amount</span>
-                    <span className="font-bold text-[#ffec27]">{selectedTicket.eventPrice || 'Free'}</span>
-                  </div>
-                  <div className="flex flex-col gap-1 col-span-2">
-                    <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Date &amp; Time</span>
-                    <span className="font-semibold text-white">{selectedTicket.eventStartDate} &middot; {selectedTicket.eventStartTime}</span>
-                  </div>
-                  <div className="flex flex-col gap-1 col-span-2">
-                    <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Location</span>
-                    <span className="font-semibold text-white truncate">{selectedTicket.eventLocation}</span>
-                  </div>
-                </div>
-
-                {/* Attendee details box */}
-                <div className="bg-[#222226] border border-[#2e2e34] rounded-xl p-3.5 flex flex-col gap-2.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#2e2e34] border border-[#3e3e46] flex items-center justify-center text-xs font-bold text-[#ffec27]">
-                      {selectedTicket.name?.substring(0, 2).toUpperCase() || 'SF'}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-bold text-white truncate">{selectedTicket.name}</span>
-                      <span className="text-[10px] text-neutral-400 font-mono truncate">{selectedTicket.email}</span>
-                    </div>
-                  </div>
-
-                  {/* Dynamic answers */}
-                  {selectedTicket.answers && (() => {
-                    try {
-                      const parsed = JSON.parse(selectedTicket.answers);
-                      const entries = Object.entries(parsed);
-                      if (entries.length === 0) return null;
-                      return (
-                        <div className="border-t border-[#2e2e34] pt-2.5 mt-1 flex flex-col gap-1.5 text-[11px]">
-                          {entries.map(([key, val]) => (
-                            <div key={key} className="flex justify-between items-center">
-                              <span className="text-neutral-400">{key}:</span>
-                              <span className="text-white font-medium">{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    } catch { return null; }
-                  })()}
-
-                  {/* Payment details if paid */}
-                  {selectedTicket.paymentTxnId && (
-                    <div className="border-t border-[#2e2e34] pt-2.5 mt-1 flex flex-col gap-1 text-[11px] text-neutral-400">
-                      <div className="flex justify-between items-center">
-                        <span>Payment Method:</span>
-                        <span className="text-white font-medium">{selectedTicket.paymentMethod}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Account Name:</span>
-                        <span className="text-white font-medium">{selectedTicket.paymentAccountName}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Transaction ID:</span>
-                        <span className="text-white font-mono font-medium truncate max-w-[150px]">{selectedTicket.paymentTxnId}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Dashed Separator Line */}
-              <div className="w-full border-t border-dashed border-[#2e2e34] my-2" />
-
-              {/* QR Code section */}
-              <div className="px-6 pt-4 flex flex-col items-center gap-4">
-                {selectedTicket.status === 'PENDING' ? (
-                  <div className="relative p-3 bg-white/5 rounded-xl border border-dashed border-[#2e2e34] w-[164px] h-[164px] flex flex-col items-center justify-center text-center select-none animate-pulse">
-                    <span className="text-2xl mb-1.5 text-rose-500"><GoClock className="w-6 h-6" /></span>
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest leading-normal px-2">
-                      Awaiting Approval
-                    </span>
-                    <span className="text-[8px] text-neutral-500 mt-1 max-w-[130px]">
-                      Pass will be generated once organizer approves.
-                    </span>
-                  </div>
-                ) : (
-                  <div className="p-3 bg-white rounded-xl shadow-xl flex items-center justify-center select-none">
-                    <QRCodeSVG
-                      value={selectedTicket.ticketCode}
-                      size={140}
-                      bgColor="#ffffff"
-                      fgColor="#000000"
-                      level="L"
-                      includeMargin={false}
-                    />
-                  </div>
-                )}
-                <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">
-                  {selectedTicket.status === 'PENDING' ? 'Ticket Pass Status' : 'Presenter Pass QR Code'}
-                </span>
-              </div>
-
-              {/* Scalloped Bottom Edge circles */}
-              <div className="absolute left-0 right-0 -bottom-2.5 flex justify-between px-2.5 z-10 pointer-events-none">
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className="relative w-5 h-5 flex-shrink-0">
-                    <div className="absolute inset-0 rounded-full bg-[#161618] border border-[#2e2e34]" />
-                    <div className="absolute left-0 right-0 bottom-0 h-2.5 bg-[#161618] z-20" />
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
-        </div>
-      )}
       {/* Attendees Modal Overlay */}
       {(() => {
         if (!attendeesModalEventId) return null;
