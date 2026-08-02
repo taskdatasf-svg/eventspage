@@ -153,7 +153,7 @@ export default function HelpPage() {
           <div className="flex flex-col gap-2">
             <h3 className="text-white text-base font-normal">Corporate Identity</h3>
             <p>
-              All assets, database registries, and online event registration services on this portal are owned, operated, and maintained by <strong>Student Forge Technologies Private Limited</strong>, a registered corporate entity under the laws of India, based in Hyderabad, Telangana, India.
+              All assets, database registries, and online event registration services on this portal (<a href="https://events.studentforge.in/" className="underline hover:text-white">events.studentforge.in</a>) are owned, operated, and maintained by <strong>Student Forge Technologies Private Limited</strong> (parent website: <a href="https://www.studentforge.in/" className="underline hover:text-white">studentforge.in</a>), a registered corporate entity under the laws of India, based in Hyderabad, Telangana, India. Development, operational management, and portal hosting are powered and managed by <a href="https://www.redlix.co.in/" className="underline hover:text-white">Studio Redlix</a>.
             </p>
           </div>
 

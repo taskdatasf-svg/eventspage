@@ -1,0 +1,17 @@
+# StudentForge Events Portal
+
+StudentForge is a campus events and ticketing platform designed for university student communities. It enables organizers to host technology workshops, student meetups, and campus gatherings with custom ticketing, secure checking, and verification flows.
+
+- **Events Portal URL**: https://events.studentforge.in/
+- **Parent Website URL**: https://www.studentforge.in/
+- **Built & Powered By**: Studio Redlix (https://www.redlix.co.in/)
+
+## Key Features & User Flows
+- **Authentication**: Email verification codes (OTP) for account creation and password recovery.
+- **Security Check**: Cloudflare Turnstile captcha check on login, registration, and paid/free checkouts.
+- **Event Catalog**: Visual grids of upcoming and active events, searchable by title, tag, or location.
+- **RSVPs & Ticketing**:
+  - Free Events: Single-step, instant RSVPs.
+  - Paid Events: Select ticket quantities, execute UPI scan-to-pay payments (remitted to 6302933597@hdfc), upload the 12-digit transaction ID (UTR Reference ID), and submit for host confirmation.
+- **Entry Passes**: Secure entry tickets with dynamic cryptographically signed QR codes. Staff utilize the portal scanner to check in participants at physical entrances.
+- **Corporate Entity**: Owned, operated, and maintained by Student Forge Technologies Private Limited, based in Hyderabad, Telangana, India.

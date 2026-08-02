@@ -14,6 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://events.studentforge.in"),
+  authors: [{ name: "Studio Redlix", url: "https://www.redlix.co.in/" }],
+  creator: "Studio Redlix",
+  publisher: "Studio Redlix",
   title: "StudentForge | Campus Events & Ticketing Portal",
   description: "RSVP for college workshops, student tech meetups, and campus gatherings with custom check-in QR passes.",
   icons: {
@@ -41,6 +45,9 @@ export const metadata: Metadata = {
     title: "StudentForge | Campus Events & Ticketing Portal",
     description: "RSVP for college workshops, student tech meetups, and campus gatherings with custom check-in QR passes.",
     images: ["https://ik.imagekit.io/dypkhqxip/events%20by%20main.png"],
+  },
+  verification: {
+    google: "google-site-verification-token",
   },
 };
 
