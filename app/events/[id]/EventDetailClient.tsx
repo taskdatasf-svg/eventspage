@@ -274,8 +274,9 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 </p>
                 {event.description && event.description.length > 280 && (
                   <button
+                    type="button"
                     onClick={() => setIsDescExpanded(!isDescExpanded)}
-                    className="text-xs font-semibold text-neutral-400 hover:text-white transition-colors text-left underline underline-offset-4 cursor-pointer mt-1"
+                    className="text-xs font-semibold text-neutral-400 hover:text-white transition-colors text-left underline underline-offset-4 cursor-pointer mt-1 py-2.5 pr-6 block outline-none select-none"
                   >
                     {isDescExpanded ? 'Read Less' : 'Read More'}
                   </button>
