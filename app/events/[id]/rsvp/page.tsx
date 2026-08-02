@@ -29,6 +29,7 @@ export default function RSVPPage() {
   // Flow step state: 'form' | 'payment' | 'confirm-txn'
   const [rsvpStep, setRsvpStep] = useState<'form' | 'payment' | 'confirm-txn'>('form');
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [isLocalhost, setIsLocalhost] = useState(false);
 
   // Form states
   const [name, setName] = useState('');
@@ -60,6 +61,11 @@ export default function RSVPPage() {
         setName(u.name || '');
         setEmail(u.email || '');
         emailCheck = u.email || null;
+      }
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      setIsLocalhost(isLocal);
+      if (isLocal) {
+        setTurnstileToken('localhost_bypass');
       }
     } catch (e) {
       console.error(e);
@@ -108,14 +114,14 @@ export default function RSVPPage() {
     }
 
     if (event && isEventFree(event.price)) {
-      if (!turnstileToken) {
+      if (!isLocalhost && !turnstileToken) {
         alert('Please complete the security verification.');
         return;
       }
       submitRegistration();
     } else {
       setRsvpStep('payment');
-      setTurnstileToken('');
+      setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
     }
   };
 
@@ -307,14 +313,14 @@ export default function RSVPPage() {
                     ))}
 
                     {/* Turnstile Widget for Free Events */}
-                    {event && isEventFree(event.price) && (
+                    {event && isEventFree(event.price) && !isLocalhost && (
                       <TurnstileWidget onVerify={setTurnstileToken} />
                     )}
 
                     {/* Submit button */}
                     <button
                       type="submit"
-                      disabled={submitting || (event && isEventFree(event.price) ? !turnstileToken : false)}
+                      disabled={submitting || (event && isEventFree(event.price) ? (!isLocalhost && !turnstileToken) : false)}
                       className="mt-2 w-full py-3 bg-white text-black hover:bg-neutral-100 disabled:opacity-60 font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-2"
                       style={{ color: 'black' }}
                     >
@@ -327,7 +333,7 @@ export default function RSVPPage() {
               {rsvpStep === 'payment' && (
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
-                    <button onClick={() => { setRsvpStep('form'); setTurnstileToken(''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
+                    <button onClick={() => { setRsvpStep('form'); setTurnstileToken(isLocalhost ? 'localhost_bypass' : ''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
                       <GoArrowLeft className="w-3.5 h-3.5" /> Back to RSVP Form
                     </button>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Scan &amp; Pay</h1>
@@ -374,7 +380,7 @@ export default function RSVPPage() {
               {rsvpStep === 'confirm-txn' && (
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
-                    <button onClick={() => { setRsvpStep('payment'); setTurnstileToken(''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
+                    <button onClick={() => { setRsvpStep('payment'); setTurnstileToken(isLocalhost ? 'localhost_bypass' : ''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
                       <GoArrowLeft className="w-3.5 h-3.5" /> Back to Payment Scan
                     </button>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Confirm Transaction</h1>
@@ -431,11 +437,11 @@ export default function RSVPPage() {
                     </div>
 
                     {/* Turnstile Widget for Paid Events */}
-                    <TurnstileWidget onVerify={setTurnstileToken} />
+                    {!isLocalhost && <TurnstileWidget onVerify={setTurnstileToken} />}
 
                     <button
                       type="submit"
-                      disabled={submitting || !turnstileToken}
+                      disabled={submitting || (!isLocalhost && !turnstileToken)}
                       className="mt-2 w-full py-3 bg-white text-black hover:bg-neutral-100 disabled:opacity-60 font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
                       style={{ color: 'black' }}
                     >

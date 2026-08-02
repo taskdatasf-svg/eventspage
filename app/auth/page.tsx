@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { GoCheck, GoPerson, GoLock, GoMail, GoShieldCheck, GoArrowLeft } from 'react-icons/go';
@@ -27,6 +27,17 @@ export default function AuthPage() {
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [isLocalhost, setIsLocalhost] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      setIsLocalhost(isLocal);
+      if (isLocal) {
+        setTurnstileToken('localhost_bypass');
+      }
+    }
+  }, []);
 
   // Step 1: Send Verification Email
   const handleSendVerificationCode = async (e: React.FormEvent) => {
@@ -90,7 +101,7 @@ export default function AuthPage() {
       return;
     }
 
-    if (!turnstileToken) {
+    if (!isLocalhost && !turnstileToken) {
       setError('Please complete the security verification check.');
       return;
     }
@@ -214,7 +225,7 @@ export default function AuthPage() {
     e.preventDefault();
     setError('');
 
-    if (!turnstileToken) {
+    if (!isLocalhost && !turnstileToken) {
       setError('Please complete the security verification check.');
       return;
     }
@@ -311,7 +322,7 @@ export default function AuthPage() {
                   setError('');
                   setSuccessMsg('');
                   setSignupStep(1);
-                  setTurnstileToken('');
+                  setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                 }}
                 className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
                   mode === 'login' ? 'bg-[#27272A] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
@@ -327,7 +338,7 @@ export default function AuthPage() {
                   setError('');
                   setSuccessMsg('');
                   setSignupStep(1);
-                  setTurnstileToken('');
+                  setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                 }}
                 className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
                   mode === 'signup' ? 'bg-[#27272A] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
@@ -345,7 +356,7 @@ export default function AuthPage() {
                   setForgotStep(1);
                   setError('');
                   setSuccessMsg('');
-                  setTurnstileToken('');
+                  setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                 }}
                 className="text-xs text-neutral-400 hover:text-white font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               >
@@ -401,7 +412,7 @@ export default function AuthPage() {
                       setEnteredOtp('');
                       setPassword('');
                       setConfirmPassword('');
-                      setTurnstileToken('');
+                      setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                     }}
                     className="text-[10px] uppercase font-mono text-neutral-400 hover:text-white transition-colors cursor-pointer"
                   >
@@ -422,11 +433,11 @@ export default function AuthPage() {
               </div>
 
               {/* Turnstile Widget */}
-              <TurnstileWidget onVerify={setTurnstileToken} />
+              {!isLocalhost && <TurnstileWidget onVerify={setTurnstileToken} />}
 
               <button
                 type="submit"
-                disabled={isLoading || !turnstileToken}
+                disabled={isLoading || (!isLocalhost && !turnstileToken)}
                 className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-60 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
               >
                 {isLoading ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Sign In'}
@@ -554,11 +565,11 @@ export default function AuthPage() {
                   </div>
 
                   {/* Turnstile Widget */}
-                  <TurnstileWidget onVerify={setTurnstileToken} />
+                  {!isLocalhost && <TurnstileWidget onVerify={setTurnstileToken} />}
 
                   <button
                     type="submit"
-                    disabled={isLoading || !turnstileToken}
+                    disabled={isLoading || (!isLocalhost && !turnstileToken)}
                     className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-60 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
                   >
                     {isLoading ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Complete Sign Up'}
