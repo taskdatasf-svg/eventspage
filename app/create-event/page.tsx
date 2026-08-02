@@ -157,7 +157,7 @@ export default function CreateEventPage() {
   const locationDropdownRef = useRef<HTMLDivElement>(null);
 
   // Upload Modal & Image States
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isEditingPoster, setIsEditingPoster] = useState(false);
   const [uploadedImageSrc, setUploadedImageSrc] = useState<string | null>(null);
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
   const [isDraggingModal, setIsDraggingModal] = useState(false);
@@ -312,7 +312,7 @@ export default function CreateEventPage() {
       setImageUrlInput('');
     }
     setTempFilename(null);
-    setIsUploadModalOpen(true);
+    setIsEditingPoster(true);
   };
 
   const handleSaveBanner = () => {
@@ -325,7 +325,7 @@ export default function CreateEventPage() {
       setUploadedImageSrc(null);
       setImageDimensions(null);
     }
-    setIsUploadModalOpen(false);
+    setIsEditingPoster(false);
   };
 
   const processImageFile = (file: File) => {
@@ -588,122 +588,227 @@ export default function CreateEventPage() {
             {/* Left Column: Poster Canvas Preview */}
             <div className="lg:col-span-5 flex flex-col items-center lg:items-start gap-4">
               
-              {/* Poster Canvas Card */}
-              <div
-                className={`w-full max-w-sm aspect-square ${
-                  uploadedImageSrc
-                    ? 'bg-black border-[#2e2e34]'
-                    : currentCustomColor !== 'None'
-                    ? `${getCustomColorBg(currentCustomColor)} backdrop-blur-md border`
-                    : (activeTheme.name === 'PixelBlast' || activeTheme.name === 'Grainient')
-                    ? 'bg-neutral-950/15 backdrop-blur-md border border-white/10 text-white'
-                    : 'bg-neutral-950/45 backdrop-blur-md border border-white/10 text-white'
-                } rounded-2xl p-7 flex flex-col justify-between shadow-2xl relative transition-all duration-300 overflow-hidden select-none group`}
-              >
-                {/* PixelBlast Component Integration if Theme is Selected */}
-                {!uploadedImageSrc && currentCustomColor === 'None' && activeTheme.name === 'PixelBlast' && (
-                  <div className="absolute inset-0 z-0">
-                    <PixelBlast
-                      variant="circle"
-                      pixelSize={6}
-                      color="#B497CF"
-                      patternScale={3}
-                      patternDensity={1.2}
-                      pixelSizeJitter={0.5}
-                      enableRipples
-                      rippleSpeed={0.4}
-                      rippleThickness={0.12}
-                      rippleIntensityScale={1.5}
-                      liquid
-                      liquidStrength={0.12}
-                      liquidRadius={1.2}
-                      liquidWobbleSpeed={5}
-                      speed={0.6}
-                      edgeFade={0.25}
-                      transparent
-                    />
-                  </div>
-                )}
-
-                {/* Grainient Component Integration if Theme is Selected */}
-                {!uploadedImageSrc && currentCustomColor === 'None' && activeTheme.name === 'Grainient' && (
-                  <div className="absolute inset-0 z-0">
-                    <Grainient
-                      color1="#FF9FFC"
-                      color2="#5227FF"
-                      color3="#B497CF"
-                      timeSpeed={0.25}
-                      colorBalance={0.0}
-                      warpStrength={1.0}
-                      warpFrequency={5.0}
-                      warpSpeed={2.0}
-                      warpAmplitude={50.0}
-                      blendAngle={0.0}
-                      blendSoftness={0.05}
-                      rotationAmount={500.0}
-                      noiseScale={2.0}
-                      grainAmount={0.1}
-                      grainScale={2.0}
-                      grainAnimated={false}
-                      contrast={1.5}
-                      gamma={1.0}
-                      saturation={1.0}
-                      centerX={0.0}
-                      centerY={0.0}
-                      zoom={0.9}
-                    />
-                  </div>
-                )}
-
-                {/* Floating Camera Button Overlay to Open Modal */}
-                <button
-                  type="button"
-                  onClick={handleOpenUploadModal}
-                  className="absolute top-4 right-4 z-20 w-8.5 h-8.5 rounded-lg bg-black/60 hover:bg-black/85 border border-[#333339] text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow hover:scale-105"
-                  title="Upload / Change Cover Banner"
+              {isEditingPoster ? (
+                /* Inline Poster Editor Panel instead of popup window */
+                <div
+                  className="w-full max-w-sm aspect-square bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative select-none"
                 >
-                  <svg className="w-4 h-4 text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316A2.192 2.192 0 0015.613 4H8.387c-.502 0-.965.267-1.218.7l-.342.544z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </button>
+                  <div className="flex items-center justify-between border-b border-[#2e2e34] pb-2">
+                    <h3 className="text-sm font-semibold text-white">Edit Event Poster</h3>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingPoster(false)}
+                      className="text-neutral-400 hover:text-white text-xs cursor-pointer"
+                    >
+                      <GoX className="w-4 h-4" />
+                    </button>
+                  </div>
 
-                {uploadedImageSrc ? (
-                  <img
-                    src={uploadedImageSrc}
-                    alt="Uploaded Event Banner"
-                    className="absolute inset-0 w-full h-full object-cover object-center z-10 transition-transform duration-300 group-hover:scale-105 cursor-pointer"
-                    onClick={handleOpenUploadModal}
-                  />
-                ) : (
-                  <>
-                    <div className="flex flex-col gap-1 z-10">
-                      <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-black uppercase leading-[0.95] tracking-tighter ${getFontFamilyClass(currentFont)}`}>
-                        {eventName ? (
-                          <span className="line-clamp-4">{eventName}</span>
-                        ) : (
-                          <>YOU&apos;RE<br />ON THE<br />GUEST-<br />LIST*</>
-                        )}
-                      </h2>
-                    </div>
-
-                    <div className="flex flex-col gap-2 z-10">
-                      {(startDate || location) && (
-                        <div className="flex flex-col text-[10px] font-mono uppercase tracking-wider opacity-90 border-t border-current/20 pt-2">
-                          {startDate && <span>{startDate} · {startTime}</span>}
-                          {location && <span className="truncate">{location}</span>}
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider opacity-90">
-                          {activeTheme.subText}
+                  {/* File drop area */}
+                  {tempImageSrc ? (
+                    /* File details */
+                    <div className="border border-[#2e2e34] bg-[#222226]/50 rounded-xl p-3 flex flex-col items-center justify-center text-center gap-1.5 flex-1 my-2">
+                      <img
+                        src={tempImageSrc}
+                        alt="Temp Preview"
+                        className="w-14 h-14 object-cover rounded-lg border border-[#2e2e34]"
+                      />
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className="text-[10px] font-semibold text-white max-w-[200px] truncate">File Selected</span>
+                        <span className="text-[9px] text-neutral-400 font-mono max-w-[200px] truncate">
+                          {tempFilename || 'image_payload.png'}
                         </span>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTempImageSrc(null);
+                          setTempFilename(null);
+                        }}
+                        className="text-[10px] text-rose-400 hover:text-rose-300 font-semibold cursor-pointer"
+                      >
+                        Remove File
+                      </button>
                     </div>
-                  </>
-                )}
-              </div>
+                  ) : (
+                    <div
+                      onDragOver={handleModalDragOver}
+                      onDragLeave={handleModalDragLeave}
+                      onDrop={handleModalDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`border border-dashed rounded-xl py-6 px-3 flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all duration-200 flex-1 my-2 ${
+                        isDraggingModal
+                          ? 'border-rose-500 bg-rose-500/5'
+                          : 'border-[#333339] hover:border-neutral-500/50 bg-[#141416]/50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-[#222226] text-neutral-300 flex items-center justify-center border border-[#2e2e34]">
+                        <GoUpload className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs font-semibold text-white">Upload Banner</span>
+                        <span className="text-[9px] text-neutral-500">Drag &amp; Drop or Browse</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* OR separator */}
+                  <div className="flex items-center gap-3 my-1">
+                    <div className="h-[1px] flex-1 bg-[#2e2e34]" />
+                    <span className="text-[9px] uppercase font-mono text-neutral-500 tracking-wider">OR</span>
+                    <div className="h-[1px] flex-1 bg-[#2e2e34]" />
+                  </div>
+
+                  {/* URL Input */}
+                  <div className="flex flex-col gap-1 text-left mb-2">
+                    <label className="text-[9px] uppercase font-mono text-neutral-400 tracking-wider">Image URL</label>
+                    <input
+                      type="url"
+                      placeholder="https://ik.imagekit.io/..."
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      className="w-full bg-[#222226] border border-[#2e2e34] focus:border-rose-500/50 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2e2e34]">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingPoster(false)}
+                      className="px-3 py-1.5 bg-[#222226] hover:bg-[#2a2a30] text-neutral-300 text-xs font-semibold rounded-lg border border-[#2e2e34] transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveBanner}
+                      className="px-3.5 py-1.5 bg-white hover:bg-neutral-200 text-black text-xs font-bold rounded-lg transition-colors cursor-pointer shadow-md"
+                      style={{ color: 'black' }}
+                    >
+                      Save Banner
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Poster Canvas Card */
+                <div
+                  className={`w-full max-w-sm aspect-square ${
+                    uploadedImageSrc
+                      ? 'bg-black border-[#2e2e34]'
+                      : currentCustomColor !== 'None'
+                      ? `${getCustomColorBg(currentCustomColor)} backdrop-blur-md border`
+                      : (activeTheme.name === 'PixelBlast' || activeTheme.name === 'Grainient')
+                      ? 'bg-neutral-950/15 backdrop-blur-md border border-white/10 text-white'
+                      : 'bg-neutral-950/45 backdrop-blur-md border border-white/10 text-white'
+                  } rounded-2xl p-7 flex flex-col justify-between shadow-2xl relative transition-all duration-300 overflow-hidden select-none group`}
+                >
+                  {/* PixelBlast Component Integration if Theme is Selected */}
+                  {!uploadedImageSrc && currentCustomColor === 'None' && activeTheme.name === 'PixelBlast' && (
+                    <div className="absolute inset-0 z-0">
+                      <PixelBlast
+                        variant="circle"
+                        pixelSize={6}
+                        color="#B497CF"
+                        patternScale={3}
+                        patternDensity={1.2}
+                        pixelSizeJitter={0.5}
+                        enableRipples
+                        rippleSpeed={0.4}
+                        rippleThickness={0.12}
+                        rippleIntensityScale={1.5}
+                        liquid
+                        liquidStrength={0.12}
+                        liquidRadius={1.2}
+                        liquidWobbleSpeed={5}
+                        speed={0.6}
+                        edgeFade={0.25}
+                        transparent
+                      />
+                    </div>
+                  )}
+
+                  {/* Grainient Component Integration if Theme is Selected */}
+                  {!uploadedImageSrc && currentCustomColor === 'None' && activeTheme.name === 'Grainient' && (
+                    <div className="absolute inset-0 z-0">
+                      <Grainient
+                        color1="#FF9FFC"
+                        color2="#5227FF"
+                        color3="#B497CF"
+                        timeSpeed={0.25}
+                        colorBalance={0.0}
+                        warpStrength={1.0}
+                        warpFrequency={5.0}
+                        warpSpeed={2.0}
+                        warpAmplitude={50.0}
+                        blendAngle={0.0}
+                        blendSoftness={0.05}
+                        rotationAmount={500.0}
+                        noiseScale={2.0}
+                        grainAmount={0.1}
+                        grainScale={2.0}
+                        grainAnimated={false}
+                        contrast={1.5}
+                        gamma={1.0}
+                        saturation={1.0}
+                        centerX={0.0}
+                        centerY={0.0}
+                        zoom={0.9}
+                      />
+                    </div>
+                  )}
+
+                  {/* Floating Camera Button Overlay to Open Editor */}
+                  <button
+                    type="button"
+                    onClick={handleOpenUploadModal}
+                    className="absolute top-4 right-4 z-20 w-8.5 h-8.5 rounded-lg bg-black/60 hover:bg-black/85 border border-[#333339] text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow hover:scale-105"
+                    title="Upload / Change Cover Banner"
+                  >
+                    <svg className="w-4 h-4 text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316A2.192 2.192 0 0015.613 4H8.387c-.502 0-.965.267-1.218.7l-.342.544z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+
+                  {uploadedImageSrc ? (
+                    <img
+                      src={uploadedImageSrc}
+                      alt="Uploaded Event Banner"
+                      className="absolute inset-0 w-full h-full object-cover object-center z-10 transition-transform duration-300 group-hover:scale-105 cursor-pointer"
+                      onClick={handleOpenUploadModal}
+                    />
+                  ) : (
+                    <>
+                      <div className="flex flex-col gap-1 z-10">
+                        <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-black uppercase leading-[0.95] tracking-tighter ${getFontFamilyClass(currentFont)}`}>
+                          {eventName ? (
+                            <span className="line-clamp-4">{eventName}</span>
+                          ) : (
+                            <>YOU&apos;RE<br />ON THE<br />GUEST-<br />LIST*</>
+                          )}
+                        </h2>
+                      </div>
+
+                      <div className="flex flex-col gap-2 z-10">
+                        {(startDate || location) && (
+                          <div className="flex flex-col text-[10px] font-mono uppercase tracking-wider opacity-90 border-t border-current/20 pt-2">
+                            {startDate && <span>{startDate} · {startTime}</span>}
+                            {location && <span className="truncate">{location}</span>}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[9px] font-mono font-bold uppercase tracking-wider opacity-90">
+                            {activeTheme.subText}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Theme Selector UI */}
               <div className="w-full max-w-sm flex flex-col gap-3">
@@ -1363,119 +1468,7 @@ export default function CreateEventPage() {
 
       </div>
 
-      {/* Recommended Banner Specs Popup Modal */}
-      {isUploadModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-          <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl max-w-xl w-full p-8 flex flex-col gap-6 shadow-2xl relative">
-            <div className="flex items-center justify-between border-b border-[#2e2e34] pb-4">
-              <div className="flex items-center gap-2">
-                <GoUpload className="w-5 h-5 text-neutral-300" />
-                <h3 className="text-base font-semibold text-white">Upload Cover Photo</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsUploadModalOpen(false)}
-                className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer rounded-lg hover:bg-[#28282d]"
-              >
-                <GoX className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="bg-[#222226] border border-[#2e2e34] rounded-xl p-4 flex items-start gap-3">
-              <GoInfo className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
-              <div className="flex flex-col gap-1 text-xs">
-                <span className="font-semibold text-white">Recommended Banner Size</span>
-                <p className="text-[#a1a1aa] leading-relaxed">
-                  For optimal display, upload a square image of <strong className="text-white font-mono">1200 × 1200 px</strong> (Aspect Ratio 1:1, Max file size 5MB).
-                </p>
-              </div>
-            </div>
-
-            {tempImageSrc ? (
-              <div className="border border-[#2e2e34] bg-[#222226] rounded-xl p-8 flex flex-col items-center justify-center text-center gap-3 relative">
-                <div className="w-14 h-14 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20">
-                  <GoCheck className="w-8 h-8" />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-semibold text-white">Local Image Selected</span>
-                  <span className="text-xs text-neutral-400 font-mono max-w-[280px] truncate">
-                    {tempFilename || 'image_payload.png'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTempImageSrc(null);
-                    setTempFilename(null);
-                  }}
-                  className="mt-1 text-xs text-rose-400 hover:text-rose-300 font-semibold cursor-pointer"
-                >
-                  Remove File
-                </button>
-              </div>
-            ) : (
-              <div
-                onDragOver={handleModalDragOver}
-                onDragLeave={handleModalDragLeave}
-                onDrop={handleModalDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center gap-3 cursor-pointer transition-all duration-200 ${
-                  isDraggingModal
-                    ? 'border-rose-500 bg-rose-500/5'
-                    : 'border-[#333339] hover:border-neutral-500/50 bg-[#141416]'
-                }`}
-              >
-                <div className="w-12 h-12 rounded-full bg-[#222226] text-neutral-300 flex items-center justify-center border border-[#2e2e34]">
-                  <GoUpload className="w-6 h-6" />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-semibold text-white">Click to Browse or Drag &amp; Drop</span>
-                  <span className="text-xs text-neutral-400">PNG, JPG, WEBP up to 5MB</span>
-                </div>
-              </div>
-            )}
-
-            {/* OR separator */}
-            <div className="flex items-center gap-3 my-1">
-              <div className="h-[1px] flex-1 bg-[#2e2e34]" />
-              <span className="text-[10px] uppercase font-mono text-neutral-500 tracking-wider">OR</span>
-              <div className="h-[1px] flex-1 bg-[#2e2e34]" />
-            </div>
-
-            {/* URL Input */}
-            <div className="flex flex-col gap-1.5 text-left">
-              <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Image URL (Optional)</label>
-              <input
-                type="url"
-                placeholder="https://example.com/image.png"
-                value={imageUrlInput}
-                onChange={(e) => setImageUrlInput(e.target.value)}
-                className="w-full bg-[#222226] border border-[#2e2e34] focus:border-rose-500/50 rounded-xl px-3.5 py-3 text-xs text-white outline-none transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-3">
-              <button
-                type="button"
-                onClick={() => setIsUploadModalOpen(false)}
-                className="px-5 py-2.5 bg-[#222226] hover:bg-[#2a2a30] text-neutral-300 text-xs font-semibold rounded-xl border border-[#2e2e34] transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSaveBanner}
-                className="px-6 py-2.5 bg-white hover:bg-neutral-200 text-black text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-md"
-                style={{ color: 'black' }}
-              >
-                Save Banner
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Bottom Theme Customization Drawer */}
       {isThemeDrawerOpen && (

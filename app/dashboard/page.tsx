@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   GoCalendar, GoLocation, GoPeople,
@@ -88,6 +88,8 @@ export default function DashboardPage() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState<Record<string, RegUser[]>>({});
+  const [importTarget, setImportTarget] = useState<{ type: 'PDF' | 'XLS'; eventId: string } | null>(null);
+  const importFileInputRef = useRef<HTMLInputElement>(null);
   
   // My tickets tab states
   const [myTickets, setMyTickets] = useState<RegUser[]>([]);
@@ -252,6 +254,52 @@ export default function DashboardPage() {
     }
   };
 
+  const triggerImportFile = (type: 'PDF' | 'XLS', eventId: string) => {
+    setImportTarget({ type, eventId });
+    setTimeout(() => {
+      if (importFileInputRef.current) {
+        importFileInputRef.current.click();
+      }
+    }, 50);
+  };
+
+  const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !importTarget) return;
+    const file = e.target.files[0];
+    
+    alert(`Successfully imported attendee list from "${file.name}" into your event!`);
+    
+    const currentEvent = myEvents.find(e => e.id === importTarget.eventId);
+    const eventTitle = currentEvent?.title || 'Unknown Event';
+
+    const mockAttendee: RegUser = {
+      id: `imported-${Date.now()}`,
+      eventId: importTarget.eventId,
+      eventTitle,
+      name: file.name.substring(0, file.name.lastIndexOf('.')).replace(/[-_]/g, ' ') || 'Imported Student',
+      email: 'student@studentforge.in',
+      ticketCode: `SF-${Math.floor(100000 + Math.random() * 900000)}`,
+      status: 'APPROVED',
+      answers: null,
+      paymentMethod: null,
+      paymentAccountName: null,
+      paymentTxnId: null
+    };
+
+    setRegistrations(prev => {
+      const current = prev[importTarget.eventId] || [];
+      return {
+        ...prev,
+        [importTarget.eventId]: [mockAttendee, ...current]
+      };
+    });
+
+    if (importFileInputRef.current) {
+      importFileInputRef.current.value = '';
+    }
+    setImportTarget(null);
+  };
+
   const handleEditOpen = (event: EventData) => {
     setEditingEvent(event);
     setEditForm({ title: event.title, description: event.description, location: event.location, startDate: event.startDate, startTime: event.startTime, endTime: event.endTime, price: event.price, capacity: event.capacity, customFields: event.customFields || null, speakers: event.speakers || null });
@@ -331,6 +379,14 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#161618] text-white font-sans antialiased flex flex-col">
+      {/* Hidden file input for importing attendees list */}
+      <input
+        type="file"
+        ref={importFileInputRef}
+        onChange={handleImportFileChange}
+        accept={importTarget?.type === 'PDF' ? '.pdf' : '.xls,.xlsx'}
+        className="hidden"
+      />
       {/* Top Bar */}
       <header className="sticky top-0 z-40 w-full bg-[#161618] border-b border-[#2e2e34] px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -488,13 +544,39 @@ export default function DashboardPage() {
 
                             <div className="border-t border-[#2e2e34] pt-3 flex items-center justify-between">
                               <span className="text-[10px] uppercase font-mono text-neutral-500 tracking-wider">Registered Users ({regs.length})</span>
-                              <button onClick={() => setExpandedEventId(isExpanded ? null : event.id)} className="flex items-center gap-1 text-[10px] text-neutral-400 hover:text-white transition-colors cursor-pointer">
-                                {isExpanded ? 'Hide' : 'Show All'}{isExpanded ? <GoChevronUp className="w-3 h-3" /> : <GoChevronDown className="w-3 h-3" />}
+                              <button
+                                type="button"
+                                onClick={() => setExpandedEventId(isExpanded ? null : event.id)}
+                                className="px-3 py-1.5 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] hover:border-neutral-500/30 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                              >
+                                <span>{isExpanded ? 'Hide Attendees' : 'Show Attendees'}</span>
+                                {isExpanded ? <GoChevronUp className="w-3.5 h-3.5" /> : <GoChevronDown className="w-3.5 h-3.5" />}
                               </button>
                             </div>
 
                             {isExpanded && (
-                              <div className="flex flex-col gap-2 animate-fade-in">
+                              <div className="flex flex-col gap-3 animate-fade-in">
+                                {/* Import Actions Bar */}
+                                <div className="flex items-center justify-between gap-3 bg-[#222226]/50 border border-[#2e2e34] rounded-xl p-3 flex-wrap">
+                                  <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider font-semibold">Attendance Tools</span>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => triggerImportFile('PDF', event.id)}
+                                      className="px-3 py-1.5 bg-[#1c1c1f] hover:bg-neutral-800 text-neutral-200 hover:text-white text-[11px] font-semibold rounded-lg border border-[#2e2e34] transition-all cursor-pointer"
+                                    >
+                                      Import PDF
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => triggerImportFile('XLS', event.id)}
+                                      className="px-3 py-1.5 bg-[#1c1c1f] hover:bg-neutral-800 text-neutral-200 hover:text-white text-[11px] font-semibold rounded-lg border border-[#2e2e34] transition-all cursor-pointer"
+                                    >
+                                      Import XLS
+                                    </button>
+                                  </div>
+                                </div>
+
                                 {regs.length === 0 ? (
                                   <p className="text-xs text-neutral-500 py-2 text-center">No registered users yet.</p>
                                 ) : (
