@@ -16,6 +16,32 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "StudentForge | Campus Events & Ticketing Portal",
   description: "RSVP for college workshops, student tech meetups, and campus gatherings with custom check-in QR passes.",
+  icons: {
+    icon: "https://ik.imagekit.io/dypkhqxip/events%20by%20sf.png",
+    shortcut: "https://ik.imagekit.io/dypkhqxip/events%20by%20sf.png",
+    apple: "https://ik.imagekit.io/dypkhqxip/events%20by%20sf.png",
+  },
+  openGraph: {
+    title: "StudentForge | Campus Events & Ticketing Portal",
+    description: "RSVP for college workshops, student tech meetups, and campus gatherings with custom check-in QR passes.",
+    url: "https://events.studentforge.in",
+    siteName: "StudentForge",
+    images: [
+      {
+        url: "https://ik.imagekit.io/dypkhqxip/events%20by%20main.png",
+        width: 1200,
+        height: 630,
+        alt: "StudentForge Campus Events & Ticketing Portal",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "StudentForge | Campus Events & Ticketing Portal",
+    description: "RSVP for college workshops, student tech meetups, and campus gatherings with custom check-in QR passes.",
+    images: ["https://ik.imagekit.io/dypkhqxip/events%20by%20main.png"],
+  },
 };
 
 export default function RootLayout({

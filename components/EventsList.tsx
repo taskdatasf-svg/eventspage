@@ -76,8 +76,42 @@ const EventsList: React.FC = () => {
 
         {/* Loading Skeleton */}
         {!isLoaded ? (
-          <div className="flex flex-col gap-4">
-            <div className="w-full h-32 bg-[#1c1c1f] rounded-2xl border border-[#2e2e34] animate-pulse" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-[#222226] border border-[#333339] rounded-md p-4 flex items-center gap-4 animate-pulse select-none"
+              >
+                {/* Left Side: Skeleton Image */}
+                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#1c1c1f] border border-[#333339] rounded-md flex-shrink-0" />
+
+                {/* Right Side: Skeleton Details */}
+                <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-12 h-4 bg-[#1c1c1f] rounded" />
+                      <div className="w-16 h-3 bg-[#1c1c1f] rounded" />
+                    </div>
+                    
+                    <div className="w-3/4 h-5 bg-[#1c1c1f] rounded mt-1" />
+                    <div className="w-1/2 h-3.5 bg-[#1c1c1f] rounded" />
+                    
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className="w-3.5 h-3.5 bg-[#1c1c1f] rounded-full" />
+                      <div className="w-24 h-3 bg-[#1c1c1f] rounded" />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#333339]/50">
+                    <div className="flex items-center gap-1">
+                      <div className="w-8 h-3 bg-[#1c1c1f] rounded" />
+                      <div className="w-10 h-4 bg-[#1c1c1f] rounded" />
+                    </div>
+                    <div className="w-12 h-3 bg-[#1c1c1f] rounded" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : events.length === 0 ? (
           /* Empty State: "No Events Found" */
