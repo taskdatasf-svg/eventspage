@@ -106,51 +106,15 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           
 
-          {/* Clean Bell Notification Button & Popover */}
-          <div className="relative" ref={bellRef}>
-            <button
-              type="button"
-              onClick={() => {
-                setIsBellOpen(!isBellOpen);
-                setIsProfileOpen(false);
-              }}
-              className="p-2 bg-[#222226] border border-[#2e2e34] hover:bg-[#2c2c32] text-neutral-300 hover:text-white rounded-xl transition-colors cursor-pointer"
+          {/* Clean Bell Notification Button leading to /alerts */}
+          <div className="relative">
+            <a
+              href="/alerts"
+              className="p-2 bg-[#222226] border border-[#2e2e34] hover:bg-[#2c2c32] text-neutral-300 hover:text-white rounded-xl transition-colors cursor-pointer flex items-center justify-center"
               aria-label="Notifications"
             >
               <GoBell className="w-4 h-4" />
-            </button>
-
-            {/* Bell Notifications Dropdown */}
-            {isBellOpen && (
-              <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in flex flex-col">
-                <div className="p-3 border-b border-[#2e2e34] bg-[#222226] flex items-center justify-between">
-                  <span className="text-xs font-semibold text-white">Notifications</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsBellOpen(false)}
-                    className="text-neutral-400 hover:text-white text-xs"
-                  >
-                    <GoX className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="p-3 flex flex-col gap-2.5 max-h-64 overflow-y-auto">
-                  <div className="flex items-start gap-2.5 p-2.5 bg-[#222226] rounded-xl text-xs">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold text-white">Event Approved</span>
-                      <span className="text-[11px] text-neutral-400">Dominicana Tech Week ticket has been issued.</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 p-2.5 bg-[#222226] rounded-xl text-xs">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold text-white">New Gathering</span>
-                      <span className="text-[11px] text-neutral-400">Seattle Tech Summit starts tomorrow.</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            </a>
           </div>
 
           {/* Circle Profile Button */}
