@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Script from 'next/script';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { EventData } from '@/lib/eventsStore';
@@ -105,10 +106,8 @@ export default function RSVPPage() {
     if (!element) return;
     
     setDownloading(true);
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    script.async = true;
-    script.onload = () => {
+
+    const generate = () => {
       const opt = {
         margin:       0.2,
         filename:     `ticket-${ticket.ticketCode}.pdf`,
@@ -128,6 +127,29 @@ export default function RSVPPage() {
           console.error(err);
           setDownloading(false);
         });
+    };
+
+    if ((window as any).html2pdf) {
+      generate();
+      return;
+    }
+
+    // Check if script already exists in document
+    let script = document.querySelector('script[src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"]') as HTMLScriptElement;
+    if (script) {
+      script.onload = () => generate();
+      script.onerror = () => {
+        alert('Failed to load PDF library. Please try again.');
+        setDownloading(false);
+      };
+      return;
+    }
+
+    script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.async = true;
+    script.onload = () => {
+      generate();
     };
     script.onerror = () => {
       alert('Failed to load PDF library. Please try again.');
@@ -816,6 +838,11 @@ export default function RSVPPage() {
           </div>
         </div>
       )}
+
+      <Script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" 
+        strategy="lazyOnload" 
+      />
 
       <Footer />
     </main>

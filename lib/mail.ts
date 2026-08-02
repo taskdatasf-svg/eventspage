@@ -107,8 +107,8 @@ export async function sendEventMail({ to, subject, event, registration, type, or
     
     if (event.coverImage && isImageUrl) {
       headerBannerHtml = `
-        <div style="width: 100%; height: 180px; overflow: hidden; position: relative;">
-          <img src="${event.coverImage}" alt="${event.title}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+        <div style="width: 100%; text-align: center; background-color: #1c1c1f;">
+          <img src="${event.coverImage}" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
         </div>
       `;
     } else {
