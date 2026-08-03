@@ -211,90 +211,20 @@ export default function RegisterPage() {
 
   const downloadPDF = () => {
     if (!ticket) return;
-    const element = document.getElementById('ticket-pdf-export-container');
-    if (!element) return;
-    
     setDownloading(true);
-
-    const generate = () => {
-      const opt = {
-        margin:       0.2,
-        filename:     `ticket-${ticket.ticketCode}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
-      };
-      
-      const html2pdfLib = (window as any).html2pdf;
-      if (html2pdfLib) {
-        html2pdfLib()
-          .from(element)
-          .set(opt)
-          .save()
-          .then(() => {
-            setDownloading(false);
-          })
-          .catch((err: any) => {
-            console.error('PDF Generation Error:', err);
-            alert('Error generating PDF. Please try again.');
-            setDownloading(false);
-          });
-      } else {
-        alert('PDF library not available. Please try again.');
-        setDownloading(false);
-      }
-    };
-
-    const checkAndGenerate = () => {
-      if ((window as any).html2pdf) {
-        generate();
-        return true;
-      }
-      return false;
-    };
-
-    if (checkAndGenerate()) return;
-
-    const cdnUrls = [
-      'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
-      'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js',
-      'https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js'
-    ];
-
-    const loadScript = (idx: number) => {
-      if (idx >= cdnUrls.length) {
-        console.warn('All PDF library CDNs failed to load. Falling back to native browser window.print()');
-        window.print();
-        setDownloading(false);
-        return;
-      }
-
-      let script = document.querySelector(`script[src="${cdnUrls[idx]}"]`) as HTMLScriptElement;
-      if (script) {
-        let attempts = 0;
-        const interval = setInterval(() => {
-          attempts++;
-          if (checkAndGenerate()) {
-            clearInterval(interval);
-          } else if (attempts > 30) {
-            clearInterval(interval);
-            script.remove();
-            loadScript(idx + 1);
-          }
-        }, 100);
-      } else {
-        script = document.createElement('script');
-        script.src = cdnUrls[idx];
-        script.async = true;
-        script.onload = () => generate();
-        script.onerror = () => {
-          loadScript(idx + 1);
-        };
-        document.body.appendChild(script);
-      }
-    };
-
-    loadScript(0);
+    try {
+      const a = document.createElement('a');
+      a.href = `/api/registrations/${ticket.id}/pdf`;
+      a.download = `ticket-${ticket.ticketCode}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error('Error launching PDF download:', err);
+      alert('Failed to download PDF ticket. Please try again.');
+    } finally {
+      setTimeout(() => setDownloading(false), 1500);
+    }
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -895,11 +825,11 @@ export default function RegisterPage() {
           </div>
         ) : (
           /* HORIZONTAL BOARDING PASS TICKET SUCCESS SCREEN */
-          <div className="max-w-3xl w-full mx-auto flex flex-col items-center gap-6 py-6 animate-fade-in no-print">
+          <div className="max-w-3xl w-full mx-auto flex flex-col items-center gap-6 py-6 animate-fade-in">
             
             {/* Header info */}
             {ticket.status === 'PENDING' ? (
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-center text-center gap-2 no-print">
                 <span className="text-3xl text-rose-500 animate-pulse"><GoClock className="w-8 h-8" /></span>
                 <h2 className="text-xl font-bold text-rose-500 tracking-tight">Pending Host Approval</h2>
                 <p className="text-xs text-neutral-400 max-w-sm">
@@ -907,7 +837,7 @@ export default function RegisterPage() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-center text-center gap-2 no-print">
                 <span className="text-3xl text-emerald-500"><GoCheck className="w-8 h-8" /></span>
                 <h2 className="text-xl font-bold text-white tracking-tight">Registration Confirmed</h2>
                 <p className="text-xs text-neutral-400">Your presenter pass has been generated. Download or print below.</p>
