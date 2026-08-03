@@ -477,9 +477,11 @@ export default function RegisterPage() {
             box-shadow: none !important;
             margin: 20px auto !important;
             width: 100% !important;
-            max-width: 440px !important;
+            max-width: 680px !important;
             border-radius: 16px !important;
-            padding-bottom: 24px !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: stretch !important;
             page-break-inside: avoid !important;
           }
           
@@ -500,14 +502,14 @@ export default function RegisterPage() {
           .printable-ticket-card .border-dashed {
             border-color: #000000 !important;
           }
-          
-          /* Hide the bottom scalloped edges to look clean on flat paper */
-          .printable-scallops {
-            display: none !important;
+
+          .printable-stub {
+            border-top: none !important;
+            border-left: 1px dashed #000000 !important;
+            width: 220px !important;
           }
-          
-          /* Hide notch overlays, but keep the border line */
-          .printable-notches div.absolute {
+
+          .printable-tear-strip {
             display: none !important;
           }
           
@@ -892,78 +894,71 @@ export default function RegisterPage() {
 
           </div>
         ) : (
-          /* GORGEOUS VERTICAL DARK TICKET PASS SUCCESS SCREEN */
-          <div className="max-w-md w-full mx-auto flex flex-col items-center gap-6 py-4 animate-fade-in">
+          /* HORIZONTAL BOARDING PASS TICKET SUCCESS SCREEN */
+          <div className="max-w-3xl w-full mx-auto flex flex-col items-center gap-6 py-6 animate-fade-in no-print">
             
-            {/* Ticket Card Container */}
-            <div className="w-full bg-[#1c1c1f] border-t border-x border-[#2e2e34] rounded-t-2xl shadow-2xl relative pb-6 printable-ticket-card">
-              
-              {/* Celebration Top Header */}
-              {ticket.status === 'PENDING' ? (
-                <div className="p-6 pb-5 flex flex-col items-center text-center gap-3 animate-fade-in">
-                  <span className="text-4xl text-rose-500 animate-pulse"><GoClock className="w-10 h-10" /></span>
-                  <h2 className="text-xl font-bold text-rose-500 tracking-tight">Pending Host Approval</h2>
-                  <p className="text-xs text-neutral-400 max-w-[280px]">
-                    Your details were sent to the organizer. We are checking and reviewing your details, we make sure to get updates of your ticket.
-                  </p>
-                </div>
-              ) : (
-                <div className="p-6 pb-5 flex flex-col items-center text-center gap-3">
-                  <span className="text-4xl text-emerald-500"><GoCheck className="w-10 h-10" /></span>
-                  <h2 className="text-xl font-bold text-white tracking-tight">Thank you</h2>
-                  <p className="text-xs text-neutral-400 max-w-[280px]">Your registration has been processed successfully.</p>
-                </div>
-              )}
-
-              {/* Dashed Separator Line with custom cutout notches */}
-              <div className="relative w-full my-2 printable-notches">
-                {/* Left Notch */}
-                <div className="absolute -left-[1.5px] -top-3 w-[3px] h-6 bg-[#161618] z-10" />
-                <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-[#161618] border border-[#2e2e34] z-20" />
-                <div className="absolute left-0 -top-3 w-3 h-6 bg-[#1c1c1f] z-30" />
-
-                {/* Right Notch */}
-                <div className="absolute -right-[1.5px] -top-3 w-[3px] h-6 bg-[#161618] z-10" />
-                <div className="absolute -right-3 -top-3 w-6 h-6 rounded-full bg-[#161618] border border-[#2e2e34] z-20" />
-                <div className="absolute right-0 -top-3 w-3 h-6 bg-[#1c1c1f] z-30" />
-
-                <div className="w-full border-t border-dashed border-[#2e2e34]" />
+            {/* Header info */}
+            {ticket.status === 'PENDING' ? (
+              <div className="flex flex-col items-center text-center gap-2">
+                <span className="text-3xl text-rose-500 animate-pulse"><GoClock className="w-8 h-8" /></span>
+                <h2 className="text-xl font-bold text-rose-500 tracking-tight">Pending Host Approval</h2>
+                <p className="text-xs text-neutral-400 max-w-sm">
+                  Your registration is pending review. The organizer will approve your details shortly.
+                </p>
               </div>
+            ) : (
+              <div className="flex flex-col items-center text-center gap-2">
+                <span className="text-3xl text-emerald-500"><GoCheck className="w-8 h-8" /></span>
+                <h2 className="text-xl font-bold text-white tracking-tight">Registration Confirmed</h2>
+                <p className="text-xs text-neutral-400">Your presenter pass has been generated. Download or print below.</p>
+              </div>
+            )}
 
-              {/* Ticket details body */}
-              <div className="px-6 py-4 flex flex-col gap-5">
+            {/* Ticket Card Container */}
+            <div className="w-full bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl shadow-2xl relative flex flex-col md:flex-row items-stretch overflow-hidden printable-ticket-card">
+              
+              {/* Left Side: Pass main information */}
+              <div className="flex-1 p-6 md:p-8 flex flex-col justify-between gap-6 min-w-0">
                 
-                {/* Meta details grid */}
-                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Ticket ID</span>
-                    <span className="font-mono font-bold text-white truncate">
+                {/* Event Name & Ticket ID Header */}
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <span className="text-[9px] uppercase font-mono text-neutral-500 tracking-wider">Event Name</span>
+                    <h3 className="text-lg md:text-xl font-bold text-white leading-tight truncate">{event.title}</h3>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span className="text-[9px] uppercase font-mono text-neutral-500 tracking-wider">Ticket ID</span>
+                    <span className="text-xs font-mono font-bold text-neutral-300">
                       {ticket.status === 'PENDING' ? (
-                        <span className="text-rose-500">PENDING APPROVAL</span>
+                        <span className="text-rose-500 font-semibold">PENDING</span>
                       ) : (
                         ticket.ticketCode
                       )}
                     </span>
                   </div>
-                  <div className="flex flex-col gap-1 text-right">
-                    <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Amount</span>
-                    <span className="font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price || 'Free'}</span>
+                </div>
+
+                {/* Details layout: Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-3.5 border-t border-[#2e2e34] pt-5">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[9px] uppercase font-mono text-neutral-500 tracking-wider">Date &amp; Time</span>
+                    <span className="text-xs font-semibold text-white truncate">{event.startDate} at {event.startTime}</span>
                   </div>
-                  <div className="flex flex-col gap-1 col-span-2">
-                    <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Date &amp; Time</span>
-                    <span className="font-semibold text-white">{event.startDate} &middot; {event.startTime}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[9px] uppercase font-mono text-neutral-500 tracking-wider">Location</span>
+                    <span className="text-xs font-semibold text-white truncate">{event.location}</span>
                   </div>
-                  <div className="flex flex-col gap-1 col-span-2">
-                    <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Location</span>
-                    <span className="font-semibold text-white truncate">{event.location}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[9px] uppercase font-mono text-neutral-500 tracking-wider">Amount Paid</span>
+                    <span className="text-xs font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price || 'Free'}</span>
                   </div>
                 </div>
 
-                {/* Attendee details box */}
-                <div className="bg-[#222226] border border-[#2e2e34] rounded-xl p-3.5 flex flex-col gap-2.5">
+                {/* Attendee Info Container */}
+                <div className="bg-[#222226] border border-[#2e2e34] rounded-xl p-4 flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <div 
-                      className="w-7 h-7 rounded-full bg-[#2e2e34] border border-[#3e3e46] flex items-center justify-center text-xs font-bold font-mono"
+                      className="w-8 h-8 rounded-full bg-[#2e2e34] border border-[#3e3e46] flex items-center justify-center text-xs font-bold font-mono"
                       style={{ color: 'var(--event-highlight)' }}
                     >
                       {ticket.name?.substring(0, 2).toUpperCase() || 'SF'}
@@ -974,18 +969,18 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  {/* Dynamic answers */}
+                  {/* Dynamic fields / Answers */}
                   {ticket?.answers && (() => {
                     try {
                       const parsed = JSON.parse(ticket.answers);
                       const entries = Object.entries(parsed);
                       if (entries.length === 0) return null;
                       return (
-                        <div className="border-t border-[#2e2e34] pt-2.5 mt-1 flex flex-col gap-1.5 text-[11px]">
+                        <div className="border-t border-[#2e2e34] pt-2 mt-0.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[10px]">
                           {entries.map(([key, val]) => (
-                            <div key={key} className="flex justify-between items-center">
-                              <span className="text-neutral-400">{key}:</span>
-                              <span className="text-white font-medium">{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
+                            <div key={key} className="flex gap-1.5">
+                              <span className="text-neutral-500 font-medium">{key}:</span>
+                              <span className="text-neutral-200 font-semibold">{typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}</span>
                             </div>
                           ))}
                         </div>
@@ -993,46 +988,42 @@ export default function RegisterPage() {
                     } catch { return null; }
                   })()}
 
-                  {/* Payment details if paid */}
+                  {/* Transaction ID if paid */}
                   {ticket.paymentTxnId && (
-                    <div className="border-t border-[#2e2e34] pt-2.5 mt-1 flex flex-col gap-1 text-[11px] text-neutral-400">
-                      <div className="flex justify-between items-center">
-                        <span>Payment Method:</span>
-                        <span className="text-white font-medium">{ticket.paymentMethod}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Account Name:</span>
-                        <span className="text-white font-medium">{ticket.paymentAccountName}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Transaction ID:</span>
-                        <span className="text-white font-mono font-medium truncate max-w-[150px]">{ticket.paymentTxnId}</span>
-                      </div>
+                    <div className="border-t border-[#2e2e34] pt-2 mt-0.5 flex justify-between gap-4 text-[10px] text-neutral-500">
+                      <div>Method: <span className="text-neutral-300 font-semibold">{ticket.paymentMethod}</span></div>
+                      <div>Account: <span className="text-neutral-300 font-semibold">{ticket.paymentAccountName}</span></div>
+                      <div className="truncate max-w-[180px]">Txn ID: <span className="text-neutral-300 font-mono font-semibold">{ticket.paymentTxnId}</span></div>
                     </div>
                   )}
                 </div>
+
               </div>
 
-              {/* Dashed Separator Line */}
-              <div className="w-full border-t border-dashed border-[#2e2e34] my-2" />
+              {/* Tear Strip separator line with custom cutout notches */}
+              <div className="hidden md:flex flex-col items-center justify-between py-4 select-none pointer-events-none printable-tear-strip">
+                <div className="w-6 h-6 rounded-full bg-[#161618] border border-[#2e2e34] -mt-7 -mb-2" />
+                <div className="h-full border-r border-dashed border-[#2e2e34] my-2" />
+                <div className="w-6 h-6 rounded-full bg-[#161618] border border-[#2e2e34] -mb-7 -mt-2" />
+              </div>
 
-              {/* QR Code section */}
-              <div className="px-6 pt-4 flex flex-col items-center gap-4">
+              {/* Right Side: QR Code Stub */}
+              <div className="w-full md:w-60 bg-[#1c1c1f] border-t md:border-t-0 border-[#2e2e34] md:border-l border-dashed p-6 md:p-8 flex flex-col items-center justify-center gap-4 text-center flex-shrink-0 printable-stub">
                 {ticket.status === 'PENDING' ? (
-                  <div className="relative p-3 bg-white/5 rounded-xl border border-dashed border-[#2e2e34] w-[164px] h-[164px] flex flex-col items-center justify-center text-center select-none animate-pulse">
-                    <span className="text-2xl mb-1.5 text-rose-500"><GoClock className="w-6 h-6" /></span>
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest leading-normal px-2">
-                      Awaiting Approval
+                  <div className="relative p-3 bg-white/5 rounded-xl border border-dashed border-[#2e2e34] w-[140px] h-[140px] flex flex-col items-center justify-center text-center select-none animate-pulse">
+                    <span className="text-xl mb-1 text-rose-500"><GoClock className="w-5 h-5" /></span>
+                    <span className="text-[9px] font-mono text-neutral-400 uppercase tracking-widest leading-normal">
+                      Awaiting
                     </span>
-                    <span className="text-[8px] text-neutral-500 mt-1 max-w-[130px]">
-                      Pass will be generated once organizer approves.
+                    <span className="text-[8px] text-neutral-500 leading-tight">
+                      Organizer approval pending.
                     </span>
                   </div>
                 ) : (
-                  <div className="p-3 bg-white rounded-xl shadow-xl flex items-center justify-center select-none">
+                  <div className="p-2.5 bg-white rounded-xl shadow-xl flex items-center justify-center select-none">
                     <QRCodeSVG
                       value={ticket.ticketCode}
-                      size={140}
+                      size={120}
                       bgColor="#ffffff"
                       fgColor="#000000"
                       level="L"
@@ -1040,19 +1031,12 @@ export default function RegisterPage() {
                     />
                   </div>
                 )}
-                <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">
-                  {ticket.status === 'PENDING' ? 'Ticket Pass Status' : 'Presenter Pass QR Code'}
-                </span>
-              </div>
-
-              {/* Scalloped Bottom Edge circles */}
-              <div className="absolute left-0 right-0 -bottom-2.5 flex justify-between px-2.5 z-10 pointer-events-none printable-scallops">
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className="relative w-5 h-5 flex-shrink-0">
-                    <div className="absolute inset-0 rounded-full bg-[#161618] border border-[#2e2e34]" />
-                    <div className="absolute left-0 right-0 bottom-0 h-2.5 bg-[#161618] z-20" />
-                  </div>
-                ))}
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[9px] font-mono text-neutral-400 uppercase tracking-wider font-semibold">Presenter Pass</span>
+                  <span className="text-[8px] font-mono text-neutral-500 uppercase tracking-widest">
+                    {ticket.status === 'PENDING' ? 'Status: Pending' : 'Scan for entry'}
+                  </span>
+                </div>
               </div>
 
             </div>
@@ -1097,124 +1081,104 @@ export default function RegisterPage() {
             left: '-9999px',
             top: '-9999px',
             width: '800px',
-            backgroundColor: '#f3f4f6',
-            color: '#000000',
+            height: '380px',
+            backgroundColor: '#1c1c1f',
+            color: '#ffffff',
             fontFamily: 'sans-serif',
-            border: '2px solid #d1d5db',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            boxSizing: 'border-box'
+            border: '2px solid #2e2e34',
+            borderRadius: '20px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'stretch',
+            boxSizing: 'border-box',
+            overflow: 'hidden'
           }}
         >
-          {/* Header Bar */}
-          <div 
-            style={{
-              backgroundColor: '#ffffff',
-              height: '65px',
-              padding: '0 24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '4px solid #009cde',
-              boxSizing: 'border-box'
-            }}
-          >
-            <span style={{ color: '#009cde', fontSize: '20px', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
-              This is your ticket
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '8px',
-                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                fontFamily: 'monospace'
-              }}>
-                SF
+          {/* Left Main Stub */}
+          <div style={{ flex: 1, padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxSizing: 'border-box', minWidth: '0' }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '0' }}>
+                <span style={{ fontSize: '9px', textTransform: 'uppercase', color: '#88888e', letterSpacing: '1px' }}>Event Name</span>
+                <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#ffffff', margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  {event.title}
+                </h3>
               </div>
-              <span style={{ fontSize: '16px', fontWeight: '800', fontFamily: 'sans-serif', color: '#111827', letterSpacing: '0.5px' }}>
-                STUDENT FORGE
-              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+                <span style={{ fontSize: '9px', textTransform: 'uppercase', color: '#88888e', letterSpacing: '1px' }}>Ticket ID</span>
+                <span style={{ fontSize: '12px', fontFamily: 'monospace', fontWeight: 'bold', color: '#d1d1d6' }}>
+                  {ticket.status === 'PENDING' ? 'PENDING APPROVAL' : ticket.ticketCode}
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* Ticket Body Content */}
-          <div 
-            style={{
-              padding: '24px',
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              gap: '24px',
-              backgroundColor: '#f3f4f6',
-              boxSizing: 'border-box'
-            }}
-          >
-            {/* Left Info Column */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', boxSizing: 'border-box', minWidth: '0' }}>
-              <span style={{ fontSize: '10px', fontWeight: '600', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
-                {event.organizer || "Infinity Event Organizer"}
-              </span>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#000000', lineHeight: '1.3', margin: '0 0 16px 0', fontFamily: 'sans-serif' }}>
-                {event.title}
-              </h2>
+            <div style={{ display: 'flex', flexDirection: 'row', gap: '32px', borderTop: '1px solid #2e2e34', paddingTop: '20px', margin: '20px 0' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontSize: '9px', textTransform: 'uppercase', color: '#88888e', letterSpacing: '1px' }}>Date &amp; Time</span>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#ffffff' }}>{event.startDate} at {event.startTime}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '200px' }}>
+                <span style={{ fontSize: '9px', textTransform: 'uppercase', color: '#88888e', letterSpacing: '1px' }}>Location</span>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.location}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontSize: '9px', textTransform: 'uppercase', color: '#88888e', letterSpacing: '1px' }}>Amount</span>
+                <span style={{ fontSize: '12px', fontWeight: 'bold', color: extractedColor }}>{event.price || 'Free'}</span>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#222226', border: '1px solid #2e2e34', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#2e2e34', border: '1px solid #3e3e46', display: 'flex', alignItems: 'center', justifyContent: 'center', color: extractedColor, fontWeight: 'bold', fontSize: '12px', fontFamily: 'monospace' }}>
+                  {ticket.name?.substring(0, 2).toUpperCase() || 'SF'}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', minWidth: '0' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffffff' }}>{ticket.name}</span>
+                  <span style={{ fontSize: '10px', color: '#a1a1aa', fontFamily: 'monospace' }}>{ticket.email}</span>
+                </div>
+              </div>
               
-              <div style={{ fontSize: '11px', color: '#1f2937', marginBottom: '4px' }}>
-                Venue: <span style={{ fontWeight: '600' }}>{event.location || 'Online'}</span>
-              </div>
-              <div style={{ fontSize: '11px', color: '#000000', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '24px' }}>
-                Date &amp; Time: {event.startDate} &middot; {event.startTime}
-              </div>
-
-              {/* Bottom metadata details row */}
-              <div style={{ display: 'flex', flexDirection: 'row', gap: '24px', marginTop: 'auto', borderTop: '1px solid #e5e7eb', paddingTop: '16px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontSize: '8px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' }}>Issued To</span>
-                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#000000' }}>{ticket.name}</span>
+              {ticket.paymentTxnId && (
+                <div style={{ borderTop: '1px solid #2e2e34', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: '#71717a' }}>
+                  <div>Method: <span style={{ color: '#d4d4d8', fontWeight: '600' }}>{ticket.paymentMethod}</span></div>
+                  <div>Account: <span style={{ color: '#d4d4d8', fontWeight: '600' }}>{ticket.paymentAccountName}</span></div>
+                  <div>Txn ID: <span style={{ color: '#d4d4d8', fontFamily: 'monospace', fontWeight: '600' }}>{ticket.paymentTxnId}</span></div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontSize: '8px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' }}>Ticket ID</span>
-                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#000000', fontFamily: 'monospace' }}>{ticket.ticketCode}</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontSize: '8px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase' }}>Price</span>
-                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#000000' }}>{event.price || 'Free'}</span>
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Right QR Code Column */}
-            <div 
-              style={{
-                width: '210px',
-                height: '210px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '12px',
-                padding: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                flexShrink: 0
-              }}
-            >
-              <QRCodeCanvas
-                value={ticket.ticketCode}
-                size={180}
-                bgColor="#ffffff"
-                fgColor="#000000"
-                level="L"
-                includeMargin={false}
-              />
+          </div>
+
+          {/* Tear Line Separator */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '1px', boxSizing: 'border-box', borderLeft: '2px dashed #2e2e34', margin: '20px 0' }}></div>
+
+          {/* Right QR Code Stub */}
+          <div style={{ width: '260px', backgroundColor: '#1c1c1f', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', boxSizing: 'border-box', flexShrink: 0 }}>
+            {ticket.status === 'PENDING' ? (
+              <div style={{ border: '2px dashed #2e2e34', borderRadius: '12px', width: '140px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px', boxSizing: 'border-box', textAlign: 'center' }}>
+                <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#ef4444', textTransform: 'uppercase', letterSpacing: '1px' }}>Awaiting</span>
+                <span style={{ fontSize: '8px', color: '#71717a', marginTop: '4px' }}>Approval Pending</span>
+              </div>
+            ) : (
+              <div style={{ padding: '12px', backgroundColor: '#ffffff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box' }}>
+                <QRCodeCanvas
+                  value={ticket.ticketCode}
+                  size={120}
+                  bgColor="#ffffff"
+                  fgColor="#000000"
+                  level="L"
+                  includeMargin={false}
+                />
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'center' }}>
+              <span style={{ fontSize: '10px', fontWeight: '600', color: '#d1d1d6', textTransform: 'uppercase', letterSpacing: '1px' }}>Presenter Pass</span>
+              <span style={{ fontSize: '8px', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {ticket.status === 'PENDING' ? 'Status: Pending' : 'Scan for entry'}
+              </span>
             </div>
           </div>
+
         </div>
       )}
 
