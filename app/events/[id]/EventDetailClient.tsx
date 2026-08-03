@@ -467,7 +467,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                       }}
                       className="w-full"
                     >
-                      View Ticket Pass (QR Code)
+                      View Ticket Pass
                     </ShinyButton>
                   </div>
                 ) : (
