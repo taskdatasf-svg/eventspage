@@ -255,43 +255,46 @@ export default function RegisterPage() {
 
     if (checkAndGenerate()) return;
 
-    // Check if script already exists in document
-    const src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    let script = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement;
-    
-    if (script) {
-      // If the script tag is already in the document, it might still be loading.
-      // We poll for window.html2pdf to be defined.
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        if (checkAndGenerate()) {
-          clearInterval(interval);
-        } else if (attempts > 60) { // 6 seconds
-          clearInterval(interval);
-          // If still not defined, recreate script tag to force load
-          script.remove();
-          const forceScript = document.createElement('script');
-          forceScript.src = src;
-          forceScript.onload = () => generate();
-          forceScript.onerror = () => {
-            alert('Failed to load PDF library. Please try again.');
-            setDownloading(false);
-          };
-          document.body.appendChild(forceScript);
-        }
-      }, 100);
-    } else {
-      script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      script.onload = () => generate();
-      script.onerror = () => {
-        alert('Failed to load PDF library. Please try again.');
+    const cdnUrls = [
+      'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
+      'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js',
+      'https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js'
+    ];
+
+    const loadScript = (idx: number) => {
+      if (idx >= cdnUrls.length) {
+        console.warn('All PDF library CDNs failed to load. Falling back to native browser window.print()');
+        window.print();
         setDownloading(false);
-      };
-      document.body.appendChild(script);
-    }
+        return;
+      }
+
+      let script = document.querySelector(`script[src="${cdnUrls[idx]}"]`) as HTMLScriptElement;
+      if (script) {
+        let attempts = 0;
+        const interval = setInterval(() => {
+          attempts++;
+          if (checkAndGenerate()) {
+            clearInterval(interval);
+          } else if (attempts > 30) {
+            clearInterval(interval);
+            script.remove();
+            loadScript(idx + 1);
+          }
+        }, 100);
+      } else {
+        script = document.createElement('script');
+        script.src = cdnUrls[idx];
+        script.async = true;
+        script.onload = () => generate();
+        script.onerror = () => {
+          loadScript(idx + 1);
+        };
+        document.body.appendChild(script);
+      }
+    };
+
+    loadScript(0);
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {

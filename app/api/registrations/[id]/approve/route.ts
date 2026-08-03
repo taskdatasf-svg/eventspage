@@ -30,16 +30,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         data: { status: 'APPROVED' }
       });
 
-      // Send approval confirmation email
-      const origin = request.headers.get('origin') || 'http://localhost:3000';
-      await sendEventMail({
-        to: updatedRegistration.email,
-        subject: `Registration Approved & Ticket Confirmed - ${event.title}`,
-        event,
-        registration: updatedRegistration,
-        type: 'CONFIRMED',
-        originUrl: origin
-      });
+      // Send approval confirmation email (soft dependency)
+      try {
+        const origin = request.headers.get('origin') || 'http://localhost:3000';
+        await sendEventMail({
+          to: updatedRegistration.email,
+          subject: `Registration Approved & Ticket Confirmed - ${event.title}`,
+          event,
+          registration: updatedRegistration,
+          type: 'CONFIRMED',
+          originUrl: origin
+        });
+      } catch (mailError) {
+        console.error('Failed to send approval email (proceeding anyway):', mailError);
+      }
     }
 
     return NextResponse.json({ success: true, registration: updatedRegistration });

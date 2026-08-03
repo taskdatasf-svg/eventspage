@@ -81,26 +81,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       },
     });
 
-    // Send registration email
-    const origin = request.headers.get('origin') || 'http://localhost:3000';
-    if (status === 'PENDING') {
-      await sendEventMail({
-        to: email,
-        subject: `Registration Pending Approval - ${event.title}`,
-        event,
-        registration,
-        type: 'PENDING',
-        originUrl: origin
-      });
-    } else {
-      await sendEventMail({
-        to: email,
-        subject: `Registration Confirmed - ${event.title}`,
-        event,
-        registration,
-        type: 'CONFIRMED',
-        originUrl: origin
-      });
+    // Send registration email (soft dependency)
+    try {
+      const origin = request.headers.get('origin') || 'http://localhost:3000';
+      if (status === 'PENDING') {
+        await sendEventMail({
+          to: email,
+          subject: `Registration Pending Approval - ${event.title}`,
+          event,
+          registration,
+          type: 'PENDING',
+          originUrl: origin
+        });
+      } else {
+        await sendEventMail({
+          to: email,
+          subject: `Registration Confirmed - ${event.title}`,
+          event,
+          registration,
+          type: 'CONFIRMED',
+          originUrl: origin
+        });
+      }
+    } catch (mailError) {
+      console.error('Failed to send registration email (proceeding anyway):', mailError);
     }
 
     return NextResponse.json({ success: true, registration });
