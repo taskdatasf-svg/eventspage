@@ -327,7 +327,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
           <div className="lg:col-span-4 flex flex-col gap-4">
 
             {/* Registration Card Console */}
-            <div className="bg-[#131315] border border-[#232329] rounded-2xl p-5 flex flex-col gap-4 shadow-[0_12px_45px_rgba(0,0,0,0.65)] relative overflow-hidden">
+            <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 sm:p-8 flex flex-col justify-between min-h-[260px] shadow-[0_12px_45px_rgba(0,0,0,0.65)] relative overflow-hidden">
               {/* Glowing accent border line */}
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#ff6b6b] to-transparent" />
               
@@ -341,7 +341,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 </span>
               </div>
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 mt-4">
                 {registered ? (
                   <div className="flex flex-col gap-2">
                     <div className="w-full py-3 bg-[#1c1c21] border border-[#232329] text-neutral-200 text-xs font-medium rounded-xl flex items-center justify-center gap-2">
