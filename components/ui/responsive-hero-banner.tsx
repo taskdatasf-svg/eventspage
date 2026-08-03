@@ -62,8 +62,9 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
 
     return (
         <section
-            className="w-full isolate min-h-screen overflow-hidden relative"
+            className="w-full isolate overflow-hidden relative"
             style={{
+                minHeight: '65vh',
                 backgroundImage: `url(${backgroundImageUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -143,31 +144,31 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
             </header>
 
             <div className="z-10 relative">
-                <div className="sm:pt-28 md:pt-32 lg:pt-36 max-w-7xl mx-auto pt-24 px-6 pb-16">
-                    <div className="mx-auto max-w-3xl text-center">
-                        <div className="mb-6 inline-flex items-center gap-3 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/15 backdrop-blur animate-fade-slide-in-1">
+                <div className="max-w-7xl mx-auto pt-16 sm:pt-20 md:pt-24 px-6 pb-14">
+                    <div className="max-w-2xl text-left">
+                        <div className="mb-4 inline-flex items-center gap-3 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/15 backdrop-blur animate-fade-slide-in-1">
                             <span className="inline-flex items-center text-xs font-medium text-neutral-900 bg-white/90 rounded-full py-0.5 px-2 font-sans">
                                 {badgeLabel}
                             </span>
-                            <span className="text-xs sm:text-sm font-medium text-white/90 font-sans">
+                            <span className="text-xs font-medium text-white/90 font-sans">
                                 {badgeText}
                             </span>
                         </div>
 
-                        <h1 className="sm:text-5xl md:text-6xl lg:text-7xl leading-tight text-4xl text-white tracking-tight font-normal animate-fade-slide-in-2">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl leading-tight text-white tracking-tight font-normal animate-fade-slide-in-2">
                             {title}
                             <br className="hidden sm:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">{titleLine2}</span>
                         </h1>
 
-                        <p className="sm:text-lg animate-fade-slide-in-3 text-base text-white/80 max-w-2xl mt-6 mx-auto">
+                        <p className="text-sm sm:text-base animate-fade-slide-in-3 text-white/70 max-w-xl mt-4">
                             {description}
                         </p>
 
-                        <div className="flex flex-col sm:flex-row sm:gap-4 mt-10 gap-3 items-center justify-center animate-fade-slide-in-4">
+                        <div className="flex flex-row gap-3 mt-8 animate-fade-slide-in-4">
                             <a
                                 href={primaryButtonHref}
-                                className="inline-flex items-center gap-2 hover:bg-white/15 text-sm font-medium text-white bg-white/10 ring-white/15 ring-1 rounded-full py-3 px-6 font-sans transition-colors shadow-lg"
+                                className="inline-flex items-center gap-2 hover:bg-white/15 text-sm font-medium text-white bg-white/10 ring-white/15 ring-1 rounded-full py-2.5 px-5 font-sans transition-colors shadow-lg"
                             >
                                 {primaryButtonText}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -177,7 +178,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                             </a>
                             <a
                                 href={secondaryButtonHref}
-                                className="inline-flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-3 text-sm font-medium text-white/90 hover:text-white font-sans transition-colors"
+                                className="inline-flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 text-sm font-medium text-white/90 hover:text-white font-sans transition-colors"
                             >
                                 {secondaryButtonText}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
