@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { 
-  GoArrowLeft, GoPeople, GoCheck, GoClock, 
-  GoX, GoCalendar, GoLocation, GoTag, GoSearch 
+  GoArrowLeft, GoPeople, GoCheck, 
+  GoX, GoCalendar, GoLocation, GoTag, GoSearch,
+  GoDownload
 } from 'react-icons/go';
 
 interface Registration {
@@ -44,13 +45,8 @@ export default function EventAttendeesPage() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Action states
   const [approvingIds, setApprovingIds] = useState<Record<string, boolean>>({});
-  const [importing, setImporting] = useState(false);
-  const [importType, setImportType] = useState<'PDF' | 'XLS' | null>(null);
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [exporting, setExporting] = useState<'PDF' | 'XLS' | null>(null);
 
   const fetchEventDetails = async () => {
     try {
@@ -88,82 +84,160 @@ export default function EventAttendeesPage() {
   const handleApproveUser = async (regId: string) => {
     setApprovingIds(prev => ({ ...prev, [regId]: true }));
     try {
-      const res = await fetch(`/api/registrations/${regId}/approve`, {
-        method: 'POST',
-      });
+      const res = await fetch(`/api/registrations/${regId}/approve`, { method: 'POST' });
       if (res.ok) {
-        // Optimistically update status locally
-        setRegistrations(prev =>
-          prev.map(r => r.id === regId ? { ...r, status: 'APPROVED' } : r)
-        );
+        setRegistrations(prev => prev.map(r => r.id === regId ? { ...r, status: 'APPROVED' } : r));
       } else {
         const data = await res.json();
         alert(data.error || 'Failed to approve registration.');
       }
-    } catch (err) {
-      console.error('Approve error:', err);
+    } catch {
       alert('Failed to approve registration.');
     } finally {
       setApprovingIds(prev => ({ ...prev, [regId]: false }));
     }
   };
 
-  const triggerImportFile = (type: 'PDF' | 'XLS') => {
-    setImportType(type);
-    setTimeout(() => {
-      if (fileInputRef.current) {
-        fileInputRef.current.click();
-      }
-    }, 50);
-  };
-
-  const handleImportFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0] || !id || !importType) return;
-    const file = e.target.files[0];
-    
-    // Check file extension
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    if (importType === 'PDF' && extension !== 'pdf') {
-      alert('Please upload a valid PDF file.');
-      return;
-    }
-    if (importType === 'XLS' && !['xls', 'xlsx'].includes(extension || '')) {
-      alert('Please upload a valid Excel spreadsheet.');
-      return;
-    }
-
-    const parsedName = file.name.substring(0, file.name.lastIndexOf('.')).replace(/[-_]/g, ' ') || 'Imported Guest';
-    const parsedEmail = `imported_${Date.now()}@studentforge.in`;
-    
+  // ── Export to XLS ─────────────────────────────────────────────────────────
+  const handleExportXLS = async () => {
+    setExporting('XLS');
     try {
-      setImporting(true);
-      const res = await fetch(`/api/events/${id}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: parsedName,
-          email: parsedEmail,
-          turnstileToken: 'localhost_bypass'
-        })
+      const XLSX = await import('xlsx');
+      const rows = registrations.map((reg, idx) => {
+        let answers: Record<string, string> = {};
+        try { answers = reg.answers ? JSON.parse(reg.answers) : {}; } catch {}
+        return {
+          '#': idx + 1,
+          'Name': reg.name,
+          'Email': reg.email,
+          'Phone': reg.phone || '',
+          'Ticket Code': reg.ticketCode,
+          'Status': reg.status,
+          'Payment Method': reg.paymentMethod || '',
+          'Account Name': reg.paymentAccountName || '',
+          'Transaction ID': reg.paymentTxnId || '',
+          'Registered At': new Date(reg.createdAt).toLocaleString(),
+          ...Object.fromEntries(Object.entries(answers).map(([k, v]) => [k, String(v)])),
+        };
       });
-      
-      if (!res.ok) throw new Error('Registration failed');
-      
-      alert(`Successfully imported attendee "${parsedName}" from "${file.name}"!`);
-      await fetchRegistrations();
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+
+      // Auto-size columns
+      const colWidths = Object.keys(rows[0] || {}).map(key => ({
+        wch: Math.max(key.length, ...rows.map(r => String((r as Record<string, unknown>)[key] ?? '').length)) + 2,
+      }));
+      ws['!cols'] = colWidths;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Attendees');
+      const fileName = `attendees_${event?.title?.replace(/[^a-z0-9]/gi, '_') || id}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(wb, fileName);
     } catch (err) {
-      console.error('Import failed:', err);
-      alert('Failed to import attendee.');
+      console.error('XLS export error:', err);
+      alert('Failed to export Excel file.');
     } finally {
-      setImporting(false);
-      setImportType(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setExporting(null);
     }
   };
 
-  // Filter registrations based on search query
+  // ── Export to PDF ─────────────────────────────────────────────────────────
+  const handleExportPDF = async () => {
+    setExporting('PDF');
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+      // Header block
+      doc.setFillColor(22, 22, 24);
+      doc.rect(0, 0, doc.internal.pageSize.getWidth(), 60, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Event Attendees', 40, 30);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(160, 160, 160);
+      doc.text(event?.title || '', 40, 45);
+      doc.text(`Exported on ${new Date().toLocaleString()} · Total: ${registrations.length}`, 40, 55);
+
+      const tableRows = registrations.map((reg, idx) => {
+        let answers = '';
+        try {
+          const parsed = reg.answers ? JSON.parse(reg.answers) : {};
+          answers = Object.entries(parsed).map(([k, v]) => `${k}: ${v}`).join('; ');
+        } catch {}
+        return [
+          idx + 1,
+          reg.name,
+          reg.email,
+          reg.phone || '—',
+          reg.ticketCode,
+          reg.status,
+          reg.paymentMethod || '—',
+          reg.paymentTxnId || '—',
+          answers || '—',
+          new Date(reg.createdAt).toLocaleDateString(),
+        ];
+      });
+
+      autoTable(doc, {
+        startY: 70,
+        head: [['#', 'Name', 'Email', 'Phone', 'Ticket Code', 'Status', 'Payment', 'Txn ID', 'Answers', 'Date']],
+        body: tableRows,
+        styles: {
+          fontSize: 7.5,
+          cellPadding: 5,
+          textColor: [30, 30, 30],
+        },
+        headStyles: {
+          fillColor: [30, 30, 34],
+          textColor: [220, 220, 220],
+          fontStyle: 'bold',
+          fontSize: 7,
+        },
+        alternateRowStyles: {
+          fillColor: [248, 248, 250],
+        },
+        columnStyles: {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 80 },
+          2: { cellWidth: 110 },
+          3: { cellWidth: 65 },
+          4: { cellWidth: 75 },
+          5: { cellWidth: 50 },
+          6: { cellWidth: 50 },
+          7: { cellWidth: 75 },
+          8: { cellWidth: 100 },
+          9: { cellWidth: 55 },
+        },
+        margin: { left: 40, right: 40 },
+        didDrawPage: (data) => {
+          // Page footer
+          const pageCount = (doc as unknown as { internal: { pages: unknown[] } }).internal.pages.length - 1;
+          doc.setFontSize(7);
+          doc.setTextColor(150, 150, 150);
+          doc.text(
+            `Page ${data.pageNumber} of ${pageCount}  ·  StudentForge Events`,
+            40,
+            doc.internal.pageSize.getHeight() - 15
+          );
+        },
+      });
+
+      const fileName = `attendees_${event?.title?.replace(/[^a-z0-9]/gi, '_') || id}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      doc.save(fileName);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      alert('Failed to export PDF file.');
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  // Filter registrations
   const filteredRegs = registrations.filter(reg => {
     const query = searchQuery.toLowerCase();
     return (
@@ -193,34 +267,29 @@ export default function EventAttendeesPage() {
             </h1>
             {event && (
               <p className="text-xs text-neutral-400 font-medium">
-                Guest list roster for <span className="text-white font-semibold">"{event.title}"</span>
+                Guest list for <span className="text-white font-semibold">&quot;{event.title}&quot;</span>
               </p>
             )}
           </div>
 
-          {/* Import Tools */}
+          {/* Export Tools */}
           <div className="flex items-center gap-2 mt-2 sm:mt-0">
             <button
-              onClick={() => triggerImportFile('PDF')}
-              disabled={importing}
-              className="px-4 py-2.5 bg-[#1c1c1f] hover:bg-neutral-800 disabled:opacity-50 text-neutral-200 hover:text-white text-xs font-bold rounded-xl border border-[#2e2e34] transition-all cursor-pointer shadow-sm flex items-center gap-2"
+              onClick={handleExportPDF}
+              disabled={!!exporting || registrations.length === 0}
+              className="px-4 py-2.5 bg-[#1c1c1f] hover:bg-[#27272b] disabled:opacity-40 disabled:cursor-not-allowed text-neutral-200 hover:text-white text-xs font-bold rounded-xl border border-[#2e2e34] hover:border-[#44444a] transition-all cursor-pointer shadow-sm flex items-center gap-2"
             >
-              Import PDF
+              <GoDownload className="w-3.5 h-3.5 text-rose-400" />
+              {exporting === 'PDF' ? 'Exporting…' : 'Export PDF'}
             </button>
             <button
-              onClick={() => triggerImportFile('XLS')}
-              disabled={importing}
-              className="px-4 py-2.5 bg-[#1c1c1f] hover:bg-neutral-800 disabled:opacity-50 text-neutral-200 hover:text-white text-xs font-bold rounded-xl border border-[#2e2e34] transition-all cursor-pointer shadow-sm flex items-center gap-2"
+              onClick={handleExportXLS}
+              disabled={!!exporting || registrations.length === 0}
+              className="px-4 py-2.5 bg-[#1c1c1f] hover:bg-[#27272b] disabled:opacity-40 disabled:cursor-not-allowed text-neutral-200 hover:text-white text-xs font-bold rounded-xl border border-[#2e2e34] hover:border-[#44444a] transition-all cursor-pointer shadow-sm flex items-center gap-2"
             >
-              Import XLS
+              <GoDownload className="w-3.5 h-3.5 text-emerald-400" />
+              {exporting === 'XLS' ? 'Exporting…' : 'Export XLS'}
             </button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleImportFileChange} 
-              className="hidden" 
-              accept={importType === 'PDF' ? '.pdf' : '.xls,.xlsx'}
-            />
           </div>
         </div>
 
@@ -251,7 +320,7 @@ export default function EventAttendeesPage() {
           )}
         </div>
 
-        {/* Attendee Roster Grid */}
+        {/* Attendee Roster */}
         {loading ? (
           <div className="flex flex-col gap-4">
             {[1, 2, 3].map(i => (
@@ -264,9 +333,9 @@ export default function EventAttendeesPage() {
               <GoPeople className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">No registered attendees found</p>
+              <p className="text-sm font-semibold text-white">No attendees found</p>
               <p className="text-xs text-neutral-500 mt-1">
-                {searchQuery ? 'Try adjusting your search terms.' : 'Attendees imported or registered will appear here.'}
+                {searchQuery ? 'Try adjusting your search terms.' : 'Attendees who register will appear here.'}
               </p>
             </div>
           </div>
@@ -292,8 +361,7 @@ export default function EventAttendeesPage() {
                       )}
                     </div>
                     <p className="text-[10px] text-neutral-400 font-mono truncate mt-0.5">{reg.email}</p>
-                    
-                    {/* Render Custom RSVP Answers */}
+
                     {reg.answers && (() => {
                       try {
                         const parsedAns = JSON.parse(reg.answers);
@@ -306,12 +374,9 @@ export default function EventAttendeesPage() {
                             ))}
                           </div>
                         );
-                      } catch {
-                        return null;
-                      }
+                      } catch { return null; }
                     })()}
 
-                    {/* Render payment details */}
                     {reg.paymentTxnId && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         <span className="text-[9px] bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono">
@@ -336,14 +401,25 @@ export default function EventAttendeesPage() {
                       onClick={() => handleApproveUser(reg.id)}
                       disabled={approvingIds[reg.id]}
                       className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer shadow-sm"
-                      style={{ color: 'white' }}
                     >
-                      {approvingIds[reg.id] ? 'Approving...' : 'Approve Guest'}
+                      {approvingIds[reg.id] ? 'Approving…' : 'Approve Guest'}
                     </button>
                   )}
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Export hint footer */}
+        {registrations.length > 0 && (
+          <div className="flex items-center justify-between px-1">
+            <p className="text-[10px] text-neutral-500">
+              Showing {filteredRegs.length} of {registrations.length} attendee{registrations.length !== 1 ? 's' : ''}
+            </p>
+            <p className="text-[10px] text-neutral-600">
+              Use &quot;Export PDF&quot; or &quot;Export XLS&quot; to download the full list
+            </p>
           </div>
         )}
       </main>
