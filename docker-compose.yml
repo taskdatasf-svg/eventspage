@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --save ""
     ports:
-      - "6379:6379"          # accessible on host for debugging; lock down in prod
+      - "6379:6379"
     networks:
       - events_net
     healthcheck:
@@ -17,7 +17,11 @@ services:
 
   # ─── Next.js App (3 replicas behind Nginx) ────────────────────────────────
   app1:
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        DIRECT_URL: ${DIRECT_URL}
     container_name: events_app1
     restart: unless-stopped
     env_file: .env.local
@@ -31,7 +35,11 @@ services:
       - events_net
 
   app2:
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        DIRECT_URL: ${DIRECT_URL}
     container_name: events_app2
     restart: unless-stopped
     env_file: .env.local
@@ -45,7 +53,11 @@ services:
       - events_net
 
   app3:
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        DIRECT_URL: ${DIRECT_URL}
     container_name: events_app3
     restart: unless-stopped
     env_file: .env.local
