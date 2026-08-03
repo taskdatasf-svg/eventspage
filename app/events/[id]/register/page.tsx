@@ -15,6 +15,7 @@ import {
   GoPlus, GoX
 } from 'react-icons/go';
 import TurnstileWidget from '@/components/TurnstileWidget';
+import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
 const isEventFree = (price: string) => {
   const clean = price.trim().toLowerCase();
@@ -378,8 +379,8 @@ export default function RegisterPage() {
       >
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-4 py-20 px-4">
-          <div className="w-8 h-8 border-2 border-[#333339] border-t-white rounded-full animate-spin" />
-          <p className="text-xs text-neutral-500 font-mono">Loading registration details…</p>
+          <DotmSquare5 size={36} dotSize={4} speed={1.2} bloom colorPreset="grad-aurora" animated />
+          <p className="text-xs text-neutral-500 font-mono tracking-wider uppercase">Loading registration details...</p>
         </div>
         <Footer />
       </main>

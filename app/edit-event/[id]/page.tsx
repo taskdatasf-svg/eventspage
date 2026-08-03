@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import PixelBlast from '@/components/PixelBlast';
 import Grainient from '@/components/Grainient';
 import { GoCalendar, GoGlobe, GoLocation, GoTag, GoPeople, GoCheck, GoUpload, GoTrash, GoX, GoInfo, GoSearch, GoPlus } from 'react-icons/go';
+import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
 
 const themes = [
@@ -549,7 +550,7 @@ export default function EditEventPage({ params }: PageProps) {
   if (pageLoading) {
     return (
       <div className="min-h-screen bg-[#161618] text-white flex flex-col items-center justify-center font-sans antialiased gap-4">
-        <div className="w-8 h-8 rounded-full border-2 border-t-white border-neutral-800 border-r-transparent animate-spin" />
+        <DotmSquare5 size={36} dotSize={4} speed={1.2} bloom colorPreset="grad-aurora" animated />
         <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest animate-pulse">Loading Event Details...</span>
       </div>
     );
@@ -1155,7 +1156,7 @@ export default function EditEventPage({ params }: PageProps) {
                       className="bg-transparent text-sm text-white placeholder-neutral-500 outline-none w-full"
                     />
                     {isLocLoading && (
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                      <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated />
                     )}
                   </div>
 

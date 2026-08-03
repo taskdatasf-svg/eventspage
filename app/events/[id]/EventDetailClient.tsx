@@ -9,6 +9,7 @@ import { EventData } from '@/lib/eventsStore';
 import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck } from 'react-icons/go';
 import { ShinyButton } from '@/components/ui/shiny-button';
 import { useViewerCount } from '@/lib/useViewerCount';
+import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
 const themes = [
   { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
@@ -193,14 +194,13 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
     }
   }, [eventId, initialEvent]);
 
-  // Loading spinner
   if (loading) {
     return (
       <main className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-4 py-20 px-4">
-          <div className="w-8 h-8 border-2 border-[#333339] border-t-white rounded-full animate-spin" />
-          <p className="text-xs text-neutral-500 font-mono">Loading event…</p>
+          <DotmSquare5 size={36} dotSize={4} speed={1.2} bloom colorPreset="grad-aurora" animated />
+          <p className="text-xs text-neutral-500 font-mono tracking-wider uppercase">Loading event...</p>
         </div>
         <Footer />
       </main>

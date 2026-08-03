@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import PixelBlast from '@/components/PixelBlast';
 import Grainient from '@/components/Grainient';
 import { GoCalendar, GoGlobe, GoLocation, GoTag, GoPeople, GoCheck, GoUpload, GoTrash, GoX, GoInfo, GoSearch, GoPlus } from 'react-icons/go';
+import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
 
 const themes = [
@@ -1084,7 +1085,7 @@ export default function CreateEventPage() {
                       className="bg-transparent text-sm text-white placeholder-neutral-500 outline-none w-full"
                     />
                     {isLocLoading && (
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                      <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated />
                     )}
                   </div>
 

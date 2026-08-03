@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { GoCheck, GoPerson, GoLock, GoMail, GoShieldCheck, GoArrowLeft } from 'react-icons/go';
 import TurnstileWidget from '@/components/TurnstileWidget';
 import Link from 'next/link';
+import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
 export default function AuthPage() {
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
@@ -440,7 +441,7 @@ export default function AuthPage() {
                 disabled={isLoading || (!isLocalhost && !turnstileToken)}
                 className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-60 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
               >
-                {isLoading ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Sign In'}
+                {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Sign In'}
               </button>
             </form>
           )}
@@ -471,7 +472,7 @@ export default function AuthPage() {
                     disabled={isLoading}
                     className="w-full py-3.5 bg-[#18181B] text-white border border-[#232329] hover:bg-[#27272A] font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
                   >
-                    {isLoading ? <span className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin" /> : 'Send Verification Code'}
+                    {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Send Verification Code'}
                   </button>
                 </form>
               )}
@@ -580,7 +581,7 @@ export default function AuthPage() {
                     disabled={isLoading || (!isLocalhost && !turnstileToken)}
                     className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-60 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
                   >
-                    {isLoading ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Complete Sign Up'}
+                    {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Complete Sign Up'}
                   </button>
                 </form>
               )}
@@ -613,7 +614,7 @@ export default function AuthPage() {
                     disabled={isLoading}
                     className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
                   >
-                    {isLoading ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Verify Email & Send OTP'}
+                    {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Verify Email & Send OTP'}
                   </button>
                 </form>
               )}
@@ -708,7 +709,7 @@ export default function AuthPage() {
                     disabled={isLoading}
                     className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
                   >
-                    {isLoading ? <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" /> : 'Reset Password'}
+                    {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Reset Password'}
                   </button>
                 </form>
               )}

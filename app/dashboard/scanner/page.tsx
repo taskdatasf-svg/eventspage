@@ -8,6 +8,7 @@ import {
   GoArrowLeft, GoShield, GoCheck, GoClock, 
   GoDeviceCameraVideo, GoX, GoLocation, GoCalendar 
 } from 'react-icons/go';
+import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
 interface VerifiedAttendee {
   id: string;
@@ -405,7 +406,7 @@ export default function TicketScannerPage() {
           <div className="lg:col-span-5">
             {verifying ? (
               <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-12 flex flex-col items-center justify-center gap-4 text-center">
-                <span className="w-8 h-8 border-3 border-[#ffec27] border-t-transparent rounded-full animate-spin" />
+                <DotmSquare5 size={32} dotSize={4} speed={1.2} bloom colorPreset="grad-aurora" animated />
                 <div>
                   <p className="text-xs font-semibold text-white">Verifying ticket code...</p>
                   <p className="text-[10px] text-neutral-500 mt-1">Validating check-in eligibility in registrations...</p>

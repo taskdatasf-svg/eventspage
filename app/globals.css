@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../components/dotmatrix-loader.css";
 
 :root {
   --background: #161618;
