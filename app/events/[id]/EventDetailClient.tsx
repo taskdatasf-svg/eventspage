@@ -7,6 +7,7 @@ import PixelBlast from '@/components/PixelBlast';
 import Grainient from '@/components/Grainient';
 import { EventData } from '@/lib/eventsStore';
 import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck } from 'react-icons/go';
+import { ShinyButton } from '@/components/ui/shiny-button';
 
 const themes = [
   { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
@@ -347,17 +348,17 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                       <GoCheck className="w-3.5 h-3.5 text-neutral-400" />
                       <span>You're Registered</span>
                     </div>
-                    <a
-                      href={`/events/${event.id}/rsvp`}
-                      className="w-full py-3 bg-white hover:bg-neutral-100 font-medium text-xs rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-lg text-center"
-                      style={{ color: 'black' }}
+                    <ShinyButton
+                      onClick={() => {
+                        window.location.href = `/events/${event.id}/rsvp`;
+                      }}
+                      className="w-full"
                     >
                       View Ticket Pass (QR Code)
-                    </a>
+                    </ShinyButton>
                   </div>
                 ) : (
-                  <button
-                    type="button"
+                  <ShinyButton
                     onClick={() => {
                       if (!user) {
                         window.location.href = '/auth';
@@ -365,10 +366,10 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                         window.location.href = `/events/${event.id}/rsvp`;
                       }
                     }}
-                    className="w-full py-3.5 bg-white text-black hover:bg-neutral-100 font-medium text-sm rounded-xl transition-all cursor-pointer shadow-lg tracking-tight"
+                    className="w-full"
                   >
                     {user ? 'Register for Event' : 'Sign Up to Register'}
-                  </button>
+                  </ShinyButton>
                 )}
 
                 {!registered && (
