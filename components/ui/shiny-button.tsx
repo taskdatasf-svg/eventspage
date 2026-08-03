@@ -28,7 +28,7 @@ export function ShinyButton({ children, onClick, className = "" }: ShinyButtonPr
 
         @property --gradient-percent {
           syntax: "<percentage>";
-          initial-value: 5%;
+          initial-value: 15%;
           inherits: false;
         }
 
@@ -145,7 +145,7 @@ export function ShinyButton({ children, onClick, className = "" }: ShinyButtonPr
           width: var(--size);
           height: var(--size);
           box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
-          opacity: 0;
+          opacity: 0.15;
           transition: opacity var(--transition);
           animation: calc(var(--duration) * 1.5) breathe linear infinite;
         }
@@ -154,21 +154,13 @@ export function ShinyButton({ children, onClick, className = "" }: ShinyButtonPr
         .shiny-cta,
         .shiny-cta::before,
         .shiny-cta::after {
-          animation: var(--animation) var(--duration),
-            var(--animation) calc(var(--duration) / 0.4) reverse paused;
-          animation-composition: add;
+          animation: var(--animation) var(--duration) linear infinite;
         }
 
         .shiny-cta:is(:hover, :focus-visible) {
-          --gradient-percent: 20%;
+          --gradient-percent: 25%;
           --gradient-angle-offset: 95deg;
           --gradient-shine: var(--shiny-cta-highlight-subtle);
-        }
-
-        .shiny-cta:is(:hover, :focus-visible),
-        .shiny-cta:is(:hover, :focus-visible)::before,
-        .shiny-cta:is(:hover, :focus-visible)::after {
-          animation-play-state: running;
         }
 
         .shiny-cta:is(:hover, :focus-visible) span::before {

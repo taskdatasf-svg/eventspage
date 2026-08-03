@@ -732,14 +732,12 @@ export default function RSVPPage() {
 
               {/* Event Cover Image */}
               {event.coverImage && (
-                <div className="w-full h-44 relative overflow-hidden border-b border-[#232329]">
+                <div className="w-full relative overflow-hidden border-b border-[#232329] bg-[#0c0c0e] flex items-center justify-center p-3">
                   <img 
                     src={event.coverImage} 
                     alt={event.title} 
-                    className="w-full h-full object-cover" 
+                    className="max-w-full max-h-72 object-contain rounded-lg shadow-md" 
                   />
-                  {/* Ambient gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1c1c1f] via-transparent to-transparent opacity-80" />
                 </div>
               )}
               <div className="p-5 flex flex-col gap-4">
