@@ -184,99 +184,152 @@ export async function sendEventMail({ to, subject, event, registration, type, or
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${subject}</title>
       </head>
-      <body style="margin: 0; padding: 0; background-color: #161618; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
-        <div style="max-width: 500px; margin: 30px auto; background-color: #1c1c1f; border: 1px solid #2e2e34; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-          
-          <!-- Event Header Banner -->
-          ${headerBannerHtml}
+      <body style="margin: 0; padding: 0; background-color: #0a0a0c; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #0a0a0c; width: 100%; min-height: 100%; padding: 30px 10px;">
+          <tr>
+            <td align="center" valign="top">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 500px; background-color: #121215; border: 1px solid #232329; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                
+                <!-- Event Header Banner -->
+                <tr>
+                  <td align="center" valign="top" style="overflow: hidden; border-radius: 16px 16px 0 0;">
+                    ${headerBannerHtml}
+                  </td>
+                </tr>
 
-          <!-- Email Content Body -->
-          <div style="padding: 24px;">
-            
-            <!-- Icon and Status -->
-            <div style="text-align: center; margin-bottom: 20px;">
-              <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">
-                ${isPending ? 'RSVP Pending Approval' : 'Registration Successful!'}
-              </h2>
-              <p style="margin: 6px 0 0 0; color: #a1a1aa; font-size: 13px; line-height: 1.5;">
-                ${isPending 
-                  ? 'Your details were sent to the organizer. We are checking and reviewing your details, we make sure to get updates of your ticket.' 
-                  : 'Your registration has been successfully processed! Below are your entry ticket details.'
-                }
-              </p>
-            </div>
+                <!-- Email Content Body -->
+                <tr>
+                  <td style="padding: 28px 20px;">
+                    
+                    <!-- Icon and Status -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align: center; margin-bottom: 24px;">
+                      <tr>
+                        <td>
+                          <h2 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; font-family: sans-serif;">
+                            ${isPending ? 'RSVP Pending Approval' : 'Registration Confirmed!'}
+                          </h2>
+                          <p style="margin: 8px 0 0 0; color: #a1a1aa; font-size: 13px; line-height: 1.5; font-family: sans-serif;">
+                            ${isPending 
+                              ? 'Your details were sent to the organizer. We are checking and reviewing your details to approve your ticket.' 
+                              : 'Your registration has been successfully processed! Below are your entry ticket details.'
+                            }
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
 
-            <!-- Ticket & Event Box -->
-            <div style="background-color: #222226; border: 1px solid #2e2e34; border-radius: 12px; padding: 18px; margin-bottom: 24px;">
-              <div style="border-bottom: 1px solid #2e2e34; padding-bottom: 14px; margin-bottom: 14px;">
-                <span style="font-size: 9px; font-family: monospace; color: #8a8a90; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 4px;">Event Details</span>
-                <h3 style="margin: 0; color: #ffffff; font-size: 15px; font-weight: 700; line-height: 1.3;">
-                  ${event.title}
-                </h3>
-                <p style="margin: 6px 0 0 0; color: #d4d4d8; font-size: 12px; font-weight: 500;">
-                  Date: ${event.startDate} &middot; ${event.startTime}
-                </p>
-                <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 12px;">
-                  Address of Event: <span style="color: #ffffff; font-weight: 500;">${event.location || 'Online'}</span>
-                </p>
-                <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 12px;">
-                  Price: <strong style="color: #ffffff;">${event.price}</strong>
-                </p>
-              </div>
+                    <!-- Ticket & Event Box -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #18181b; border: 1px solid #232329; border-radius: 12px; padding: 18px; margin-bottom: 24px; box-sizing: border-box;">
+                      
+                      <!-- Event Details Heading and info -->
+                      <tr>
+                        <td style="border-bottom: 1px solid #232329; padding-bottom: 14px; margin-bottom: 14px;">
+                          <span style="font-size: 9px; font-family: monospace; color: #71717a; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 6px;">Event Details</span>
+                          <h3 style="margin: 0 0 8px 0; color: #ffffff; font-size: 16px; font-weight: 700; line-height: 1.3; font-family: sans-serif;">
+                            ${event.title}
+                          </h3>
+                          
+                          <!-- Info Grid -->
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 12px; color: #a1a1aa; font-family: sans-serif;">
+                            <tr>
+                              <td style="padding: 3px 0; font-weight: 500;">Date & Time:</td>
+                              <td style="padding: 3px 0; text-align: right; color: #ffffff; font-weight: 600;">${event.startDate} &middot; ${event.startTime}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 3px 0; font-weight: 500;">Venue / Location:</td>
+                              <td style="padding: 3px 0; text-align: right; color: #ffffff; font-weight: 600;">${event.location || 'Online'}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 3px 0; font-weight: 500;">Admission:</td>
+                              <td style="padding: 3px 0; text-align: right; color: #ffffff; font-weight: 600;">${event.price}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
 
-              <div>
-                <span style="font-size: 9px; font-family: monospace; color: #8a8a90; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 4px;">Attendee Info</span>
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #ffffff;">
-                  <tr>
-                    <td style="padding: 3px 0; color: #a1a1aa; width: 40%;">Name:</td>
-                    <td style="padding: 3px 0; text-align: right; font-weight: 600;">${registration.name}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 3px 0; color: #a1a1aa;">Email:</td>
-                    <td style="padding: 3px 0; text-align: right; font-weight: 500; font-family: monospace;">${registration.email}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 3px 0; color: #a1a1aa;">Ticket ID:</td>
-                    <td style="padding: 3px 0; text-align: right; font-weight: bold; font-family: monospace; color: #ffffff; letter-spacing: 0.5px;">
-                      ${isPending ? '<span style="color: #a1a1aa; font-size: 11px;">PENDING APPROVAL</span>' : registration.ticketCode}
-                    </td>
-                  </tr>
-                </table>
-              </div>
+                      <!-- Spacer -->
+                      <tr>
+                        <td height="14"></td>
+                      </tr>
 
-              <!-- RSVP Answers & Payment (if any) -->
-              ${answersHtml}
-              ${paymentHtml}
+                      <!-- Attendee Info -->
+                      <tr>
+                        <td>
+                          <span style="font-size: 9px; font-family: monospace; color: #71717a; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 6px;">Attendee Details</span>
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 12px; color: #a1a1aa; font-family: sans-serif;">
+                            <tr>
+                              <td style="padding: 3px 0; width: 40%;">Full Name:</td>
+                              <td style="padding: 3px 0; text-align: right; font-weight: 600; color: #ffffff;">${registration.name}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 3px 0;">Email:</td>
+                              <td style="padding: 3px 0; text-align: right; font-weight: 500; font-family: monospace; color: #ffffff;">${registration.email}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 3px 0;">Ticket Status:</td>
+                              <td style="padding: 3px 0; text-align: right; font-weight: bold; font-family: monospace; color: #ffffff; letter-spacing: 0.5px;">
+                                ${isPending 
+                                  ? '<span style="color: #fbbf24; font-size: 11px; text-transform: uppercase;">PENDING APPROVAL</span>' 
+                                  : `<span style="color: #34d399; font-size: 11px; text-transform: uppercase;">${registration.ticketCode}</span>`
+                                }
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
 
-              <!-- Scannable Entry Pass QR Code -->
-              ${!isPending ? `
-              <div style="text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #2e2e34;">
-                <p style="margin: 0 0 8px 0; font-size: 10px; font-family: monospace; color: #8a8a90; text-transform: uppercase; letter-spacing: 1.5px;">Entry Pass QR Code</p>
-                <div style="display: inline-block; background-color: #ffffff; padding: 10px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: center;">
-                  <img src="cid:ticket-qrcode" alt="Ticket QR Code" style="width: 150px; height: 150px; display: block; margin: 0 auto;" />
-                </div>
-                <p style="margin: 6px 0 0 0; font-family: monospace; font-size: 12px; color: #ffffff; font-weight: bold; letter-spacing: 1px;">${registration.ticketCode}</p>
-                <p style="margin: 4px 0 0 0; font-size: 10px; color: #a1a1aa; line-height: 1.4;">Present this QR code to the organizer at the entrance for verification.</p>
-              </div>
-              ` : ''}
-            </div>
+                      <!-- RSVP Answers & Payment (if any) -->
+                      <tr>
+                        <td>
+                          ${answersHtml}
+                          ${paymentHtml}
+                        </td>
+                      </tr>
 
-            <!-- View ticket pass CTA -->
-            <div style="text-align: center; margin-bottom: 10px;">
-              <a href="${passUrl}" style="display: inline-block; background-color: #ffffff; color: #000000; font-weight: bold; font-size: 13px; text-decoration: none; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(255,255,255,0.1); text-align: center; transition: background-color 0.2s;">
-                ${isPending ? 'Check Ticket Status' : 'View Ticket Pass (QR Code)'}
-              </a>
-            </div>
+                      <!-- Scannable Entry Pass QR Code -->
+                      ${!isPending ? `
+                      <tr>
+                        <td align="center" style="text-align: center; margin-top: 20px; padding-top: 18px; border-top: 1px solid #232329;">
+                          <span style="margin: 0 0 10px 0; font-size: 9px; font-family: monospace; color: #71717a; text-transform: uppercase; letter-spacing: 1.5px; display: block;">Entry Pass QR Code</span>
+                          <div style="display: inline-block; background-color: #ffffff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; margin-bottom: 8px;">
+                            <img src="cid:ticket-qrcode" alt="Ticket QR Code" width="140" height="140" style="width: 140px; height: 140px; display: block; margin: 0 auto; border: 0; outline: none;" />
+                          </div>
+                          <div style="font-family: monospace; font-size: 13px; color: #ffffff; font-weight: bold; letter-spacing: 1.5px; margin-top: 4px;">${registration.ticketCode}</div>
+                          <p style="margin: 6px 0 0 0; font-size: 10px; color: #71717a; font-family: sans-serif; line-height: 1.4; max-width: 280px; text-align: center;">
+                            Please present this secure QR pass to the organizer at the venue entrance for scanning.
+                          </p>
+                        </td>
+                      </tr>
+                      ` : ''}
+                    </table>
 
-          </div>
+                    <!-- View ticket pass CTA -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align: center; margin-bottom: 12px;">
+                      <tr>
+                        <td>
+                          <a href="${passUrl}" style="display: inline-block; background-color: #ffffff; color: #000000; font-family: sans-serif; font-weight: bold; font-size: 13px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(255,255,255,0.08); text-align: center;">
+                            ${isPending ? 'Check Ticket Status' : 'View Ticket Pass (QR Code)'}
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
 
-          <!-- Footer without Logo -->
-          <div style="background-color: #161618; border-top: 1px solid #2e2e34; padding: 20px; text-align: center;">
-            <p style="margin: 0; font-size: 10px; font-family: monospace; color: #52525b; text-transform: uppercase; letter-spacing: 2px;">
-              Student Forge Events Platform
-            </p>
-          </div>
-        </div>
+                  </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td style="padding: 24px 20px; text-align: center; background-color: #0a0a0c; border-top: 1px solid #232329;">
+                    <p style="margin: 0; font-size: 9px; font-family: monospace; color: #52525b; text-transform: uppercase; letter-spacing: 2px;">
+                      Student Forge Events Platform &bull; All Rights Reserved
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+        </table>
       </body>
       </html>
     `;

@@ -6,7 +6,7 @@ import Script from 'next/script';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { EventData } from '@/lib/eventsStore';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
   GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock
@@ -127,50 +127,77 @@ export default function RSVPPage() {
         margin:       0.2,
         filename:     `ticket-${ticket.ticketCode}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
       };
       
-      (window as any).html2pdf()
-        .from(element)
-        .set(opt)
-        .save()
-        .then(() => {
-          setDownloading(false);
-        })
-        .catch((err: any) => {
-          console.error(err);
-          setDownloading(false);
-        });
+      const html2pdfLib = (window as any).html2pdf;
+      if (html2pdfLib) {
+        html2pdfLib()
+          .from(element)
+          .set(opt)
+          .save()
+          .then(() => {
+            setDownloading(false);
+          })
+          .catch((err: any) => {
+            console.error('PDF Generation Error:', err);
+            alert('Error generating PDF. Please try again.');
+            setDownloading(false);
+          });
+      } else {
+        alert('PDF library not available. Please try again.');
+        setDownloading(false);
+      }
     };
 
-    if ((window as any).html2pdf) {
-      generate();
-      return;
-    }
+    const checkAndGenerate = () => {
+      if ((window as any).html2pdf) {
+        generate();
+        return true;
+      }
+      return false;
+    };
+
+    if (checkAndGenerate()) return;
 
     // Check if script already exists in document
-    let script = document.querySelector('script[src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"]') as HTMLScriptElement;
+    const src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    let script = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement;
+    
     if (script) {
+      // If the script tag is already in the document, it might still be loading.
+      // We poll for window.html2pdf to be defined.
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts++;
+        if (checkAndGenerate()) {
+          clearInterval(interval);
+        } else if (attempts > 60) { // 6 seconds
+          clearInterval(interval);
+          // If still not defined, recreate script tag to force load
+          script.remove();
+          const forceScript = document.createElement('script');
+          forceScript.src = src;
+          forceScript.onload = () => generate();
+          forceScript.onerror = () => {
+            alert('Failed to load PDF library. Please try again.');
+            setDownloading(false);
+          };
+          document.body.appendChild(forceScript);
+        }
+      }, 100);
+    } else {
+      script = document.createElement('script');
+      script.src = src;
+      script.async = true;
       script.onload = () => generate();
       script.onerror = () => {
         alert('Failed to load PDF library. Please try again.');
         setDownloading(false);
       };
-      return;
+      document.body.appendChild(script);
     }
-
-    script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    script.async = true;
-    script.onload = () => {
-      generate();
-    };
-    script.onerror = () => {
-      alert('Failed to load PDF library. Please try again.');
-      setDownloading(false);
-    };
-    document.body.appendChild(script);
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -776,11 +803,26 @@ export default function RSVPPage() {
             <span style={{ color: '#009cde', fontSize: '20px', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
               This is your ticket
             </span>
-            <img 
-              src={logoBase64 || "https://ik.imagekit.io/dypkhqxip/events%20loho"} 
-              alt="Logo" 
-              style={{ height: '32px', width: 'auto', objectFit: 'contain', display: 'block' }} 
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                fontFamily: 'monospace'
+              }}>
+                SF
+              </div>
+              <span style={{ fontSize: '16px', fontWeight: '800', fontFamily: 'sans-serif', color: '#111827', letterSpacing: '0.5px' }}>
+                STUDENT FORGE
+              </span>
+            </div>
           </div>
 
           {/* Ticket Body Content */}
@@ -844,7 +886,7 @@ export default function RSVPPage() {
                 flexShrink: 0
               }}
             >
-              <QRCodeSVG
+              <QRCodeCanvas
                 value={ticket.ticketCode}
                 size={180}
                 bgColor="#ffffff"
