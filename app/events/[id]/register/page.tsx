@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import { EventData } from '@/lib/eventsStore';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import { ShinyButton } from '@/components/ui/shiny-button';
+import { AntiMetalButton } from '@/components/ui/anti-metal-button';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
   GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock,
@@ -837,8 +838,13 @@ export default function RegisterPage() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col items-center text-center gap-2 no-print">
-                <span className="text-3xl text-emerald-500"><GoCheck className="w-8 h-8" /></span>
+              <div className="flex flex-col items-center text-center gap-1 no-print -mt-4">
+                <div 
+                  className="w-[120px] h-[120px] flex items-center justify-center -mb-2"
+                  dangerouslySetInnerHTML={{
+                    __html: `<dotlottie-wc src="https://lottie.host/41df1d4a-e726-48b9-8c63-95896d087232/he0C1Dd3Ne.lottie" style="width: 120px; height: 120px;" autoplay loop></dotlottie-wc>`
+                  }}
+                />
                 <h2 className="text-xl font-bold text-white tracking-tight">Registration Confirmed</h2>
                 <p className="text-xs text-neutral-400">Your presenter pass has been generated. Download or print below.</p>
               </div>
@@ -973,19 +979,21 @@ export default function RegisterPage() {
 
             {/* Download & Print buttons */}
             {ticket.status !== 'PENDING' && (
-              <div className="w-full flex flex-col sm:flex-row gap-2 mb-2 no-print">
-                <ShinyButton
+              <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-3 mb-4 no-print">
+                <AntiMetalButton
                   onClick={downloadPDF}
-                  className="flex-1"
-                >
-                  {downloading ? 'Generating PDF...' : 'Download (PDF)'}
-                </ShinyButton>
-                <ShinyButton
+                  className="flex-1 w-full sm:w-auto"
+                  label={downloading ? 'Downloading...' : 'Download (PDF)'}
+                  accentFrom={extractedColor}
+                  accentTo={extractedColor}
+                />
+                <AntiMetalButton
                   onClick={() => window.print()}
-                  className="flex-1"
-                >
-                  Print Ticket
-                </ShinyButton>
+                  className="flex-1 w-full sm:w-auto"
+                  label="Print Ticket"
+                  accentFrom={extractedColor}
+                  accentTo={extractedColor}
+                />
               </div>
             )}
 
@@ -1114,6 +1122,11 @@ export default function RegisterPage() {
 
       <Script 
         src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" 
+        strategy="lazyOnload" 
+      />
+      <Script 
+        src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" 
+        type="module"
         strategy="lazyOnload" 
       />
 
