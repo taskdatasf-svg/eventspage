@@ -31,6 +31,7 @@ interface RegUser {
   paymentMethod?: string | null;
   paymentTxnId?: string | null;
   status?: string;
+  eventCoverImage?: string | null;
 }
 
 // Colors removed for clean monochromatic look
@@ -636,15 +637,25 @@ export default function DashboardPage() {
                   <div className="flex flex-col gap-4">
                     {myTickets.map((ticket) => {
                       return (
-                        <div key={ticket.id} className="bg-[#1c1c1f] border border-[#2e2e34] rounded-xl overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4">
-                          <div className="flex items-center gap-4 min-w-0">
-                            {/* Event header strip styling for logo block */}
-                            <div className="w-12 h-12 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0 text-white text-sm font-black select-none">
-                              {ticket.eventTitle.substring(0, 1).toUpperCase()}
+                        <div key={ticket.id} className="bg-[#1c1c1f] hover:bg-[#202023] border border-[#2e2e34] hover:border-[#3a3a42] rounded-2xl overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4 transition-all duration-200">
+                          <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
+                            {/* Event Cover Image Box */}
+                            <div className="w-12 h-12 rounded-xl bg-[#222226] border border-[#2e2e34] overflow-hidden flex-shrink-0 flex items-center justify-center select-none shadow-inner">
+                              {ticket.eventCoverImage ? (
+                                <img
+                                  src={ticket.eventCoverImage}
+                                  alt={ticket.eventTitle}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-white text-xs font-bold uppercase">
+                                  {ticket.eventTitle.substring(0, 2).toUpperCase()}
+                                </span>
+                              )}
                             </div>
-                            <div className="flex flex-col min-w-0">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-bold text-white truncate">{ticket.eventTitle}</h3>
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="text-sm font-bold text-white truncate max-w-[200px] sm:max-w-xs">{ticket.eventTitle}</h3>
                                 {ticket.status === 'PENDING' ? (
                                   <span className="text-[8px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono font-semibold animate-pulse">
                                     Pending Approval
@@ -655,32 +666,32 @@ export default function DashboardPage() {
                                   </span>
                                 )}
                               </div>
-                              <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] text-neutral-400">
-                                <span className="flex items-center gap-1"><GoCalendar className="w-3 h-3" />{ticket.eventStartDate} at {ticket.eventStartTime}</span>
-                                <span className="flex items-center gap-1 truncate max-w-[150px] sm:max-w-none"><GoLocation className="w-3 h-3" />{ticket.eventLocation}</span>
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-neutral-400">
+                                <span className="flex items-center gap-1"><GoCalendar className="w-3.5 h-3.5 text-neutral-500" />{ticket.eventStartDate} at {ticket.eventStartTime}</span>
+                                <span className="flex items-center gap-1 truncate max-w-[200px] sm:max-w-none"><GoLocation className="w-3.5 h-3.5 text-neutral-500" />{ticket.eventLocation}</span>
                               </div>
                             </div>
                           </div>
 
-                        <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#2e2e34] pt-3 sm:pt-0">
-                          <div className="flex flex-col">
-                            <span className="text-[9px] uppercase font-mono text-neutral-500">Ticket ID</span>
-                            <span className="text-xs font-mono font-semibold text-neutral-300">
-                              {ticket.status === 'PENDING' ? 'PENDING' : ticket.ticketCode}
-                            </span>
+                          <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#2e2e34] pt-3 sm:pt-0 w-full sm:w-auto">
+                            <div className="flex flex-col">
+                              <span className="text-[9px] uppercase font-mono text-neutral-500">Ticket ID</span>
+                              <span className="text-xs font-mono font-semibold text-neutral-300">
+                                {ticket.status === 'PENDING' ? 'PENDING' : ticket.ticketCode}
+                              </span>
+                            </div>
+                            <a
+                              href={`/events/${ticket.eventId}/register`}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-bold rounded-lg transition-all cursor-pointer shadow-sm active:scale-95 text-black"
+                              style={{ color: 'black' }}
+                            >
+                              <GoEye className="w-3.5 h-3.5" />
+                              <span>View</span>
+                            </a>
                           </div>
-                          <a
-                            href={`/events/${ticket.eventId}/register`}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-bold rounded-md transition-all cursor-pointer shadow-sm text-black"
-                            style={{ color: 'black' }}
-                          >
-                            <GoEye className="w-3.5 h-3.5" />
-                            <span>View Pass</span>
-                          </a>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                   </div>
                 )}
               </div>

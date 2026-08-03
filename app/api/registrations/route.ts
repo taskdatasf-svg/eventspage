@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       registrations.map(async (reg) => {
         const event = await prisma.event.findUnique({
           where: { id: reg.eventId },
-          select: { headerBg: true, startDate: true, startTime: true, location: true, price: true }
+          select: { headerBg: true, startDate: true, startTime: true, location: true, price: true, coverImage: true }
         });
         return {
           ...reg,
@@ -28,7 +28,8 @@ export async function GET(request: Request) {
           eventStartDate: event?.startDate || '',
           eventStartTime: event?.startTime || '',
           eventLocation: event?.location || 'Online',
-          eventPrice: event?.price || 'Free'
+          eventPrice: event?.price || 'Free',
+          eventCoverImage: event?.coverImage || null
         };
       })
     );
