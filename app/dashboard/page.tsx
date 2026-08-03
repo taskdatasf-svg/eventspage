@@ -389,23 +389,33 @@ export default function DashboardPage() {
         className="hidden"
       />
       {/* Top Bar */}
-      <header className="sticky top-0 z-40 w-full bg-[#161618] border-b border-[#2e2e34] px-4 sm:px-8 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <a href="/" className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-xs">
-            <GoArrowLeft className="w-3.5 h-3.5" /><span>Back</span>
+      <header className="sticky top-0 z-40 w-full bg-[#161618]/95 backdrop-blur-md border-b border-[#2e2e34] px-4 sm:px-8 py-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <a href="/" className="flex items-center gap-1 sm:gap-2 text-neutral-400 hover:text-white transition-colors text-xs py-1">
+            <GoArrowLeft className="w-3.5 h-3.5" />
+            <span className="hidden min-[380px]:inline">Back</span>
           </a>
-          <span className="text-[#2e2e34]">|</span>
-          <img src="https://ik.imagekit.io/dypkhqxip/events%20loho" alt="Student Forge" className="h-8 w-auto object-contain select-none" />
+          <span className="text-[#2e2e34] hidden min-[380px]:inline">|</span>
+          <img src="https://ik.imagekit.io/dypkhqxip/events%20loho" alt="Student Forge" className="h-7 sm:h-8 w-auto object-contain select-none" />
           <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest hidden sm:block">Dashboard</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="text-xs font-semibold text-white">{user.name}</span>
-            <span className="text-[10px] text-neutral-400 font-mono">{user.email}</span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Avatar (Initials) */}
+          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full bg-[linear-gradient(135deg,#6366f1_0%,#4f46e5_100%)] text-white shadow-[0_2px_8px_rgba(79,70,229,0.2)] border border-white/10 flex items-center justify-center text-xs font-bold select-none font-sans">
+            {user.name ? (
+              user.name.split(' ').length >= 2
+                ? (user.name.split(' ')[0][0] + user.name.split(' ')[1][0]).toUpperCase()
+                : user.name.substring(0, 2).toUpperCase()
+            ) : 'U'}
           </div>
-          <div className="w-8 h-8 rounded-full bg-[#222226] border border-[#333339] flex items-center justify-center text-xs font-bold">{user.name?.substring(0, 2).toUpperCase() || 'U'}</div>
-          <button onClick={handleSignOut} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-400 hover:text-white bg-[#222226] hover:bg-[#2c2c32] border border-[#333339] rounded-md transition-all cursor-pointer">
-            <GoSignOut className="w-3.5 h-3.5" /><span className="hidden sm:block">Sign Out</span>
+          {/* Sign Out Button */}
+          <button 
+            onClick={handleSignOut} 
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs text-neutral-400 hover:text-white bg-[#222226] hover:bg-[#2c2c32] active:scale-95 border border-[#333339] rounded-xl transition-all cursor-pointer"
+            title="Sign Out"
+          >
+            <GoSignOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Sign Out</span>
           </button>
         </div>
       </header>
