@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { EventData } from '@/lib/eventsStore';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
+import { ShinyButton } from '@/components/ui/shiny-button';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
   GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock
@@ -18,6 +19,58 @@ const isEventFree = (price: string) => {
   return clean === 'free' || clean === '0' || clean === '0.00' || clean === 'free entry';
 };
 
+function rgbToSoftHex(r: number, g: number, b: number): string {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+
+  s = 0.75;
+  l = 0.65;
+
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+  };
+
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const newR = Math.round(hue2rgb(p, q, h + 1/3) * 255);
+  const newG = Math.round(hue2rgb(p, q, h) * 255);
+  const newB = Math.round(hue2rgb(p, q, h - 1/3) * 255);
+
+  const toHex = (c: number) => {
+    const hex = c.toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
+}
+
+function getFallbackSoftColor(headerBg: string | undefined): string {
+  if (!headerBg) return '#ff6b6b';
+  const clean = headerBg.toLowerCase();
+  if (clean.includes('818cf8')) return '#ff6b6b';
+  if (clean.includes('fef08a') || clean.includes('ffe600')) return '#fde047';
+  if (clean.includes('6ee7b7')) return '#86efac';
+  if (clean.includes('fbcfe8')) return '#fbcfe8';
+  if (clean.includes('fed7aa')) return '#fdba74';
+  return '#ff6b6b';
+}
+
 export default function RSVPPage() {
   const params = useParams();
   const router = useRouter();
@@ -27,21 +80,54 @@ export default function RSVPPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [downloading, setDownloading] = useState(false);
-  const [logoBase64, setLogoBase64] = useState<string>('');
+  const [extractedColor, setExtractedColor] = useState<string>('#ff6b6b');
 
   useEffect(() => {
-    const logoUrl = 'https://ik.imagekit.io/dypkhqxip/events%20loho';
-    fetch(logoUrl)
-      .then(res => res.blob())
-      .then(blob => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setLogoBase64(reader.result as string);
-        };
-        reader.readAsDataURL(blob);
-      })
-      .catch(err => console.error('Failed to convert logo to base64:', err));
-  }, []);
+    if (!event?.coverImage) {
+      setExtractedColor(getFallbackSoftColor(event?.headerBg));
+      return;
+    }
+
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = event.coverImage;
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 10;
+        canvas.height = 10;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, 10, 10);
+        const data = ctx.getImageData(0, 0, 10, 10).data;
+        
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
+          if (brightness > 15 && brightness < 240) {
+            r += data[i];
+            g += data[i+1];
+            b += data[i+2];
+            count++;
+          }
+        }
+        if (count > 0) {
+          r = Math.round(r / count);
+          g = Math.round(g / count);
+          b = Math.round(b / count);
+          setExtractedColor(rgbToSoftHex(r, g, b));
+        } else {
+          setExtractedColor(getFallbackSoftColor(event?.headerBg));
+        }
+      } catch (e) {
+        console.warn('Color extraction failed:', e);
+        setExtractedColor(getFallbackSoftColor(event?.headerBg));
+      }
+    };
+    img.onerror = () => {
+      setExtractedColor(getFallbackSoftColor(event?.headerBg));
+    };
+  }, [event?.coverImage, event?.headerBg]);
 
   // Flow step state: 'form' | 'payment' | 'confirm-txn'
   const [rsvpStep, setRsvpStep] = useState<'form' | 'payment' | 'confirm-txn'>('form');
@@ -273,7 +359,13 @@ export default function RSVPPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
+      <main 
+        className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans"
+        style={{
+          ['--event-highlight' as any]: '#ff6b6b',
+          ['--event-highlight-bg' as any]: '#ff6b6b1a'
+        }}
+      >
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-4 py-20 px-4">
           <div className="w-8 h-8 border-2 border-[#333339] border-t-white rounded-full animate-spin" />
@@ -304,11 +396,21 @@ export default function RSVPPage() {
   const qrPaymentValue = `upi://pay?pa=6302933597@hdfc&pn=Student%20Forge%20Events&am=${numericPrice}&cu=INR&tn=RSVP%20${encodeURIComponent(event.title.substring(0, 15))}`;
 
   return (
-    <main className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
+    <main 
+      className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans"
+      style={{
+        ['--event-highlight' as any]: extractedColor,
+        ['--event-highlight-bg' as any]: `${extractedColor}1a`
+      }}
+    >
       <Navbar />
 
-      {/* Global CSS for Print Optimization */}
+      {/* Global CSS for Print Optimization & Dynamic Input Focus */}
       <style dangerouslySetInnerHTML={{ __html: `
+        input:focus, select:focus, textarea:focus {
+          border-color: var(--event-highlight) !important;
+          box-shadow: 0 0 0 1px var(--event-highlight) !important;
+        }
         @media print {
           /* Hide Navbar, Footer, Breadcrumbs, download/print buttons, and back actions */
           nav, footer, .no-print, button, a {
@@ -488,14 +590,12 @@ export default function RSVPPage() {
                     )}
 
                     {/* Submit button */}
-                    <button
-                      type="submit"
-                      disabled={submitting || (event && isEventFree(event.price) ? (!isLocalhost && !turnstileToken) : false)}
-                      className="mt-2 w-full py-3 bg-white text-black hover:bg-neutral-100 disabled:opacity-60 font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-2"
-                      style={{ color: 'black' }}
+                    <ShinyButton
+                      onClick={undefined}
+                      className="mt-2 w-full"
                     >
-                      <span>{isEventFree(event.price) ? 'Submit RSVP' : 'Proceed to Payment'}</span>
-                    </button>
+                      {submitting ? 'Submitting...' : (isEventFree(event.price) ? 'Submit RSVP' : 'Proceed to Payment')}
+                    </ShinyButton>
                   </form>
                 </>
               )}
@@ -507,7 +607,7 @@ export default function RSVPPage() {
                       <GoArrowLeft className="w-3.5 h-3.5" /> Back to RSVP Form
                     </button>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Scan &amp; Pay</h1>
-                    <p className="text-xs text-neutral-400">Please complete the payment of <strong className="text-[#ffec27]">{event.price}</strong> to register.</p>
+                    <p className="text-xs text-neutral-400">Please complete the payment of <strong style={{ color: 'var(--event-highlight)' }}>{event.price}</strong> to register.</p>
                   </div>
 
                   <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col items-center gap-6 shadow-sm animate-fade-in text-center">
@@ -515,7 +615,7 @@ export default function RSVPPage() {
                     {/* Amount badge */}
                     <div className="bg-[#222226] border border-[#2e2e34] px-5 py-2.5 rounded-xl flex flex-col gap-0.5 max-w-[200px] w-full">
                       <span className="text-[10px] uppercase font-mono text-neutral-500">Amount Due</span>
-                      <span className="text-lg font-bold text-[#ffec27]">{event.price}</span>
+                      <span className="text-lg font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price}</span>
                     </div>
 
                     {/* Styled QR Code */}
@@ -536,13 +636,12 @@ export default function RSVPPage() {
                       <p className="text-[10px] text-neutral-500 font-mono mt-1">Once scanning and paying is done, click the button below to add payment transaction details for host approval.</p>
                     </div>
 
-                    <button
+                    <ShinyButton
                       onClick={() => setRsvpStep('confirm-txn')}
-                      className="w-full py-3 bg-white text-black hover:bg-neutral-100 font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                      style={{ color: 'black' }}
+                      className="w-full"
                     >
-                      <span>Next Step: Confirm Payment</span>
-                    </button>
+                      Next Step: Confirm Payment
+                    </ShinyButton>
                   </div>
                 </>
               )}
@@ -609,14 +708,12 @@ export default function RSVPPage() {
                     {/* Turnstile Widget for Paid Events */}
                     {!isLocalhost && <TurnstileWidget onVerify={setTurnstileToken} />}
 
-                    <button
-                      type="submit"
-                      disabled={submitting || (!isLocalhost && !turnstileToken)}
-                      className="mt-2 w-full py-3 bg-white text-black hover:bg-neutral-100 disabled:opacity-60 font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                      style={{ color: 'black' }}
+                    <ShinyButton
+                      onClick={undefined}
+                      className="mt-2 w-full"
                     >
-                      <span>{submitting ? 'Submitting Details...' : 'Complete RSVP & Submit'}</span>
-                    </button>
+                      {submitting ? 'Submitting Details...' : 'Complete RSVP & Submit'}
+                    </ShinyButton>
                   </form>
                 </>
               )}
@@ -625,7 +722,10 @@ export default function RSVPPage() {
 
             {/* Right Side: Event Details Summary Card */}
             <div className="lg:col-span-5 bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl overflow-hidden shadow-sm flex flex-col">
-              <div className={`px-5 py-2.5 ${event.headerBg || 'bg-[#ffe600]'} text-slate-950 font-mono text-[10px] font-bold uppercase tracking-wider flex justify-between select-none`}>
+              <div 
+                className="px-5 py-2.5 text-slate-950 font-mono text-[10px] font-bold uppercase tracking-wider flex justify-between select-none"
+                style={{ backgroundColor: 'var(--event-highlight)' }}
+              >
                 <span>{event.ticketCode}</span>
                 <span>RSVP ONLY</span>
               </div>
@@ -705,7 +805,7 @@ export default function RSVPPage() {
                   </div>
                   <div className="flex flex-col gap-1 text-right">
                     <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Amount</span>
-                    <span className="font-bold text-[#ffec27]">{event.price || 'Free'}</span>
+                    <span className="font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price || 'Free'}</span>
                   </div>
                   <div className="flex flex-col gap-1 col-span-2">
                     <span className="text-[10px] font-mono uppercase text-neutral-500 tracking-wider">Date &amp; Time</span>
@@ -720,7 +820,10 @@ export default function RSVPPage() {
                 {/* Attendee details box */}
                 <div className="bg-[#222226] border border-[#2e2e34] rounded-xl p-3.5 flex flex-col gap-2.5">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#2e2e34] border border-[#3e3e46] flex items-center justify-center text-xs font-bold text-[#ffec27]">
+                    <div 
+                      className="w-7 h-7 rounded-full bg-[#2e2e34] border border-[#3e3e46] flex items-center justify-center text-xs font-bold font-mono"
+                      style={{ color: 'var(--event-highlight)' }}
+                    >
                       {ticket.name?.substring(0, 2).toUpperCase() || 'SF'}
                     </div>
                     <div className="flex flex-col min-w-0">
@@ -815,21 +918,18 @@ export default function RSVPPage() {
             {/* Download & Print buttons */}
             {ticket.status !== 'PENDING' && (
               <div className="w-full flex flex-col sm:flex-row gap-2 mb-2 no-print">
-                <button
+                <ShinyButton
                   onClick={downloadPDF}
-                  disabled={downloading}
-                  className="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-800 text-white font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-indigo-500/20"
-                  style={{ color: 'white' }}
+                  className="flex-1"
                 >
-                  <span>{downloading ? 'Generating PDF...' : 'Download (PDF)'}</span>
-                </button>
-                <button
+                  {downloading ? 'Generating PDF...' : 'Download (PDF)'}
+                </ShinyButton>
+                <ShinyButton
                   onClick={() => window.print()}
-                  className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-emerald-500/20"
-                  style={{ color: 'white' }}
+                  className="flex-1"
                 >
-                  <span>Print Ticket</span>
-                </button>
+                  Print Ticket
+                </ShinyButton>
               </div>
             )}
 
