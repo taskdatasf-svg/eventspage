@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import { EventData } from '@/lib/eventsStore';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import { ShinyButton } from '@/components/ui/shiny-button';
+import { AntiMetalButton } from '@/components/ui/anti-metal-button';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
   GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock
@@ -140,6 +141,13 @@ export default function RSVPPage() {
   const [phone, setPhone] = useState('');
   const [answers, setAnswers] = useState<Record<string, string | boolean>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  interface Friend {
+    name: string;
+    email: string;
+    phone: string;
+  }
+  const [friends, setFriends] = useState<Friend[]>([]);
 
   // Payment states
   const [paymentAccountName, setPaymentAccountName] = useState('');
@@ -316,6 +324,7 @@ export default function RSVPPage() {
   const submitRegistration = async () => {
     setSubmitting(true);
     try {
+      // 1. Submit main participant registration
       const res = await fetch(`/api/events/${id}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -331,11 +340,41 @@ export default function RSVPPage() {
         }),
       });
       const data = await res.json();
-      if (res.ok && data.success) {
-        setTicket(data.registration);
-      } else {
-        alert(data.error || 'Failed to complete RSVP');
+      if (!res.ok || !data.success) {
+        alert(data.error || 'Failed to complete RSVP for yourself.');
+        setSubmitting(false);
+        return;
       }
+
+      // 2. Submit registrations for each friend sequentially
+      for (let i = 0; i < friends.length; i++) {
+        const friend = friends[i];
+        if (!friend.name || !friend.email) continue;
+        try {
+          const friendRes = await fetch(`/api/events/${id}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: friend.name,
+              email: friend.email,
+              phone: friend.phone,
+              answers,
+              paymentAccountName: paymentAccountName || null,
+              paymentMethod: paymentMethod || null,
+              paymentTxnId: paymentTxnId || null,
+              turnstileToken
+            }),
+          });
+          const friendData = await friendRes.json();
+          if (!friendRes.ok || !friendData.success) {
+            console.warn(`Failed to register friend ${friend.name}:`, friendData.error);
+          }
+        } catch (e) {
+          console.error(`Failed to register friend ${friend.name}:`, e);
+        }
+      }
+
+      setTicket(data.registration);
     } catch (err) {
       console.error(err);
       alert('Network error. Please try again.');
@@ -408,8 +447,9 @@ export default function RSVPPage() {
       {/* Global CSS for Print Optimization & Dynamic Input Focus */}
       <style dangerouslySetInnerHTML={{ __html: `
         input:focus, select:focus, textarea:focus {
-          border-color: var(--event-highlight) !important;
-          box-shadow: 0 0 0 1px var(--event-highlight) !important;
+          border-bottom-color: var(--event-highlight) !important;
+          outline: none !important;
+          box-shadow: none !important;
         }
         @media print {
           /* Hide Navbar, Footer, Breadcrumbs, download/print buttons, and back actions */
@@ -504,7 +544,7 @@ export default function RSVPPage() {
                     <p className="text-xs text-neutral-400">Fill in your details below to secure your entry pass.</p>
                   </div>
 
-                  <form onSubmit={handleFormSubmit} className="bg-[#1c1c1f] border border-[#232329] rounded-2xl p-8 flex flex-col gap-5 shadow-sm animate-fade-in">
+                  <form onSubmit={handleFormSubmit} className="flex flex-col gap-6 animate-fade-in bg-transparent border-0 p-0 shadow-none">
                     {/* Full Name */}
                     <div className="flex flex-col gap-2">
                       <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider flex items-center gap-1.5">
@@ -516,7 +556,7 @@ export default function RSVPPage() {
                         onChange={(e) => setName(e.target.value)}
                         required
                         placeholder="Enter your full name"
-                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -531,7 +571,7 @@ export default function RSVPPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         placeholder="you@example.com"
-                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -545,7 +585,7 @@ export default function RSVPPage() {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+1 (555) 000-0000"
-                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -563,7 +603,7 @@ export default function RSVPPage() {
                               value={(answers[field.name] as string) || ''}
                               onChange={(e) => setAnswers({ ...answers, [field.name]: e.target.value })}
                               placeholder={`Enter ${field.name.toLowerCase()}`}
-                              className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
+                              className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                             />
                           </>
                         ) : (
@@ -583,6 +623,93 @@ export default function RSVPPage() {
                         )}
                       </div>
                     ))}
+
+                    {/* Friends / Additional Participants */}
+                    <div className="flex flex-col gap-4 mt-2 border-t border-[#232329] pt-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">
+                          Additional Friends ({friends.length})
+                        </span>
+                        <AntiMetalButton
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setFriends([...friends, { name: '', email: '', phone: '' }]);
+                          }}
+                          accentFrom="var(--event-highlight)"
+                          accentTo="var(--event-highlight-bg)"
+                          dotColor="#0f0f0f"
+                          className="scale-[0.85] origin-right"
+                        >
+                          Add Friend
+                        </AntiMetalButton>
+                      </div>
+
+                      {friends.map((friend, idx) => (
+                        <div key={idx} className="bg-[#141416]/50 border border-[#232329] rounded-xl p-5 flex flex-col gap-4 relative animate-fade-in shadow-inner">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newFriends = [...friends];
+                              newFriends.splice(idx, 1);
+                              setFriends(newFriends);
+                            }}
+                            className="absolute top-4 right-4 text-xs font-mono text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                          
+                          <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wide">Friend #{idx + 1} details</span>
+                          
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[9px] uppercase font-mono text-neutral-500">Full Name *</label>
+                            <input
+                              type="text"
+                              required
+                              value={friend.name}
+                              onChange={(e) => {
+                                const newFriends = [...friends];
+                                newFriends[idx].name = e.target.value;
+                                setFriends(newFriends);
+                              }}
+                              placeholder="Friend's full name"
+                              className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[9px] uppercase font-mono text-neutral-500">Email Address *</label>
+                            <input
+                              type="email"
+                              required
+                              value={friend.email}
+                              onChange={(e) => {
+                                const newFriends = [...friends];
+                                newFriends[idx].email = e.target.value;
+                                setFriends(newFriends);
+                              }}
+                              placeholder="friend@example.com"
+                              className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[9px] uppercase font-mono text-neutral-500">Phone Number (Optional)</label>
+                            <input
+                              type="tel"
+                              value={friend.phone}
+                              onChange={(e) => {
+                                const newFriends = [...friends];
+                                newFriends[idx].phone = e.target.value;
+                                setFriends(newFriends);
+                              }}
+                              placeholder="Friend's phone"
+                              className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
 
                     {/* Turnstile Widget for Free Events */}
                     {event && isEventFree(event.price) && !isLocalhost && (
@@ -656,7 +783,7 @@ export default function RSVPPage() {
                     <p className="text-xs text-neutral-400">Fill in details of the transaction you made to submit registration.</p>
                   </div>
 
-                  <form onSubmit={handleTxnSubmit} className="bg-[#1c1c1f] border border-[#232329] rounded-2xl p-8 flex flex-col gap-5 shadow-sm animate-fade-in">
+                  <form onSubmit={handleTxnSubmit} className="flex flex-col gap-6 animate-fade-in bg-transparent border-0 p-0 shadow-none">
                     
                     {/* Account Name */}
                     <div className="flex flex-col gap-2">
@@ -669,7 +796,7 @@ export default function RSVPPage() {
                         onChange={(e) => setPaymentAccountName(e.target.value)}
                         required
                         placeholder="e.g. John Doe / Bank account holder name"
-                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -681,7 +808,7 @@ export default function RSVPPage() {
                       <select
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors cursor-pointer"
+                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all cursor-pointer"
                       >
                         <option value="UPI" className="bg-[#141416]">UPI / GPay / PhonePe</option>
                         <option value="Bank Transfer" className="bg-[#141416]">Bank Transfer (IMPS/NEFT)</option>
@@ -701,7 +828,7 @@ export default function RSVPPage() {
                         onChange={(e) => setPaymentTxnId(e.target.value)}
                         required
                         placeholder="e.g. Txn-129037482, UPI Ref ID, etc."
-                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors font-mono placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all font-mono placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -732,12 +859,14 @@ export default function RSVPPage() {
 
               {/* Event Cover Image */}
               {event.coverImage && (
-                <div className="w-full relative overflow-hidden border-b border-[#232329] bg-[#0c0c0e] flex items-center justify-center p-3">
+                <div className="w-full h-44 relative overflow-hidden border-b border-[#232329]">
                   <img 
                     src={event.coverImage} 
                     alt={event.title} 
-                    className="max-w-full max-h-72 object-contain rounded-lg shadow-md" 
+                    className="w-full h-full object-cover" 
                   />
+                  {/* Ambient gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1c1c1f] via-transparent to-transparent opacity-80" />
                 </div>
               )}
               <div className="p-5 flex flex-col gap-4">

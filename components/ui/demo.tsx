@@ -1,9 +1,10 @@
-import { ShinyButton } from "@/components/ui/shiny-button";
+import { AntiMetalButton } from "@/components/ui/anti-metal-button";
 
 export default function DemoOne() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <ShinyButton onClick={() => alert("Button clicked!")}>Get unlimited access</ShinyButton>
+    <div className="flex min-h-[300px] w-full flex-col items-center justify-center gap-6">
+      {/* Default */}
+      <AntiMetalButton />
     </div>
-  )
+  );
 }
