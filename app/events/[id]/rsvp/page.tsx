@@ -307,6 +307,74 @@ export default function RSVPPage() {
     <main className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
       <Navbar />
 
+      {/* Global CSS for Print Optimization */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          /* Hide Navbar, Footer, Breadcrumbs, download/print buttons, and back actions */
+          nav, footer, .no-print, button, a {
+            display: none !important;
+          }
+          
+          /* Set body print background */
+          body, html, main, div {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            box-shadow: none !important;
+          }
+          
+          /* Target printable ticket container and make it look clean on paper */
+          .printable-ticket-card {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            border: 2px solid #000000 !important;
+            color: #000000 !important;
+            box-shadow: none !important;
+            margin: 20px auto !important;
+            width: 100% !important;
+            max-width: 440px !important;
+            border-radius: 16px !important;
+            padding-bottom: 24px !important;
+            page-break-inside: avoid !important;
+          }
+          
+          /* Override texts to dark */
+          .printable-ticket-card * {
+            color: #000000 !important;
+          }
+          
+          /* Make details labels medium gray */
+          .printable-ticket-card .text-neutral-400,
+          .printable-ticket-card .text-neutral-500 {
+            color: #4b5563 !important;
+          }
+          
+          /* Ensure dashed and regular borders print cleanly in dark color */
+          .printable-ticket-card .border-t,
+          .printable-ticket-card .border-x,
+          .printable-ticket-card .border-dashed {
+            border-color: #000000 !important;
+          }
+          
+          /* Hide the bottom scalloped edges to look clean on flat paper */
+          .printable-scallops {
+            display: none !important;
+          }
+          
+          /* Hide notch overlays, but keep the border line */
+          .printable-notches div.absolute {
+            display: none !important;
+          }
+          
+          /* Make background color of details cards light grey */
+          .printable-ticket-card div.bg-\\[\\#222226\\] {
+            background-color: #f3f4f6 !important;
+            background: #f3f4f6 !important;
+            border: 1px solid #d1d5db !important;
+          }
+        }
+      `}} />
+
       <div className="w-full max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 flex-1 flex flex-col gap-6">
         
         {/* Breadcrumb Navigation */}
@@ -586,7 +654,7 @@ export default function RSVPPage() {
           <div className="max-w-md w-full mx-auto flex flex-col items-center gap-6 py-4 animate-fade-in">
             
             {/* Ticket Card Container */}
-            <div className="w-full bg-[#1c1c1f] border-t border-x border-[#2e2e34] rounded-t-2xl shadow-2xl relative pb-6">
+            <div className="w-full bg-[#1c1c1f] border-t border-x border-[#2e2e34] rounded-t-2xl shadow-2xl relative pb-6 printable-ticket-card">
               
               {/* Celebration Top Header */}
               {ticket.status === 'PENDING' ? (
@@ -606,7 +674,7 @@ export default function RSVPPage() {
               )}
 
               {/* Dashed Separator Line with custom cutout notches */}
-              <div className="relative w-full my-2">
+              <div className="relative w-full my-2 printable-notches">
                 {/* Left Notch */}
                 <div className="absolute -left-[1.5px] -top-3 w-[3px] h-6 bg-[#161618] z-10" />
                 <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full bg-[#161618] border border-[#2e2e34] z-20" />
@@ -733,7 +801,7 @@ export default function RSVPPage() {
               </div>
 
               {/* Scalloped Bottom Edge circles */}
-              <div className="absolute left-0 right-0 -bottom-2.5 flex justify-between px-2.5 z-10 pointer-events-none">
+              <div className="absolute left-0 right-0 -bottom-2.5 flex justify-between px-2.5 z-10 pointer-events-none printable-scallops">
                 {[...Array(12)].map((_, i) => (
                   <div key={i} className="relative w-5 h-5 flex-shrink-0">
                     <div className="absolute inset-0 rounded-full bg-[#161618] border border-[#2e2e34]" />
@@ -744,22 +812,31 @@ export default function RSVPPage() {
 
             </div>
 
-            {/* Download PDF button */}
+            {/* Download & Print buttons */}
             {ticket.status !== 'PENDING' && (
-              <button
-                onClick={downloadPDF}
-                disabled={downloading}
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-800 text-white font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-indigo-500/20 mb-2"
-                style={{ color: 'white' }}
-              >
-                <span>{downloading ? 'Generating PDF...' : 'Download Ticket (PDF)'}</span>
-              </button>
+              <div className="w-full flex flex-col sm:flex-row gap-2 mb-2 no-print">
+                <button
+                  onClick={downloadPDF}
+                  disabled={downloading}
+                  className="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-800 text-white font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-indigo-500/20"
+                  style={{ color: 'white' }}
+                >
+                  <span>{downloading ? 'Generating PDF...' : 'Download (PDF)'}</span>
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-md transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-emerald-500/20"
+                  style={{ color: 'white' }}
+                >
+                  <span>Print Ticket</span>
+                </button>
+              </div>
             )}
 
             {/* Back action */}
             <a
               href={`/events/${event.id}`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] border border-[#2e2e34] rounded-md text-xs text-neutral-300 hover:text-white hover:bg-[#2c2c32] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] border border-[#2e2e34] rounded-md text-xs text-neutral-300 hover:text-white hover:bg-[#2c2c32] transition-colors no-print"
             >
               <GoArrowLeft className="w-3.5 h-3.5" /> Back to Event Details
             </a>
