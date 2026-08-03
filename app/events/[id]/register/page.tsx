@@ -850,14 +850,14 @@ export default function RegisterPage() {
             <div className="lg:col-span-5 bg-[#1c1c1f] border border-[#232329] rounded-2xl overflow-hidden shadow-sm flex flex-col">
               {/* Event Cover Image at the absolute top */}
               {event.coverImage && (
-                <div className="w-full h-44 relative overflow-hidden border-b border-[#232329]">
+                <div className="w-full aspect-square relative overflow-hidden border-b border-[#232329] bg-[#121214]">
                   <img 
                     src={event.coverImage} 
                     alt={event.title} 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-full object-contain select-none" 
                   />
-                  {/* Ambient gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1c1c1f] via-transparent to-transparent opacity-80" />
+                  {/* Ambient bottom gradient overlay */}
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#1c1c1f] to-transparent opacity-70 pointer-events-none" />
                 </div>
               )}
               <div className="p-5 flex flex-col gap-4">
