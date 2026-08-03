@@ -262,7 +262,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
             </div>
 
             {/* Event Description Section */}
-            <div className="flex flex-col gap-3.5 pt-6 border-t border-white/5">
+            <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-4 shadow-[0_12px_45px_rgba(0,0,0,0.65)]">
               <h3 className={`text-xs uppercase font-mono tracking-wider ${highlightColor}`}>About the Event</h3>
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">
@@ -290,11 +290,11 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 const parsedSpeakers = JSON.parse(event.speakers) as { name: string; role: string; image?: string | null }[];
                 if (parsedSpeakers.length === 0) return null;
                 return (
-                  <div className="flex flex-col gap-4 pt-6 border-t border-white/5 animate-fade-in">
+                  <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-4 shadow-[0_12px_45px_rgba(0,0,0,0.65)] animate-fade-in">
                     <h3 className={`text-xs uppercase font-mono tracking-wider ${highlightColor}`}>Speakers</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {parsedSpeakers.map((sp, idx) => (
-                        <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 flex items-center gap-3">
+                        <div key={idx} className="bg-[#18181b] border border-[#232329] rounded-xl p-3.5 flex items-center gap-3">
                           {sp.image ? (
                             <img
                               src={sp.image}
@@ -326,13 +326,16 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
           <div className="lg:col-span-4 flex flex-col gap-4">
 
             {/* Registration Card Console */}
-            <div className="bg-black border border-white/5 rounded-2xl p-5 flex flex-col gap-4 shadow-2xl">
+            <div className="bg-[#131315] border border-[#232329] rounded-2xl p-5 flex flex-col gap-4 shadow-[0_12px_45px_rgba(0,0,0,0.65)] relative overflow-hidden">
+              {/* Glowing accent border line */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#ff6b6b] to-transparent" />
+              
               <div className="flex items-end justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Admission Price</span>
                   <span className={`text-3xl font-normal leading-none ${highlightColor}`}>{event.price || 'Free'}</span>
                 </div>
-                <span className="text-[9px] font-mono uppercase tracking-wider bg-white/[0.04] border border-white/5 text-neutral-400 px-2.5 py-1 rounded-md">
+                <span className="text-[9px] font-mono uppercase tracking-wider bg-[#1c1c21] border border-[#232329] text-neutral-400 px-2.5 py-1 rounded-md">
                   {event.visibility || 'Public'}
                 </span>
               </div>
@@ -340,7 +343,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
               <div className="flex flex-col gap-3">
                 {registered ? (
                   <div className="flex flex-col gap-2">
-                    <div className="w-full py-3 bg-white/[0.04] border border-white/5 text-neutral-200 text-xs font-medium rounded-xl flex items-center justify-center gap-2">
+                    <div className="w-full py-3 bg-[#1c1c21] border border-[#232329] text-neutral-200 text-xs font-medium rounded-xl flex items-center justify-center gap-2">
                       <GoCheck className="w-3.5 h-3.5 text-neutral-400" />
                       <span>You're Registered</span>
                     </div>
@@ -376,12 +379,12 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
               </div>
             </div>
 
-            {/* Event Meta Info List */}
-            <div className="flex flex-col gap-6 p-4">
+            {/* Event Meta Info Card */}
+            <div className="bg-[#131315] border border-[#232329] rounded-2xl p-5 flex flex-col gap-5 shadow-[0_12px_45px_rgba(0,0,0,0.65)]">
 
               {/* Date & Time row */}
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-[#ff6b6b]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-8.5 h-8.5 rounded-xl bg-neutral-950/40 border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner">
                   <GoCalendar className={`w-4 h-4 ${highlightColor}`} />
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -395,7 +398,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
               {/* Location row */}
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-[#ff6b6b]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-8.5 h-8.5 rounded-xl bg-neutral-950/40 border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner">
                   <GoLocation className={`w-4 h-4 ${highlightColor}`} />
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -406,7 +409,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
               {/* Organizer row */}
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-[#ff6b6b]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-8.5 h-8.5 rounded-xl bg-neutral-950/40 border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner">
                   <GoPerson className={`w-4 h-4 ${highlightColor}`} />
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -417,7 +420,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
               {/* Capacity row */}
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-[#ff6b6b]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-8.5 h-8.5 rounded-xl bg-neutral-950/40 border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner">
                   <GoPeople className={`w-4 h-4 ${highlightColor}`} />
                 </div>
                 <div className="flex flex-col min-w-0">
