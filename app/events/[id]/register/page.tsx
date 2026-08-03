@@ -556,7 +556,7 @@ export default function RegisterPage() {
                         onChange={(e) => setName(e.target.value)}
                         required
                         placeholder="Enter your full name"
-                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-neutral-700 focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -571,7 +571,7 @@ export default function RegisterPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         placeholder="you@example.com"
-                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-neutral-700 focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -585,7 +585,7 @@ export default function RegisterPage() {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+1 (555) 000-0000"
-                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-neutral-700 focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -603,7 +603,7 @@ export default function RegisterPage() {
                               value={(answers[field.name] as string) || ''}
                               onChange={(e) => setAnswers({ ...answers, [field.name]: e.target.value })}
                               placeholder={`Enter ${field.name.toLowerCase()}`}
-                              className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
+                              className="w-full bg-transparent border-b border-neutral-700 focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                             />
                           </>
                         ) : (
@@ -625,7 +625,7 @@ export default function RegisterPage() {
                     ))}
 
                     {/* Friends / Additional Participants */}
-                    <div className="flex flex-col gap-4 mt-2 border-t border-[#232329] pt-4">
+                    <div className="flex flex-col gap-4 mt-2 border-t border-neutral-700 pt-4">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">
                           Additional Friends ({friends.length})
@@ -636,7 +636,7 @@ export default function RegisterPage() {
                             e.preventDefault();
                             setFriends([...friends, { name: '', email: '', phone: '' }]);
                           }}
-                          className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer py-1.5 px-3 rounded-lg border border-[#232329] bg-[#141416]/50 hover:bg-[#1c1c1f] transition-all hover:border-neutral-500"
+                          className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer py-1.5 px-3 rounded-lg border border-neutral-600 bg-[#141416]/50 hover:bg-[#1c1c1f] transition-all hover:border-neutral-500"
                           style={{ color: 'var(--event-highlight)' }}
                         >
                           <GoPlus className="w-3.5 h-3.5" /> Add Friend
@@ -644,7 +644,7 @@ export default function RegisterPage() {
                       </div>
 
                       {friends.map((friend, idx) => (
-                        <div key={idx} className="bg-[#141416]/50 border border-[#232329] rounded-xl p-5 flex flex-col gap-4 relative animate-fade-in shadow-inner">
+                        <div key={idx} className="bg-[#141416]/50 border border-neutral-600 rounded-xl p-5 flex flex-col gap-4 relative animate-fade-in shadow-inner">
                           <button
                             type="button"
                             onClick={() => {
@@ -672,7 +672,7 @@ export default function RegisterPage() {
                                 setFriends(newFriends);
                               }}
                               placeholder="Friend's full name"
-                              className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
+                              className="w-full bg-transparent border-b border-neutral-600 focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
                             />
                           </div>
 
@@ -688,7 +688,7 @@ export default function RegisterPage() {
                                 setFriends(newFriends);
                               }}
                               placeholder="friend@example.com"
-                              className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
+                              className="w-full bg-transparent border-b border-neutral-600 focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
                             />
                           </div>
 
@@ -703,7 +703,7 @@ export default function RegisterPage() {
                                 setFriends(newFriends);
                               }}
                               placeholder="Friend's phone"
-                              className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
+                              className="w-full bg-transparent border-b border-neutral-600 focus:border-[var(--event-highlight)] rounded-none px-0 py-2 text-xs text-white outline-none transition-all placeholder:text-neutral-600"
                             />
                           </div>
                         </div>
@@ -795,7 +795,7 @@ export default function RegisterPage() {
                         onChange={(e) => setPaymentAccountName(e.target.value)}
                         required
                         placeholder="e.g. John Doe / Bank account holder name"
-                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-neutral-700 focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -807,7 +807,7 @@ export default function RegisterPage() {
                       <select
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all cursor-pointer"
+                        className="w-full bg-transparent border-b border-neutral-700 focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all cursor-pointer"
                       >
                         <option value="UPI" className="bg-[#141416]">UPI / GPay / PhonePe</option>
                         <option value="Bank Transfer" className="bg-[#141416]">Bank Transfer (IMPS/NEFT)</option>
@@ -827,7 +827,7 @@ export default function RegisterPage() {
                         onChange={(e) => setPaymentTxnId(e.target.value)}
                         required
                         placeholder="e.g. Txn-129037482, UPI Ref ID, etc."
-                        className="w-full bg-transparent border-b border-[#232329] focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all font-mono placeholder:text-neutral-600"
+                        className="w-full bg-transparent border-b border-neutral-700 focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all font-mono placeholder:text-neutral-600"
                       />
                     </div>
 
