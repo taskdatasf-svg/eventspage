@@ -154,6 +154,7 @@ export default function RegisterPage() {
   const [paymentAccountName, setPaymentAccountName] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [paymentTxnId, setPaymentTxnId] = useState('');
+  const [revealQr, setRevealQr] = useState(false);
 
   // Success states
   const [ticket, setTicket] = useState<any>(null);
@@ -235,6 +236,22 @@ export default function RegisterPage() {
       return;
     }
 
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    // Validate phone if provided
+    if (phone) {
+      const phoneRegex = /^\+?[0-9\s\-()]{7,15}$/;
+      if (!phoneRegex.test(phone)) {
+        alert('Please enter a valid phone number (e.g. 10-digit number or international format).');
+        return;
+      }
+    }
+
     // Check required dynamic fields
     for (const field of parsedCustomFields) {
       if (field.required && !answers[field.name]) {
@@ -250,6 +267,7 @@ export default function RegisterPage() {
       }
       submitRegistration();
     } else {
+      setRevealQr(false); // Reset reveal state for next screen
       setRsvpStep('payment');
       setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
     }
@@ -323,6 +341,25 @@ export default function RegisterPage() {
       alert('Please fill out all verification details.');
       return;
     }
+
+    const accountNameRegex = /^[a-zA-Z0-9\s.\-]{3,50}$/;
+    if (!accountNameRegex.test(paymentAccountName)) {
+      alert('Payment Account Name must be 3-50 characters, containing only letters, numbers, spaces, dots, or hyphens.');
+      return;
+    }
+
+    const txnIdRegex = /^(\d{12}|[a-zA-Z0-9]{8,24})$/;
+    if (!txnIdRegex.test(paymentTxnId)) {
+      alert('Transaction ID must be a valid 12-digit UPI reference number or an 8-24 character alphanumeric transaction ID.');
+      return;
+    }
+
+    const validMethods = ['UPI', 'GPAY', 'PHONEPE', 'PAYTM', 'OTHER'];
+    if (!validMethods.includes(paymentMethod.toUpperCase())) {
+      alert('Please select a valid payment method.');
+      return;
+    }
+
     if (!turnstileToken) {
       alert('Please complete the security verification.');
       return;
@@ -674,29 +711,53 @@ export default function RegisterPage() {
 
                   <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col items-center gap-6 shadow-sm animate-fade-in text-center">
                     
-                    {/* Amount badge */}
-                    <div className="bg-[#222226] border border-[#2e2e34] px-5 py-2.5 rounded-xl flex flex-col gap-0.5 max-w-[200px] w-full">
-                      <span className="text-[10px] uppercase font-mono text-neutral-500">Amount Due</span>
-                      <span className="text-lg font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price}</span>
-                    </div>
+                    {revealQr ? (
+                      /* ONLY THE QR IS SHOWN */
+                      <div className="flex flex-col items-center gap-4 w-full">
+                        <div className="p-4 bg-white rounded-xl shadow-xl flex items-center justify-center select-none animate-fade-in">
+                          <QRCodeSVG
+                            value={qrPaymentValue}
+                            size={180}
+                            bgColor="#ffffff"
+                            fgColor="#000000"
+                            level="Q"
+                            includeMargin={false}
+                          />
+                        </div>
+                        <button 
+                          onClick={() => setRevealQr(false)} 
+                          className="text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors font-mono cursor-pointer"
+                        >
+                          Hide QR Code
+                        </button>
+                      </div>
+                    ) : (
+                      /* BEFORE REVEAL (SHOWS PLACEHOLDER & DETAILS) */
+                      <>
+                        {/* Amount badge */}
+                        <div className="bg-[#222226] border border-[#2e2e34] px-5 py-2.5 rounded-xl flex flex-col gap-0.5 max-w-[200px] w-full">
+                          <span className="text-[10px] uppercase font-mono text-neutral-500">Amount Due</span>
+                          <span className="text-lg font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price}</span>
+                        </div>
 
-                    {/* Styled QR Code */}
-                    <div className="p-4 bg-white rounded-xl shadow-xl flex items-center justify-center select-none">
-                      <QRCodeSVG
-                        value={qrPaymentValue}
-                        size={160}
-                        bgColor="#ffffff"
-                        fgColor="#000000"
-                        level="Q"
-                        includeMargin={false}
-                      />
-                    </div>
+                        {/* Blurred QR Placeholder */}
+                        <div className="relative w-[192px] h-[192px] bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden flex flex-col items-center justify-center gap-2 group shadow-inner">
+                          <div className="absolute inset-0 bg-[radial-gradient(#ffffff05_1px,transparent_1px)] [background-size:16px_16px] blur-[1px]" />
+                          <button
+                            onClick={() => setRevealQr(true)}
+                            className="z-10 px-4 py-2 bg-[#222226] border border-neutral-700 text-xs font-semibold text-white rounded-lg hover:bg-neutral-800 hover:border-neutral-600 active:scale-95 transition-all shadow-md cursor-pointer"
+                          >
+                            Reveal QR Code
+                          </button>
+                        </div>
 
-                    <div className="flex flex-col gap-1 max-w-sm">
-                      <p className="text-xs text-neutral-300 font-semibold">Scan QR using GPay, PhonePe, UPI or Bank App</p>
-                      <p className="text-xs text-neutral-400 font-mono">UPI ID: <strong className="text-white select-all">6302933597@hdfc</strong></p>
-                      <p className="text-[10px] text-neutral-500 font-mono mt-1">Once scanning and paying is done, click the button below to add payment transaction details for host approval.</p>
-                    </div>
+                        <div className="flex flex-col gap-1 max-w-sm">
+                          <p className="text-xs text-neutral-300 font-semibold">Scan QR using GPay, PhonePe, UPI or Bank App</p>
+                          <p className="text-xs text-neutral-400 font-mono">UPI ID: <strong className="text-white select-all">6302933597@hdfc</strong></p>
+                          <p className="text-[10px] text-neutral-500 font-mono mt-1">Once scanning and paying is done, click the button below to add payment transaction details for host approval.</p>
+                        </div>
+                      </>
+                    )}
 
                     <ShinyButton
                       onClick={() => setRsvpStep('confirm-txn')}
