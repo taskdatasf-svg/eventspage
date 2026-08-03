@@ -805,8 +805,8 @@ export default function RegisterPage() {
                         {/* Official Payment Logos (GPay, PhonePe, UPI) */}
                         <div className="flex items-center gap-1.5 select-none">
                           {/* GPay Badge */}
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 border border-white/15 text-[10px] font-bold text-white font-sans shadow-sm">
-                            <svg className="w-3 h-3" viewBox="0 0 24 24">
+                          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/10 border border-white/15 text-[11px] font-bold text-white font-sans shadow-sm">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
@@ -815,12 +815,16 @@ export default function RegisterPage() {
                             GPay
                           </span>
                           {/* PhonePe Badge */}
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#5f259f]/40 border border-[#5f259f]/60 text-[10px] font-bold text-purple-200 font-sans shadow-sm">
-                            <span className="w-2.5 h-2.5 rounded-full bg-[#5f259f] text-white text-[8px] flex items-center justify-center font-bold">पे</span>
+                          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/10 border border-white/15 text-[11px] font-bold text-white font-sans shadow-sm">
+                            <span className="w-3.5 h-3.5 rounded-full bg-[#5f259f] text-white text-[9px] flex items-center justify-center font-bold flex-shrink-0">पे</span>
                             PhonePe
                           </span>
                           {/* UPI Badge */}
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-bold text-emerald-400 font-mono shadow-sm">
+                          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/10 border border-white/15 text-[11px] font-bold text-white font-sans shadow-sm">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 32 32">
+                              <path fill="#007934" d="M18.8 4L13.2 14.8H18L13.2 24L23.6 12.4H18.8L23.6 4H18.8Z" />
+                              <path fill="#E05E00" d="M13.2 4L7.6 14.8H12.4L7.6 24L18 12.4H13.2L18 4H13.2Z" />
+                            </svg>
                             UPI
                           </span>
                         </div>
