@@ -109,13 +109,30 @@ export async function POST(request: Request) {
     console.log('\n\x1b[43m\x1b[30m%s\x1b[0m', ` [SANDBOX MODE] VERIFICATION CODE FOR ${email}: ${code} `);
     console.log(`Use this code to authorize your action if Resend sandbox limits prevent delivery.\n`);
 
+    // Fetch logo for inline CID attachment
+    const attachments: { filename: string; content: Buffer; contentId: string }[] = [];
+    try {
+      const logoRes = await fetch('https://ik.imagekit.io/dypkhqxip/eventssflo');
+      if (logoRes.ok) {
+        const logoBuf = await logoRes.arrayBuffer();
+        attachments.push({
+          filename: 'logo.png',
+          content: Buffer.from(logoBuf),
+          contentId: 'sf-logo',
+        });
+      }
+    } catch (e) {
+      console.error('Failed to fetch logo for OTP email:', e);
+    }
+
     try {
       await resend.emails.send({
         from: `Student Forge <${resendFromEmail}>`,
         to: email,
         subject: 'Confirm Your Email - Student Forge',
         text: `Your verification code is: ${code}`,
-        html: mailHtml
+        html: mailHtml.replace(/https:\/\/ik\.imagekit\.io\/dypkhqxip\/eventssflo/g, 'cid:sf-logo'),
+        attachments: attachments.length > 0 ? attachments : undefined,
       });
     } catch (mailError: any) {
       console.warn('Resend mail delivery failed (proceeding using terminal logs):', mailError.message);

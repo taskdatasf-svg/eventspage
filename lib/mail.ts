@@ -479,7 +479,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       attachments: attachments.map(att => ({
         filename: att.filename,
         content: att.content,
-        ...(att.cid ? { cid: att.cid } : {}),
+        ...(att.cid ? { contentId: att.cid } : {}),
       })),
     });
     console.log(`Email sent successfully to ${to} (${type})`);
