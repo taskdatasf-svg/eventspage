@@ -422,62 +422,90 @@ export default function DashboardPage() {
 
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="hidden sm:flex w-56 flex-shrink-0 bg-[#1a1a1d] border-r border-[#2e2e34] flex-col py-6 px-3 gap-1 sticky top-[57px] h-[calc(100vh-57px)]">
-          <p className="text-[9px] uppercase tracking-widest text-neutral-500 font-mono px-3 mb-2">Navigation</p>
+        <aside className="hidden sm:flex w-64 flex-shrink-0 bg-[#1a1a1d] border-r border-[#2e2e34] flex-col py-6 px-4 gap-1.5 sticky top-[57px] h-[calc(100vh-57px)]">
+          <p className="text-[9px] uppercase tracking-widest text-neutral-500 font-mono px-3 mb-3">Navigation</p>
           
           <button
             onClick={() => setActiveTab('my-events')}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium cursor-pointer text-left ${
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer text-left transition-all active:scale-[0.98] ${
               activeTab === 'my-events'
-                ? 'bg-[#222226] text-white border border-[#333339]'
-                : 'text-neutral-400 hover:text-white hover:bg-[#222226]'
+                ? 'bg-white/[0.06] text-white border border-[#333339]'
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
-            <GoCalendar className="w-4 h-4 flex-shrink-0" />My Events
+            <GoCalendar className="w-4.5 h-4.5 flex-shrink-0 text-[#818cf8]" />
+            <span>My Events</span>
           </button>
 
           <button
             onClick={() => setActiveTab('my-tickets')}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium cursor-pointer text-left ${
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer text-left transition-all active:scale-[0.98] ${
               activeTab === 'my-tickets'
-                ? 'bg-[#222226] text-white border border-[#333339]'
-                : 'text-neutral-400 hover:text-white hover:bg-[#222226]'
+                ? 'bg-white/[0.06] text-white border border-[#333339]'
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
-            <GoTag className="w-4 h-4 flex-shrink-0" />My Tickets
+            <GoTag className="w-4.5 h-4.5 flex-shrink-0 text-[#f472b6]" />
+            <span>My Tickets</span>
           </button>
 
           <button
             onClick={() => setActiveTab('verify')}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium cursor-pointer text-left ${
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer text-left transition-all active:scale-[0.98] ${
               activeTab === 'verify'
-                ? 'bg-[#222226] text-white border border-[#333339]'
-                : 'text-neutral-400 hover:text-white hover:bg-[#222226]'
+                ? 'bg-white/[0.06] text-white border border-[#333339]'
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
-            <GoCheck className="w-4 h-4 flex-shrink-0" />Verify Ticket Pass
+            <GoShield className="w-4.5 h-4.5 flex-shrink-0 text-[#34d399]" />
+            <span>Verify Ticket Pass</span>
           </button>
 
-          <a
-            href="/dashboard/scanner"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#222226] transition-all"
-          >
-            <GoDeviceCameraVideo className="w-4 h-4 flex-shrink-0 text-[#ffec27]" />Live Ticket Scanner
-          </a>
-
-          <div className="mt-auto pt-6 border-t border-[#2e2e34] flex flex-col gap-1">
-            <a href="/create-event" className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-neutral-400 hover:text-white hover:bg-[#222226] transition-all">
-              <GoPlus className="w-4 h-4" />Create New Event
-            </a>
-            <button onClick={handleSignOut} className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-rose-400 hover:bg-[#25252a] transition-all w-full cursor-pointer">
-              <GoSignOut className="w-4 h-4" />Sign Out
-            </button>
+          <div className="mt-auto pt-6 border-t border-[#2e2e34] flex flex-col items-center">
+            <span className="text-[10px] font-mono text-neutral-500 tracking-wider">V.0.01</span>
           </div>
         </aside>
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto px-4 sm:px-8 py-8">
           <div className="max-w-4xl mx-auto flex flex-col gap-6">
+
+            {/* Mobile Tab Navigation (sm:hidden) */}
+            <div className="flex sm:hidden items-center bg-[#1a1a1d] border border-[#2e2e34] p-1 rounded-2xl gap-0.5">
+              <button
+                onClick={() => setActiveTab('my-events')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-[0.97] ${
+                  activeTab === 'my-events'
+                    ? 'bg-white/[0.06] text-white border border-[#333339]'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <GoCalendar className="w-3.5 h-3.5 text-[#818cf8]" />
+                <span>Events</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('my-tickets')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-[0.97] ${
+                  activeTab === 'my-tickets'
+                    ? 'bg-white/[0.06] text-white border border-[#333339]'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <GoTag className="w-3.5 h-3.5 text-[#f472b6]" />
+                <span>Tickets</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('verify')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-[0.97] ${
+                  activeTab === 'verify'
+                    ? 'bg-white/[0.06] text-white border border-[#333339]'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <GoShield className="w-3.5 h-3.5 text-[#34d399]" />
+                <span>Verify</span>
+              </button>
+            </div>
 
             {activeTab === 'my-events' && (
               <>
