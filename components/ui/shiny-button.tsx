@@ -54,6 +54,10 @@ export function ShinyButton({ children, onClick, className = "" }: ShinyButtonPr
           overflow: hidden;
           cursor: pointer;
           outline-offset: 4px;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           padding: 0.875rem 1.75rem;
           font-family: "Inter", sans-serif;
           font-size: 0.875rem;
