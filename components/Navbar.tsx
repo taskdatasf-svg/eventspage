@@ -7,6 +7,7 @@ export interface UserSession {
   id: string;
   name: string;
   email: string;
+  profileImage?: string | null;
 }
 
 export default function Navbar() {
@@ -23,7 +24,21 @@ export default function Navbar() {
     try {
       const raw = localStorage.getItem('student_forge_user');
       if (raw) {
-        setUser(JSON.parse(raw));
+        const parsed = JSON.parse(raw);
+        setUser(parsed);
+        // Fetch latest profile photo from database to keep in sync
+        if (parsed.email) {
+          fetch(`/api/user/profile?email=${encodeURIComponent(parsed.email)}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.success && data.profileImage) {
+                const updated = { ...parsed, profileImage: data.profileImage };
+                setUser(updated);
+                localStorage.setItem('student_forge_user', JSON.stringify(updated));
+              }
+            })
+            .catch(err => console.error('Navbar profile sync error:', err));
+        }
       }
     } catch (e) {
       console.error('Error reading user session:', e);
@@ -174,10 +189,14 @@ export default function Navbar() {
                   setIsProfileOpen(!isProfileOpen);
                   setIsBellOpen(false);
                 }}
-                className="w-8.5 h-8.5 rounded-full bg-[#222226] text-white border border-[#333339] hover:bg-[#2c2c32] font-semibold text-xs flex items-center justify-center shadow-md cursor-pointer transition-all hover:scale-105"
+                className="w-8.5 h-8.5 rounded-full bg-[#222226] text-white border border-[#333339] hover:bg-[#2c2c32] flex items-center justify-center shadow-md cursor-pointer transition-all hover:scale-105 overflow-hidden"
                 title={user.name || user.email}
               >
-                <span>{getUserInitials(user.name || user.email)}</span>
+                {user.profileImage ? (
+                  <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.email)}`} alt="Avatar" className="w-full h-full object-cover" />
+                )}
               </button>
             ) : (
               /* Signed Out Circle Profile Button navigating to /auth */
@@ -196,8 +215,12 @@ export default function Navbar() {
                 
                 {/* Account Details Header */}
                 <div className="p-3 bg-[#1e1e24] rounded-xl flex items-center gap-3 border border-[#2e2e34] mb-2">
-                  <div className="w-9 h-9 rounded-full bg-[linear-gradient(135deg,#6366f1_0%,#4f46e5_100%)] text-white font-bold text-xs flex items-center justify-center border border-white/10 shadow-[0_2px_8px_rgba(79,70,229,0.3)]">
-                    <span>{getUserInitials(user.name || user.email)}</span>
+                  <div className="w-9 h-9 rounded-full overflow-hidden border border-white/10 shadow-[0_2px_8px_rgba(79,70,229,0.3)] bg-[#2e2e34] flex items-center justify-center flex-shrink-0">
+                    {user.profileImage ? (
+                      <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.email)}`} alt="Avatar" className="w-full h-full object-cover" />
+                    )}
                   </div>
                   <div className="flex flex-col truncate">
                     <span className="text-xs font-semibold text-white truncate">{user.name || 'Student Forge User'}</span>

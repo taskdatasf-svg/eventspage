@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, profileImage: user.profileImage },
     });
   } catch (error) {
     console.error('Login error:', error);

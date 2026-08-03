@@ -7,12 +7,12 @@ import {
   GoTrash, GoPencil, GoCheck, GoX,
   GoChevronDown, GoChevronUp, GoSignOut,
   GoEye, GoPlus, GoArrowLeft, GoShield, GoTag, GoDeviceCameraVideo,
-  GoClock
+  GoClock, GoPerson
 } from 'react-icons/go';
 import { EventData } from '@/lib/eventsStore';
 import { QRCodeSVG } from 'qrcode.react';
 
-interface UserSession { id: string; name: string; email: string; }
+interface UserSession { id: string; name: string; email: string; profileImage?: string | null; }
 interface RegUser {
   id?: string;
   name: string;
@@ -85,7 +85,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserSession | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [activeTab, setActiveTab] = useState<'my-events' | 'my-tickets' | 'verify'>('my-events');
+  const [activeTab, setActiveTab] = useState<'my-events' | 'my-tickets' | 'verify' | 'profile'>('my-events');
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState<Record<string, RegUser[]>>({});
@@ -117,6 +117,10 @@ export default function DashboardPage() {
   const [editNewSpeakerRole, setEditNewSpeakerRole] = useState('');
   const [editNewSpeakerImage, setEditNewSpeakerImage] = useState<string | null>(null);
   const [isDraggingEditSpeaker, setIsDraggingEditSpeaker] = useState(false);
+
+  // Profile photo states
+  const [profileDragActive, setProfileDragActive] = useState(false);
+  const [profileUploading, setProfileUploading] = useState(false);
 
   const [verifyCode, setVerifyCode] = useState('');
   const [verifiedReg, setVerifiedReg] = useState<RegUser | null>(null);
@@ -153,7 +157,21 @@ export default function DashboardPage() {
     try {
       const raw = localStorage.getItem('student_forge_user');
       if (raw) { 
-        setUser(JSON.parse(raw)); 
+        const parsed = JSON.parse(raw);
+        setUser(parsed); 
+        // Fetch latest profile photo from database to keep in sync
+        if (parsed.email) {
+          fetch(`/api/user/profile?email=${encodeURIComponent(parsed.email)}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.success && data.profileImage) {
+                const updated = { ...parsed, profileImage: data.profileImage };
+                setUser(updated);
+                localStorage.setItem('student_forge_user', JSON.stringify(updated));
+              }
+            })
+            .catch(err => console.error('Dashboard user profile sync error:', err));
+        }
       }
       else { router.replace('/auth'); }
     } catch { router.replace('/auth'); }
@@ -221,6 +239,64 @@ export default function DashboardPage() {
   }, [user, activeTab]);
 
   const handleSignOut = () => { localStorage.removeItem('student_forge_user'); router.push('/'); };
+
+  const handleProfileImageFile = async (file: File) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be smaller than 5MB.');
+      return;
+    }
+    setProfileUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target?.result as string;
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user?.email, profileImage: base64 }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          const updated = { ...user!, profileImage: base64 };
+          setUser(updated);
+          localStorage.setItem('student_forge_user', JSON.stringify(updated));
+        }
+      } catch (err) {
+        console.error('Profile upload error:', err);
+      } finally {
+        setProfileUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleProfileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setProfileDragActive(false);
+    if (e.dataTransfer.files?.[0]) {
+      handleProfileImageFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleProfileRemove = async () => {
+    if (!user?.email) return;
+    setProfileUploading(true);
+    try {
+      await fetch('/api/user/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, profileImage: null }),
+      });
+      const updated = { ...user, profileImage: null };
+      setUser(updated);
+      localStorage.setItem('student_forge_user', JSON.stringify(updated));
+    } catch (err) {
+      console.error('Profile remove error:', err);
+    } finally {
+      setProfileUploading(false);
+    }
+  };
 
   const handleDelete = async (id: string) => {
     await fetch(`/api/events/${id}`, { method: 'DELETE' });
@@ -401,13 +477,13 @@ export default function DashboardPage() {
           <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest hidden sm:block">Dashboard</span>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Avatar (Initials) */}
-          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full bg-[linear-gradient(135deg,#6366f1_0%,#4f46e5_100%)] text-white shadow-[0_2px_8px_rgba(79,70,229,0.2)] border border-white/10 flex items-center justify-center text-xs font-bold select-none font-sans">
-            {user.name ? (
-              user.name.split(' ').length >= 2
-                ? (user.name.split(' ')[0][0] + user.name.split(' ')[1][0]).toUpperCase()
-                : user.name.substring(0, 2).toUpperCase()
-            ) : 'U'}
+          {/* Avatar (Photo / Dicebear) */}
+          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full border border-white/10 flex items-center justify-center overflow-hidden shadow-[0_2px_8px_rgba(79,70,229,0.2)] bg-[#222226]">
+            {user.profileImage ? (
+              <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+            ) : (
+              <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.email)}`} alt="Avatar" className="w-full h-full object-cover" />
+            )}
           </div>
           {/* Sign Out Button */}
           <button 
@@ -462,6 +538,18 @@ export default function DashboardPage() {
             <span>Verify Ticket Pass</span>
           </button>
 
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer text-left transition-all active:scale-[0.98] ${
+              activeTab === 'profile'
+                ? 'bg-white/[0.06] text-white border border-[#333339]'
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
+            }`}
+          >
+            <GoPerson className="w-4.5 h-4.5 flex-shrink-0 text-[#f59e0b]" />
+            <span>Profile Settings</span>
+          </button>
+
           <div className="mt-auto pt-6 border-t border-[#2e2e34] flex flex-col items-center">
             <span className="text-[10px] font-mono text-neutral-500 tracking-wider">V.0.01</span>
           </div>
@@ -475,36 +563,47 @@ export default function DashboardPage() {
             <div className="flex sm:hidden items-center bg-[#1a1a1d] border border-[#2e2e34] p-1 rounded-2xl gap-0.5">
               <button
                 onClick={() => setActiveTab('my-events')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-[0.97] ${
+                className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[10px] font-bold transition-all active:scale-[0.97] ${
                   activeTab === 'my-events'
                     ? 'bg-white/[0.06] text-white border border-[#333339]'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <GoCalendar className="w-3.5 h-3.5 text-[#818cf8]" />
+                <GoCalendar className="w-3 h-3 text-[#818cf8]" />
                 <span>Events</span>
               </button>
               <button
                 onClick={() => setActiveTab('my-tickets')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-[0.97] ${
+                className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[10px] font-bold transition-all active:scale-[0.97] ${
                   activeTab === 'my-tickets'
                     ? 'bg-white/[0.06] text-white border border-[#333339]'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <GoTag className="w-3.5 h-3.5 text-[#f472b6]" />
+                <GoTag className="w-3 h-3 text-[#f472b6]" />
                 <span>Tickets</span>
               </button>
               <button
                 onClick={() => setActiveTab('verify')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-[0.97] ${
+                className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[10px] font-bold transition-all active:scale-[0.97] ${
                   activeTab === 'verify'
                     ? 'bg-white/[0.06] text-white border border-[#333339]'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <GoShield className="w-3.5 h-3.5 text-[#34d399]" />
+                <GoShield className="w-3 h-3 text-[#34d399]" />
                 <span>Verify</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[10px] font-bold transition-all active:scale-[0.97] ${
+                  activeTab === 'profile'
+                    ? 'bg-white/[0.06] text-white border border-[#333339]'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <GoPerson className="w-3 h-3 text-[#f59e0b]" />
+                <span>Profile</span>
               </button>
             </div>
 
@@ -796,6 +895,164 @@ export default function DashboardPage() {
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Profile Settings Tab ── */}
+            {activeTab === 'profile' && (
+              <div className="flex flex-col gap-6 animate-fade-in">
+                {/* Header */}
+                <div className="border-b border-[#2e2e34] pb-5">
+                  <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <GoPerson className="text-[#f59e0b]" /> Profile Settings
+                  </h1>
+                  <p className="text-xs text-neutral-400 mt-0.5">Manage your profile photo and account information.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+
+                  {/* Left: Photo Upload */}
+                  <div className="md:col-span-5 flex flex-col gap-5">
+                    <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col items-center gap-5">
+                      {/* Avatar preview */}
+                      <div className="relative group">
+                        <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-[#333339] shadow-[0_0_30px_rgba(245,158,11,0.12)] bg-[#222226]">
+                          {user?.profileImage ? (
+                            <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <img
+                              src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user?.email || '')}`}
+                              alt="Auto avatar"
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                        {profileUploading && (
+                          <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center">
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-white">{user?.name}</p>
+                        <p className="text-[11px] text-neutral-400 font-mono mt-0.5">{user?.email}</p>
+                        {!user?.profileImage && (
+                          <p className="text-[10px] text-amber-500/70 mt-2 italic">Auto-generated avatar from your email</p>
+                        )}
+                      </div>
+
+                      {/* Drag-and-drop upload zone */}
+                      <div
+                        onDragOver={(e) => { e.preventDefault(); setProfileDragActive(true); }}
+                        onDragLeave={() => setProfileDragActive(false)}
+                        onDrop={handleProfileDrop}
+                        onClick={() => document.getElementById('profile-photo-input')?.click()}
+                        className={`w-full border-2 border-dashed rounded-xl p-5 flex flex-col items-center gap-2 cursor-pointer transition-all select-none ${
+                          profileDragActive
+                            ? 'border-amber-500/70 bg-amber-500/5'
+                            : 'border-[#333339] hover:border-[#44444a] hover:bg-white/[0.02]'
+                        }`}
+                      >
+                        <div className="w-9 h-9 rounded-full bg-[#222226] border border-[#333339] flex items-center justify-center">
+                          <GoPerson className="w-4 h-4 text-amber-400" />
+                        </div>
+                        <p className="text-xs text-neutral-300 font-medium text-center">
+                          {profileDragActive ? 'Drop your photo here' : 'Drag & drop a photo, or click to browse'}
+                        </p>
+                        <p className="text-[10px] text-neutral-500">PNG, JPG, WEBP up to 5 MB</p>
+                      </div>
+                      <input
+                        id="profile-photo-input"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files?.[0]) handleProfileImageFile(e.target.files[0]);
+                          e.target.value = '';
+                        }}
+                      />
+
+                      {/* Remove photo button */}
+                      {user?.profileImage && (
+                        <button
+                          onClick={handleProfileRemove}
+                          disabled={profileUploading}
+                          className="flex items-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 transition-colors cursor-pointer disabled:opacity-40"
+                        >
+                          <GoX className="w-3.5 h-3.5" />
+                          Remove photo &amp; use auto avatar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Account Information */}
+                  <div className="md:col-span-7 flex flex-col gap-4">
+                    <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col gap-5">
+                      <p className="text-[10px] uppercase font-mono text-neutral-500 tracking-widest">Account Information</p>
+
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Full Name</label>
+                          <div className="flex items-center gap-3 px-3.5 py-2.5 bg-[#222226] border border-[#2e2e34] rounded-xl">
+                            <GoPerson className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" />
+                            <span className="text-xs text-white">{user?.name || '—'}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Email Address</label>
+                          <div className="flex items-center gap-3 px-3.5 py-2.5 bg-[#222226] border border-[#2e2e34] rounded-xl">
+                            <span className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0 text-[11px]">@</span>
+                            <span className="text-xs text-white font-mono">{user?.email || '—'}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">User ID</label>
+                          <div className="flex items-center gap-3 px-3.5 py-2.5 bg-[#222226] border border-[#2e2e34] rounded-xl">
+                            <span className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0 text-[11px]">#</span>
+                            <span className="text-[11px] text-neutral-400 font-mono truncate">{user?.id || '—'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Avatar info box */}
+                      <div className="mt-2 bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mt-0.5">
+                          <img
+                            src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user?.email || '')}`}
+                            alt="Auto avatar"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-[11px] font-semibold text-amber-400">Automatic Avatar</p>
+                          <p className="text-[10px] text-neutral-400 leading-relaxed">
+                            If you don't upload a photo, a unique cartoon avatar is automatically generated from your email address using DiceBear. It always looks consistent across all devices.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sign out card */}
+                    <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold text-white">Sign out</p>
+                        <p className="text-[10px] text-neutral-500 mt-0.5">You will be redirected to the sign-in page.</p>
+                      </div>
+                      <button
+                        onClick={handleSignOut}
+                        className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 rounded-xl transition-all cursor-pointer active:scale-95"
+                      >
+                        <GoSignOut className="w-3.5 h-3.5" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             )}
