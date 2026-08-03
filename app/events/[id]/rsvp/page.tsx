@@ -504,7 +504,7 @@ export default function RSVPPage() {
                     <p className="text-xs text-neutral-400">Fill in your details below to secure your entry pass.</p>
                   </div>
 
-                  <form onSubmit={handleFormSubmit} className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col gap-5 shadow-sm animate-fade-in">
+                  <form onSubmit={handleFormSubmit} className="bg-[#1c1c1f] border border-[#232329] rounded-2xl p-8 flex flex-col gap-5 shadow-sm animate-fade-in">
                     {/* Full Name */}
                     <div className="flex flex-col gap-2">
                       <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider flex items-center gap-1.5">
@@ -516,7 +516,7 @@ export default function RSVPPage() {
                         onChange={(e) => setName(e.target.value)}
                         required
                         placeholder="Enter your full name"
-                        className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors"
+                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -531,7 +531,7 @@ export default function RSVPPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         placeholder="you@example.com"
-                        className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors"
+                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -545,7 +545,7 @@ export default function RSVPPage() {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+1 (555) 000-0000"
-                        className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors"
+                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -563,7 +563,7 @@ export default function RSVPPage() {
                               value={(answers[field.name] as string) || ''}
                               onChange={(e) => setAnswers({ ...answers, [field.name]: e.target.value })}
                               placeholder={`Enter ${field.name.toLowerCase()}`}
-                              className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors"
+                              className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
                             />
                           </>
                         ) : (
@@ -656,7 +656,7 @@ export default function RSVPPage() {
                     <p className="text-xs text-neutral-400">Fill in details of the transaction you made to submit registration.</p>
                   </div>
 
-                  <form onSubmit={handleTxnSubmit} className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col gap-5 shadow-sm animate-fade-in">
+                  <form onSubmit={handleTxnSubmit} className="bg-[#1c1c1f] border border-[#232329] rounded-2xl p-8 flex flex-col gap-5 shadow-sm animate-fade-in">
                     
                     {/* Account Name */}
                     <div className="flex flex-col gap-2">
@@ -669,7 +669,7 @@ export default function RSVPPage() {
                         onChange={(e) => setPaymentAccountName(e.target.value)}
                         required
                         placeholder="e.g. John Doe / Bank account holder name"
-                        className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors"
+                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -681,12 +681,12 @@ export default function RSVPPage() {
                       <select
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors cursor-pointer"
+                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors cursor-pointer"
                       >
-                        <option value="UPI" className="bg-[#222226]">UPI / GPay / PhonePe</option>
-                        <option value="Bank Transfer" className="bg-[#222226]">Bank Transfer (IMPS/NEFT)</option>
-                        <option value="Card Payment" className="bg-[#222226]">Credit / Debit Card</option>
-                        <option value="PayPal" className="bg-[#222226]">PayPal</option>
+                        <option value="UPI" className="bg-[#141416]">UPI / GPay / PhonePe</option>
+                        <option value="Bank Transfer" className="bg-[#141416]">Bank Transfer (IMPS/NEFT)</option>
+                        <option value="Card Payment" className="bg-[#141416]">Credit / Debit Card</option>
+                        <option value="PayPal" className="bg-[#141416]">PayPal</option>
                       </select>
                     </div>
 
@@ -701,7 +701,7 @@ export default function RSVPPage() {
                         onChange={(e) => setPaymentTxnId(e.target.value)}
                         required
                         placeholder="e.g. Txn-129037482, UPI Ref ID, etc."
-                        className="w-full bg-[#222226] border border-[#2e2e34] focus:border-[#44444a] rounded-md px-3 py-2 text-xs text-white outline-none transition-colors font-mono"
+                        className="w-full bg-[#141416] border border-[#232329] rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors font-mono placeholder:text-neutral-600"
                       />
                     </div>
 
@@ -721,7 +721,7 @@ export default function RSVPPage() {
             </div>
 
             {/* Right Side: Event Details Summary Card */}
-            <div className="lg:col-span-5 bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl overflow-hidden shadow-sm flex flex-col">
+            <div className="lg:col-span-5 bg-[#1c1c1f] border border-[#232329] rounded-2xl overflow-hidden shadow-sm flex flex-col">
               <div 
                 className="px-5 py-2.5 text-slate-950 font-mono text-[10px] font-bold uppercase tracking-wider flex justify-between select-none"
                 style={{ backgroundColor: 'var(--event-highlight)' }}
@@ -729,6 +729,19 @@ export default function RSVPPage() {
                 <span>{event.ticketCode}</span>
                 <span>RSVP ONLY</span>
               </div>
+
+              {/* Event Cover Image */}
+              {event.coverImage && (
+                <div className="w-full h-44 relative overflow-hidden border-b border-[#232329]">
+                  <img 
+                    src={event.coverImage} 
+                    alt={event.title} 
+                    className="w-full h-full object-cover" 
+                  />
+                  {/* Ambient gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1c1c1f] via-transparent to-transparent opacity-80" />
+                </div>
+              )}
               <div className="p-5 flex flex-col gap-4">
                 <h4 className="text-base font-bold text-white leading-tight">{event.title}</h4>
                 <div className="flex flex-col gap-3.5 text-xs text-neutral-400 pt-2 border-t border-[#2e2e34]">
