@@ -28,12 +28,12 @@ interface SendMailParams {
 }
 
 const getHexColor = (bgClass: string) => {
-  if (bgClass.includes('[#818cf8]')) return '#ff6b6b';
-  if (bgClass.includes('[#fef08a]')) return '#fef08a';
-  if (bgClass.includes('[#6ee7b7]')) return '#6ee7b7';
-  if (bgClass.includes('[#fbcfe8]')) return '#fbcfe8';
-  if (bgClass.includes('[#fed7aa]')) return '#fed7aa';
-  return '#ff6b6b'; // Soft red default
+  if (bgClass.includes('[#818cf8]')) return '#4f46e5'; // Indigo
+  if (bgClass.includes('[#fef08a]')) return '#b45309'; // Amber/Yellow
+  if (bgClass.includes('[#6ee7b7]')) return '#059669'; // Emerald
+  if (bgClass.includes('[#fbcfe8]')) return '#db2777'; // Pink
+  if (bgClass.includes('[#fed7aa]')) return '#ea580c'; // Orange
+  return '#4f46e5'; // Indigo default
 };
 
 export async function sendEventMail({ to, subject, event, registration, type, originUrl }: SendMailParams) {
@@ -52,13 +52,13 @@ export async function sendEventMail({ to, subject, event, registration, type, or
         const entries = Object.entries(parsed);
         if (entries.length > 0) {
           answersHtml = `
-            <div style="border-top: 1px solid #2e2e34; padding-top: 16px; margin-top: 16px;">
-              <h4 style="margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; font-family: monospace; color: #8a8a90; letter-spacing: 1px;">RSVP Info</h4>
-              <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #ffffff;">
+            <div style="border-top: 1px solid #e1e4e8; padding-top: 14px; margin-top: 14px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069; font-weight: 600;">Registration info</h4>
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #24292e;">
                 ${entries.map(([k, v]) => `
                   <tr>
-                    <td style="padding: 4px 0; color: #a1a1aa; width: 40%; font-weight: 500;">${k}:</td>
-                    <td style="padding: 4px 0; text-align: right; font-weight: 600;">${typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)}</td>
+                    <td style="padding: 3px 0; color: #586069; width: 40%; font-weight: 500;">${k}:</td>
+                    <td style="padding: 3px 0; text-align: right; font-weight: 600; color: #24292e;">${typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)}</td>
                   </tr>
                 `).join('')}
               </table>
@@ -74,20 +74,20 @@ export async function sendEventMail({ to, subject, event, registration, type, or
     let paymentHtml = '';
     if (registration.paymentTxnId) {
       paymentHtml = `
-        <div style="border-top: 1px solid #2e2e34; padding-top: 16px; margin-top: 16px;">
-          <h4 style="margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; font-family: monospace; color: #8a8a90; letter-spacing: 1px;">Payment Verification</h4>
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #ffffff;">
+        <div style="border-top: 1px solid #e1e4e8; padding-top: 14px; margin-top: 14px;">
+          <h4 style="margin: 0 0 10px 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069; font-weight: 600;">Payment details</h4>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #24292e;">
             <tr>
-              <td style="padding: 4px 0; color: #a1a1aa; width: 40%;">Method:</td>
-              <td style="padding: 4px 0; text-align: right; font-weight: 600;">${registration.paymentMethod}</td>
+              <td style="padding: 3px 0; color: #586069; width: 40%;">Method:</td>
+              <td style="padding: 3px 0; text-align: right; font-weight: 600; color: #24292e;">${registration.paymentMethod}</td>
             </tr>
             <tr>
-              <td style="padding: 4px 0; color: #a1a1aa;">Account Name:</td>
-              <td style="padding: 4px 0; text-align: right; font-weight: 600;">${registration.paymentAccountName}</td>
+              <td style="padding: 3px 0; color: #586069;">Account name:</td>
+              <td style="padding: 3px 0; text-align: right; font-weight: 600; color: #24292e;">${registration.paymentAccountName}</td>
             </tr>
             <tr>
-              <td style="padding: 4px 0; color: #a1a1aa;">Transaction ID:</td>
-              <td style="padding: 4px 0; text-align: right; font-family: monospace; font-size: 12px; color: #ffffff;">${registration.paymentTxnId}</td>
+              <td style="padding: 3px 0; color: #586069;">Transaction ID:</td>
+              <td style="padding: 3px 0; text-align: right; font-family: monospace; font-size: 11px; color: #24292e;">${registration.paymentTxnId}</td>
             </tr>
           </table>
         </div>
@@ -134,32 +134,30 @@ export async function sendEventMail({ to, subject, event, registration, type, or
             cid: 'event-cover'
           });
           headerBannerHtml = `
-            <div style="width: 100%; text-align: center; background-color: #1c1c1f;">
-              <img src="cid:event-cover" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
+            <div style="width: 100%; text-align: center; background-color: #f6f8fa; border-bottom: 1px solid #e1e4e8;">
+              <img src="cid:event-cover" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; border: 0; outline: none; text-decoration: none;" />
             </div>
           `;
         } else {
           headerBannerHtml = `
-            <div style="width: 100%; text-align: center; background-color: #1c1c1f;">
-              <img src="${bannerSrc}" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
+            <div style="width: 100%; text-align: center; background-color: #f6f8fa; border-bottom: 1px solid #e1e4e8;">
+              <img src="${bannerSrc}" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; border: 0; outline: none; text-decoration: none;" />
             </div>
           `;
         }
       } catch (err) {
         console.error('Failed to attach cover as CID, falling back to absolute URL:', err);
         headerBannerHtml = `
-          <div style="width: 100%; text-align: center; background-color: #1c1c1f;">
-            <img src="${bannerSrc}" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
+          <div style="width: 100%; text-align: center; background-color: #f6f8fa; border-bottom: 1px solid #e1e4e8;">
+            <img src="${bannerSrc}" alt="${event.title}" width="500" style="width: 100%; max-width: 500px; height: auto; display: block; margin: 0 auto; border: 0; outline: none; text-decoration: none;" />
           </div>
         `;
       }
     } else {
-      // Sleek minimal grayscale gradient banner
       headerBannerHtml = `
-        <div style="width: 100%; height: 120px; background: linear-gradient(135deg, #2e2e34 0%, #1c1c1f 100%); text-align: center; position: relative;">
-          <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.25); border-radius: 16px 16px 0 0;"></div>
-          <div style="position: relative; width: 100%; padding-top: 45px; text-shadow: 0 2px 4px rgba(0,0,0,0.6); text-align: center;">
-            <span style="font-family: monospace; font-size: 14px; font-weight: bold; color: #ffffff; letter-spacing: 3px; text-transform: uppercase;">
+        <div style="width: 100%; height: 100px; background-color: #f6f8fa; border-bottom: 1px solid #e1e4e8; text-align: center;">
+          <div style="padding-top: 38px; text-align: center;">
+            <span style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 13px; font-weight: 600; color: #586069; letter-spacing: 1px;">
               ${event.organizer || 'Student Forge Events'}
             </span>
           </div>
@@ -177,34 +175,34 @@ export async function sendEventMail({ to, subject, event, registration, type, or
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${subject}</title>
       </head>
-      <body style="margin: 0; padding: 0; background-color: #0a0a0c; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #0a0a0c; width: 100%; min-height: 100%; padding: 30px 10px;">
+      <body style="margin: 0; padding: 0; background-color: #fafbfc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #24292e;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #fafbfc; width: 100%; min-height: 100%; padding: 30px 10px;">
           <tr>
             <td align="center" valign="top">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 500px; background-color: #121215; border: 1px solid #232329; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 500px; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(27,31,35,0.04);">
                 
                 <!-- Event Header Banner -->
                 <tr>
-                  <td align="center" valign="top" style="overflow: hidden; border-radius: 16px 16px 0 0;">
+                  <td align="center" valign="top" style="overflow: hidden;">
                     ${headerBannerHtml}
                   </td>
                 </tr>
 
                 <!-- Email Content Body -->
                 <tr>
-                  <td style="padding: 28px 20px;">
+                  <td style="padding: 32px 24px;">
                     
                     <!-- Icon and Status -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align: center; margin-bottom: 24px;">
                       <tr>
                         <td>
-                          <h2 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; font-family: sans-serif;">
-                            ${isPending ? 'RSVP Pending Approval' : 'Registration Confirmed!'}
+                          <h2 style="margin: 0; color: #24292e; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+                            ${isPending ? 'Registration pending approval' : 'Registration confirmed'}
                           </h2>
-                          <p style="margin: 8px 0 0 0; color: #a1a1aa; font-size: 13px; line-height: 1.5; font-family: sans-serif;">
+                          <p style="margin: 8px 0 0 0; color: #586069; font-size: 13px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                             ${isPending 
-                              ? 'Your details were sent to the organizer. We are checking and reviewing your details to approve your ticket.' 
-                              : 'Your registration has been successfully processed! Below are your entry ticket details.'
+                              ? 'Your registration request was sent to the organizer. We will notify you once your ticket is approved.' 
+                              : 'Your registration was successfully processed! Below are your entry ticket details.'
                             }
                           </p>
                         </td>
@@ -212,29 +210,29 @@ export async function sendEventMail({ to, subject, event, registration, type, or
                     </table>
 
                     <!-- Ticket & Event Box -->
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #18181b; border: 1px solid #232329; border-radius: 12px; padding: 18px; margin-bottom: 24px; box-sizing: border-box;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; margin-bottom: 24px; box-sizing: border-box;">
                       
                       <!-- Event Details Heading and info -->
                       <tr>
-                        <td style="border-bottom: 1px solid #232329; padding-bottom: 14px; margin-bottom: 14px;">
-                          <span style="font-size: 9px; font-family: monospace; color: #71717a; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 6px;">Event Details</span>
-                          <h3 style="margin: 0 0 8px 0; color: #ffffff; font-size: 16px; font-weight: 700; line-height: 1.3; font-family: sans-serif;">
+                        <td style="border-bottom: 1px solid #e1e4e8; padding-bottom: 12px; margin-bottom: 12px;">
+                          <span style="font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069; font-weight: 600; display: block; margin-bottom: 4px;">Event details</span>
+                          <h3 style="margin: 0 0 8px 0; color: #24292e; font-size: 15px; font-weight: 600; line-height: 1.3; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                             ${event.title}
                           </h3>
                           
                           <!-- Info Grid -->
-                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 12px; color: #a1a1aa; font-family: sans-serif;">
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 12px; color: #586069; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                             <tr>
-                              <td style="padding: 3px 0; font-weight: 500;">Date & Time:</td>
-                              <td style="padding: 3px 0; text-align: right; color: #ffffff; font-weight: 600;">${event.startDate} &middot; ${event.startTime}</td>
+                              <td style="padding: 3px 0; font-weight: 500;">Date &amp; Time:</td>
+                              <td style="padding: 3px 0; text-align: right; color: #24292e; font-weight: 600;">${event.startDate} at ${event.startTime}</td>
                             </tr>
                             <tr>
                               <td style="padding: 3px 0; font-weight: 500;">Venue / Location:</td>
-                              <td style="padding: 3px 0; text-align: right; color: #ffffff; font-weight: 600;">${event.location || 'Online'}</td>
+                              <td style="padding: 3px 0; text-align: right; color: #24292e; font-weight: 600;">${event.location || 'Online'}</td>
                             </tr>
                             <tr>
                               <td style="padding: 3px 0; font-weight: 500;">Admission:</td>
-                              <td style="padding: 3px 0; text-align: right; color: #ffffff; font-weight: 600;">${event.price}</td>
+                              <td style="padding: 3px 0; text-align: right; color: #24292e; font-weight: 600;">${event.price}</td>
                             </tr>
                           </table>
                         </td>
@@ -242,28 +240,28 @@ export async function sendEventMail({ to, subject, event, registration, type, or
 
                       <!-- Spacer -->
                       <tr>
-                        <td height="14"></td>
+                        <td height="12"></td>
                       </tr>
 
                       <!-- Attendee Info -->
                       <tr>
-                        <td>
-                          <span style="font-size: 9px; font-family: monospace; color: #71717a; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 6px;">Attendee Details</span>
-                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 12px; color: #a1a1aa; font-family: sans-serif;">
+                        <td style="border-bottom: 1px solid #e1e4e8; padding-bottom: 12px; margin-bottom: 12px;">
+                          <span style="font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069; font-weight: 600; display: block; margin-bottom: 4px;">Attendee details</span>
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 12px; color: #586069; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                             <tr>
-                              <td style="padding: 3px 0; width: 40%;">Full Name:</td>
-                              <td style="padding: 3px 0; text-align: right; font-weight: 600; color: #ffffff;">${registration.name}</td>
+                              <td style="padding: 3px 0; width: 40%;">Full name:</td>
+                              <td style="padding: 3px 0; text-align: right; font-weight: 600; color: #24292e;">${registration.name}</td>
                             </tr>
                             <tr>
-                              <td style="padding: 3px 0;">Email:</td>
-                              <td style="padding: 3px 0; text-align: right; font-weight: 500; font-family: monospace; color: #ffffff;">${registration.email}</td>
+                              <td style="padding: 3px 0;">Email address:</td>
+                              <td style="padding: 3px 0; text-align: right; font-weight: 500; font-family: monospace; color: #24292e;">${registration.email}</td>
                             </tr>
                             <tr>
-                              <td style="padding: 3px 0;">Ticket Status:</td>
-                              <td style="padding: 3px 0; text-align: right; font-weight: bold; font-family: monospace; color: #ffffff; letter-spacing: 0.5px;">
+                              <td style="padding: 3px 0;">Ticket status:</td>
+                              <td style="padding: 3px 0; text-align: right; font-weight: bold; font-family: monospace; color: #24292e;">
                                 ${isPending 
-                                  ? '<span style="color: #fbbf24; font-size: 11px; text-transform: uppercase;">PENDING APPROVAL</span>' 
-                                  : `<span style="color: #34d399; font-size: 11px; text-transform: uppercase;">${registration.ticketCode}</span>`
+                                  ? `<span style="color: #d97706; font-size: 11px;">Pending Approval</span>` 
+                                  : `<span style="color: #059669; font-size: 11px;">Confirmed (${registration.ticketCode})</span>`
                                 }
                               </td>
                             </tr>
@@ -282,14 +280,14 @@ export async function sendEventMail({ to, subject, event, registration, type, or
                       <!-- Scannable Entry Pass QR Code -->
                       ${!isPending ? `
                       <tr>
-                        <td align="center" style="text-align: center; margin-top: 20px; padding-top: 18px; border-top: 1px solid #232329;">
-                          <span style="margin: 0 0 10px 0; font-size: 9px; font-family: monospace; color: #71717a; text-transform: uppercase; letter-spacing: 1.5px; display: block;">Entry Pass QR Code</span>
-                          <div style="display: inline-block; background-color: #ffffff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; margin-bottom: 8px;">
-                            <img src="cid:ticket-qrcode" alt="Ticket QR Code" width="140" height="140" style="width: 140px; height: 140px; display: block; margin: 0 auto; border: 0; outline: none;" />
+                        <td align="center" style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e1e4e8;">
+                          <span style="margin: 0 0 10px 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069; font-weight: 600; display: block;">Entry pass QR code</span>
+                          <div style="display: inline-block; background-color: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #e1e4e8; text-align: center; margin-bottom: 8px;">
+                            <img src="cid:ticket-qrcode" alt="Ticket QR Code" width="130" height="130" style="width: 130px; height: 130px; display: block; margin: 0 auto; border: 0; outline: none;" />
                           </div>
-                          <div style="font-family: monospace; font-size: 13px; color: #ffffff; font-weight: bold; letter-spacing: 1.5px; margin-top: 4px;">${registration.ticketCode}</div>
-                          <p style="margin: 6px 0 0 0; font-size: 10px; color: #71717a; font-family: sans-serif; line-height: 1.4; max-width: 280px; text-align: center;">
-                            Please present this secure QR pass to the organizer at the venue entrance for scanning.
+                          <div style="font-family: monospace; font-size: 13px; color: #24292e; font-weight: bold; letter-spacing: 1px; margin-top: 4px;">${registration.ticketCode}</div>
+                          <p style="margin: 6px 0 0 0; font-size: 11px; color: #586069; font-family: -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.4; max-width: 280px; text-align: center;">
+                            Please present this QR pass to the organizer at the venue entrance for scanning.
                           </p>
                         </td>
                       </tr>
@@ -300,8 +298,8 @@ export async function sendEventMail({ to, subject, event, registration, type, or
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align: center; margin-bottom: 12px;">
                       <tr>
                         <td>
-                          <a href="${passUrl}" style="display: inline-block; background-color: #ffffff; color: #000000; font-family: sans-serif; font-weight: bold; font-size: 13px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(255,255,255,0.08); text-align: center;">
-                            ${isPending ? 'Check Ticket Status' : 'View Ticket Pass (QR Code)'}
+                          <a href="${passUrl}" style="display: inline-block; background-color: #24292e; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; font-size: 13px; text-decoration: none; padding: 10px 20px; border-radius: 6px; border: 1px solid #1b1f23; text-align: center;">
+                            ${isPending ? 'Check ticket status' : 'View ticket pass'}
                           </a>
                         </td>
                       </tr>
@@ -312,9 +310,13 @@ export async function sendEventMail({ to, subject, event, registration, type, or
 
                 <!-- Footer -->
                 <tr>
-                  <td style="padding: 24px 20px; text-align: center; background-color: #0a0a0c; border-top: 1px solid #232329;">
-                    <p style="margin: 0; font-size: 9px; font-family: monospace; color: #52525b; text-transform: uppercase; letter-spacing: 2px;">
-                      Student Forge Events Platform &bull; All Rights Reserved
+                  <td style="padding: 24px 20px; text-align: center; background-color: #f6f8fa; border-top: 1px solid #e1e4e8;">
+                    <div style="margin-bottom: 8px;">
+                      <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 4px; background-color: #4f46e5; color: #ffffff; font-weight: bold; font-size: 10px; font-family: monospace; text-align: center; vertical-align: middle;">SF</span>
+                      <span style="font-size: 11px; font-weight: 600; color: #24292e; margin-left: 6px; vertical-align: middle;">Student Forge Events</span>
+                    </div>
+                    <p style="margin: 0; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069;">
+                      Secure Ticketing System &bull; Hyderabad, India
                     </p>
                   </td>
                 </tr>
