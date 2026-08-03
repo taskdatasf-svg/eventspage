@@ -463,7 +463,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                     </div>
                     <ShinyButton
                       onClick={() => {
-                        window.location.href = `/events/${event.id}/rsvp`;
+                        window.location.href = `/events/${event.id}/register`;
                       }}
                       className="w-full"
                     >
@@ -476,7 +476,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                       if (!user) {
                         window.location.href = '/auth';
                       } else {
-                        window.location.href = `/events/${event.id}/rsvp`;
+                        window.location.href = `/events/${event.id}/register`;
                       }
                     }}
                     className="w-full"

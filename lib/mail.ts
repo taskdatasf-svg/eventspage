@@ -42,7 +42,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
     const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const resend = new Resend(resendApiKey);
 
-    const passUrl = `${originUrl}/events/${event.id}/rsvp`;
+    const passUrl = `${originUrl}/events/${event.id}/register`;
 
     // Process RSVP answers
     let answersHtml = '';

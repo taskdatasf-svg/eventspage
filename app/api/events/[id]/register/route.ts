@@ -86,7 +86,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (status === 'PENDING') {
       await sendEventMail({
         to: email,
-        subject: `RSVP Pending Approval - ${event.title}`,
+        subject: `Registration Pending Approval - ${event.title}`,
         event,
         registration,
         type: 'PENDING',
@@ -95,7 +95,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     } else {
       await sendEventMail({
         to: email,
-        subject: `RSVP Confirmed - ${event.title}`,
+        subject: `Registration Confirmed - ${event.title}`,
         event,
         registration,
         type: 'CONFIRMED',

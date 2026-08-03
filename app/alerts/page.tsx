@@ -98,7 +98,7 @@ export default function AlertsPage() {
                 hour: '2-digit',
                 minute: '2-digit'
               }) : 'Recently',
-              link: `/events/${reg.eventId}/rsvp`,
+              link: `/events/${reg.eventId}/register`,
               rawDate: reg.createdAt || ''
             });
           });

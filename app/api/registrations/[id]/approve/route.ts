@@ -34,7 +34,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const origin = request.headers.get('origin') || 'http://localhost:3000';
       await sendEventMail({
         to: updatedRegistration.email,
-        subject: `RSVP Approved & Ticket Confirmed - ${event.title}`,
+        subject: `Registration Approved & Ticket Confirmed - ${event.title}`,
         event,
         registration: updatedRegistration,
         type: 'CONFIRMED',

@@ -588,7 +588,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-white">No tickets found</p>
-                      <p className="text-xs text-neutral-500 mt-1">You haven't RSVP'd to any events yet.</p>
+                      <p className="text-xs text-neutral-500 mt-1">You haven't registered for any events yet.</p>
                     </div>
                     <a href="/events" className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] text-white text-xs rounded-md border border-[#333339] hover:bg-[#2c2c32] transition-all cursor-pointer">
                       Browse Upcoming Events
@@ -632,7 +632,7 @@ export default function DashboardPage() {
                             </span>
                           </div>
                           <a
-                            href={`/events/${ticket.eventId}/rsvp`}
+                            href={`/events/${ticket.eventId}/register`}
                             className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-bold rounded-md transition-all cursor-pointer shadow-sm text-black"
                             style={{ color: 'black' }}
                           >

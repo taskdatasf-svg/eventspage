@@ -8,10 +8,10 @@ import Footer from '@/components/Footer';
 import { EventData } from '@/lib/eventsStore';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import { ShinyButton } from '@/components/ui/shiny-button';
-import { AntiMetalButton } from '@/components/ui/anti-metal-button';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
-  GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock
+  GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock,
+  GoPlus, GoX
 } from 'react-icons/go';
 import TurnstileWidget from '@/components/TurnstileWidget';
 
@@ -72,7 +72,7 @@ function getFallbackSoftColor(headerBg: string | undefined): string {
   return '#ff6b6b';
 }
 
-export default function RSVPPage() {
+export default function RegisterPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -341,7 +341,7 @@ export default function RSVPPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        alert(data.error || 'Failed to complete RSVP for yourself.');
+        alert(data.error || 'Failed to complete registration for yourself.');
         setSubmitting(false);
         return;
       }
@@ -408,7 +408,7 @@ export default function RSVPPage() {
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center gap-4 py-20 px-4">
           <div className="w-8 h-8 border-2 border-[#333339] border-t-white rounded-full animate-spin" />
-          <p className="text-xs text-neutral-500 font-mono">Loading RSVP details…</p>
+          <p className="text-xs text-neutral-500 font-mono">Loading registration details…</p>
         </div>
         <Footer />
       </main>
@@ -432,7 +432,7 @@ export default function RSVPPage() {
 
   // Generate a mock payment QR code content (UPI format containing amount and descriptor)
   const numericPrice = event.price.replace(/[^0-9.]/g, '') || '0';
-  const qrPaymentValue = `upi://pay?pa=6302933597@hdfc&pn=Student%20Forge%20Events&am=${numericPrice}&cu=INR&tn=RSVP%20${encodeURIComponent(event.title.substring(0, 15))}`;
+  const qrPaymentValue = `upi://pay?pa=6302933597@hdfc&pn=Student%20Forge%20Events&am=${numericPrice}&cu=INR&tn=Registration%20${encodeURIComponent(event.title.substring(0, 15))}`;
 
   return (
     <main 
@@ -527,11 +527,11 @@ export default function RSVPPage() {
           <span>/</span>
           <a href={`/events/${event.id}`} className="hover:text-white transition-colors truncate max-w-[150px] sm:max-w-xs">{event.title}</a>
           <span>/</span>
-          <span className="text-white font-medium">RSVP</span>
+          <span className="text-white font-medium">Register</span>
         </nav>
 
         {!ticket ? (
-          /* RSVP Form / Payment Flow Grid */
+          /* Registration Form / Payment Flow Grid */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* Left Side: Form inputs */}
@@ -540,7 +540,7 @@ export default function RSVPPage() {
               {rsvpStep === 'form' && (
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
-                    <h1 className="text-2xl font-bold text-white tracking-tight">Complete your RSVP</h1>
+                    <h1 className="text-2xl font-bold text-white tracking-tight">Complete your Registration</h1>
                     <p className="text-xs text-neutral-400">Fill in your details below to secure your entry pass.</p>
                   </div>
 
@@ -630,19 +630,17 @@ export default function RSVPPage() {
                         <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">
                           Additional Friends ({friends.length})
                         </span>
-                        <AntiMetalButton
+                        <button
                           type="button"
                           onClick={(e) => {
                             e.preventDefault();
                             setFriends([...friends, { name: '', email: '', phone: '' }]);
                           }}
-                          accentFrom="var(--event-highlight)"
-                          accentTo="var(--event-highlight-bg)"
-                          dotColor="#0f0f0f"
-                          className="scale-[0.85] origin-right"
+                          className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer py-1.5 px-3 rounded-lg border border-[#232329] bg-[#141416]/50 hover:bg-[#1c1c1f] transition-all hover:border-neutral-500"
+                          style={{ color: 'var(--event-highlight)' }}
                         >
-                          Add Friend
-                        </AntiMetalButton>
+                          <GoPlus className="w-3.5 h-3.5" /> Add Friend
+                        </button>
                       </div>
 
                       {friends.map((friend, idx) => (
@@ -654,9 +652,10 @@ export default function RSVPPage() {
                               newFriends.splice(idx, 1);
                               setFriends(newFriends);
                             }}
-                            className="absolute top-4 right-4 text-xs font-mono text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+                            className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-white/5 text-neutral-400 hover:text-rose-400 transition-colors cursor-pointer flex items-center justify-center"
+                            title="Remove Friend"
                           >
-                            Remove
+                            <GoX className="w-4 h-4" />
                           </button>
                           
                           <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wide">Friend #{idx + 1} details</span>
@@ -721,7 +720,7 @@ export default function RSVPPage() {
                       onClick={undefined}
                       className="mt-2 w-full"
                     >
-                      {submitting ? 'Submitting...' : (isEventFree(event.price) ? 'Submit RSVP' : 'Proceed to Payment')}
+                      {submitting ? 'Submitting...' : (isEventFree(event.price) ? 'Submit Registration' : 'Proceed to Payment')}
                     </ShinyButton>
                   </form>
                 </>
@@ -731,7 +730,7 @@ export default function RSVPPage() {
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
                     <button onClick={() => { setRsvpStep('form'); setTurnstileToken(isLocalhost ? 'localhost_bypass' : ''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
-                      <GoArrowLeft className="w-3.5 h-3.5" /> Back to RSVP Form
+                      <GoArrowLeft className="w-3.5 h-3.5" /> Back to Registration Form
                     </button>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Scan &amp; Pay</h1>
                     <p className="text-xs text-neutral-400">Please complete the payment of <strong style={{ color: 'var(--event-highlight)' }}>{event.price}</strong> to register.</p>
@@ -839,7 +838,7 @@ export default function RSVPPage() {
                       onClick={undefined}
                       className="mt-2 w-full"
                     >
-                      {submitting ? 'Submitting Details...' : 'Complete RSVP & Submit'}
+                      {submitting ? 'Submitting Details...' : 'Complete Registration & Submit'}
                     </ShinyButton>
                   </form>
                 </>
@@ -849,15 +848,7 @@ export default function RSVPPage() {
 
             {/* Right Side: Event Details Summary Card */}
             <div className="lg:col-span-5 bg-[#1c1c1f] border border-[#232329] rounded-2xl overflow-hidden shadow-sm flex flex-col">
-              <div 
-                className="px-5 py-2.5 text-slate-950 font-mono text-[10px] font-bold uppercase tracking-wider flex justify-between select-none"
-                style={{ backgroundColor: 'var(--event-highlight)' }}
-              >
-                <span>{event.ticketCode}</span>
-                <span>RSVP ONLY</span>
-              </div>
-
-              {/* Event Cover Image */}
+              {/* Event Cover Image at the absolute top */}
               {event.coverImage && (
                 <div className="w-full h-44 relative overflow-hidden border-b border-[#232329]">
                   <img 
@@ -870,6 +861,14 @@ export default function RSVPPage() {
                 </div>
               )}
               <div className="p-5 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono uppercase bg-[#222226] border border-[#333339] text-neutral-300 px-2.5 py-1 rounded-md">
+                    {event.ticketCode}
+                  </span>
+                  <span className="text-[10px] font-mono uppercase text-neutral-400">
+                    Registration Pass
+                  </span>
+                </div>
                 <h4 className="text-base font-bold text-white leading-tight">{event.title}</h4>
                 <div className="flex flex-col gap-3.5 text-xs text-neutral-400 pt-2 border-t border-[#2e2e34]">
                   <div className="flex items-center gap-2">
