@@ -29,17 +29,17 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=320&h=240&fit=crop&q=80',
 ];
 
-// The S-curve path in a 1400×580 viewBox
-// Creates a flowing loop + wave shape matching the reference
+// The S-curve path in a 1400×480 viewBox
+// Mirrored horizontally: loop is on the RIGHT, wave flows left → right
 const PATH_VIEWBOX_W = 1400;
 const PATH_VIEWBOX_H = 480;
 const PATH_D = `
-  M -120 360
-  C 80 360, 210 20, 420 180
-  C 630 360, 490 520, 370 400
-  C 250 280, 330 -20, 560 100
-  C 790 220, 920 430, 1160 290
-  C 1400 150, 1520 60, 1720 200
+  M 1520 360
+  C 1320 360, 1190 20, 980 180
+  C 770 360, 910 520, 1030 400
+  C 1150 280, 1070 -20, 840 100
+  C 610 220, 480 430, 240 290
+  C 0 150, -120 60, -320 200
 `;
 
 const NUM_CARDS = 22;
@@ -139,7 +139,7 @@ function PathMarquee({ images }: PathMarqueeProps) {
     <div
       ref={containerRef}
       className="relative w-full"
-      style={{ height: 420 }}
+      style={{ height: 480, paddingTop: 64 }}
       onMouseEnter={() => { hoveredRef.current = true; }}
       onMouseLeave={() => { hoveredRef.current = false; }}
     >
@@ -257,8 +257,11 @@ const Hero: React.FC<HeroProps> = ({
   return (
     <section className="relative w-full bg-[#161618] text-white flex flex-col items-center overflow-hidden">
 
-      {/* ── Text block ── */}
-      <div className="relative z-10 max-w-3xl text-center flex flex-col items-center gap-4 px-4 sm:px-8 pt-20 pb-2">
+      {/* ── SVG Path Marquee (TOP) ── */}
+      {images.length > 0 && <PathMarquee images={images} />}
+
+      {/* ── Text block (BELOW marquee) ── */}
+      <div className="relative z-10 max-w-3xl text-center flex flex-col items-center gap-4 px-4 sm:px-8 pt-4 pb-16">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#222226] border border-[#333339] text-[10px] uppercase tracking-widest text-neutral-400 font-mono rounded-md">
           <span className="w-1.5 h-1.5 bg-[#f6602d] rounded-full animate-pulse" />
           Student Forge Platform
@@ -302,9 +305,6 @@ const Hero: React.FC<HeroProps> = ({
           </button>
         </div>
       </div>
-
-      {/* ── SVG Path Marquee ── */}
-      {images.length > 0 && <PathMarquee images={images} />}
     </section>
   );
 };
