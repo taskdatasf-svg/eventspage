@@ -520,8 +520,9 @@ export default function RegisterPage() {
                   <form onSubmit={handleFormSubmit} className="flex flex-col gap-6 animate-fade-in bg-transparent border-0 p-0 shadow-none">
                     {/* Full Name */}
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider flex items-center gap-1.5">
-                        <GoPerson className="w-3.5 h-3.5" /> Full Name
+                      <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider flex items-center justify-between">
+                        <span className="flex items-center gap-1.5"><GoPerson className="w-3.5 h-3.5" /> Full Name</span>
+                        <img src="https://ik.imagekit.io/dypkhqxip/eventssflo" alt="Student Forge" className="h-3.5 w-auto object-contain opacity-80 select-none" />
                       </label>
                       <input
                         type="text"
@@ -783,8 +784,9 @@ export default function RegisterPage() {
                     
                     {/* Account Name */}
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">
-                        Sender Account Name *
+                      <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider flex items-center justify-between">
+                        <span>Sender Account Name *</span>
+                        <img src="https://ik.imagekit.io/dypkhqxip/eventssflo" alt="Student Forge" className="h-3.5 w-auto object-contain opacity-80 select-none" />
                       </label>
                       <input
                         type="text"
@@ -798,8 +800,9 @@ export default function RegisterPage() {
 
                     {/* Payment Method */}
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">
-                        Payment Method *
+                      <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider flex items-center justify-between">
+                        <span>Payment Method *</span>
+                        <img src="https://ik.imagekit.io/dypkhqxip/eventssflo" alt="Student Forge" className="h-3.5 w-auto object-contain opacity-80 select-none" />
                       </label>
                       <select
                         value={paymentMethod}
@@ -815,8 +818,9 @@ export default function RegisterPage() {
 
                     {/* Transaction ID */}
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">
-                        Transaction ID / Reference Number *
+                      <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider flex items-center justify-between">
+                        <span>Transaction ID / Reference Number *</span>
+                        <img src="https://ik.imagekit.io/dypkhqxip/eventssflo" alt="Student Forge" className="h-3.5 w-auto object-contain opacity-80 select-none" />
                       </label>
                       <input
                         type="text"
