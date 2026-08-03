@@ -49,8 +49,7 @@ export async function POST(request: Request) {
                   <td style="padding: 32px 32px 24px 32px;">
                     <!-- Brand Icon & Header -->
                     <div style="margin-bottom: 24px;">
-                      <span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 6px; background-color: #4f46e5; color: #ffffff; font-weight: bold; font-size: 13px; font-family: monospace; text-align: center; vertical-align: middle;">SF</span>
-                      <span style="font-size: 14px; font-weight: 600; color: #24292e; margin-left: 8px; vertical-align: middle;">Student Forge</span>
+                      <img src="https://ik.imagekit.io/dypkhqxip/eventssflo" alt="Student Forge" height="28" style="height: 28px; width: auto; display: block; border: 0;" />
                     </div>
                     
                     <h2 style="margin: 0 0 12px 0; color: #24292e; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">Confirm your email address</h2>
@@ -85,13 +84,15 @@ export async function POST(request: Request) {
 
                     <!-- Bottom Brand Logo & Footer -->
                     <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #eaecef; text-align: center;">
-                      <div style="margin-bottom: 8px;">
-                        <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 4px; background-color: #4f46e5; color: #ffffff; font-weight: bold; font-size: 10px; font-family: monospace; text-align: center; vertical-align: middle;">SF</span>
-                        <span style="font-size: 11px; font-weight: 600; color: #24292e; margin-left: 6px; vertical-align: middle;">Student Forge Events</span>
+                      <div style="margin-bottom: 12px;">
+                        <img src="https://ik.imagekit.io/dypkhqxip/eventssflo" alt="Student Forge" height="24" style="height: 24px; width: auto; display: inline-block; vertical-align: middle; border: 0;" />
                       </div>
-                      <span style="font-size: 11px; color: #6a737d; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: block;">
-                        Secure Authentication System &bull; Hyderabad, India
-                      </span>
+                      <p style="margin: 0 0 6px 0; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069;">
+                        © 2026 Student Forge Technologies Private Limited. All rights reserved.
+                      </p>
+                      <p style="margin: 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #959da5;">
+                        Powered by <strong style="color: #24292e;">Studio Redlix</strong>
+                      </p>
                     </div>
                   </td>
                 </tr>
