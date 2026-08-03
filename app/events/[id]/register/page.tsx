@@ -839,12 +839,13 @@ export default function RegisterPage() {
               </div>
             ) : (
               <div className="flex flex-col items-center text-center gap-1 no-print -mt-4">
-                <div 
-                  className="w-[120px] h-[120px] flex items-center justify-center -mb-2"
-                  dangerouslySetInnerHTML={{
-                    __html: `<dotlottie-wc src="https://lottie.host/41df1d4a-e726-48b9-8c63-95896d087232/he0C1Dd3Ne.lottie" style="width: 120px; height: 120px;" autoplay loop></dotlottie-wc>`
-                  }}
-                />
+                <div className="w-[120px] h-[120px] flex items-center justify-center -mb-2 overflow-hidden">
+                  <iframe 
+                    src="https://lottie.host/embed/41df1d4a-e726-48b9-8c63-95896d087232/he0C1Dd3Ne.lottie" 
+                    style={{ width: '120px', height: '120px', border: 'none', background: 'transparent', pointerEvents: 'none' }}
+                    scrolling="no"
+                  />
+                </div>
                 <h2 className="text-xl font-bold text-white tracking-tight">Registration Confirmed</h2>
                 <p className="text-xs text-neutral-400">Your presenter pass has been generated. Download or print below.</p>
               </div>
