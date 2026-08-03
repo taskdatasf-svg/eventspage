@@ -1,0 +1,84 @@
+services:
+  # ─── Redis Cache ──────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: events_redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --save ""
+    ports:
+      - "6379:6379"          # accessible on host for debugging; lock down in prod
+    networks:
+      - events_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Next.js App (3 replicas behind Nginx) ────────────────────────────────
+  app1:
+    build: .
+    container_name: events_app1
+    restart: unless-stopped
+    env_file: .env.local
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - events_net
+
+  app2:
+    build: .
+    container_name: events_app2
+    restart: unless-stopped
+    env_file: .env.local
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - events_net
+
+  app3:
+    build: .
+    container_name: events_app3
+    restart: unless-stopped
+    env_file: .env.local
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - events_net
+
+  # ─── Nginx Load Balancer ──────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: events_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app1
+      - app2
+      - app3
+    networks:
+      - events_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+networks:
+  events_net:
+    driver: bridge

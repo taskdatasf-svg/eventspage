@@ -1,12 +1,31 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cacheGet, cacheSet, cacheDel } from '@/lib/redis';
+
+const CACHE_KEY = 'events:all';
+const CACHE_TTL = 60; // 60 seconds
 
 export async function GET() {
   try {
+    // ── 1. Cache hit ────────────────────────────────────────────────────────
+    const cached = await cacheGet<{ events: unknown[] }>(CACHE_KEY);
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: { 'X-Cache': 'HIT' },
+      });
+    }
+
+    // ── 2. Cache miss — query DB ────────────────────────────────────────────
     const events = await prisma.event.findMany({
       orderBy: { createdAt: 'desc' },
     });
-    return NextResponse.json({ events });
+
+    const payload = { events };
+    await cacheSet(CACHE_KEY, payload, CACHE_TTL);
+
+    return NextResponse.json(payload, {
+      headers: { 'X-Cache': 'MISS' },
+    });
   } catch (error) {
     console.error('GET /api/events error:', error);
     return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
@@ -42,6 +61,9 @@ export async function POST(request: Request) {
         speakers: body.speakers || null,
       },
     });
+
+    // Invalidate list cache so next GET reflects the new event
+    await cacheDel(CACHE_KEY);
 
     return NextResponse.json({ success: true, event });
   } catch (error) {
