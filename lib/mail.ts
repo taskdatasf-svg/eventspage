@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 interface SendMailParams {
   to: string;
@@ -38,16 +38,9 @@ const getHexColor = (bgClass: string) => {
 
 export async function sendEventMail({ to, subject, event, registration, type, originUrl }: SendMailParams) {
   try {
-    const emailUser = process.env.EMAIL_USER || 'rishirohank.studentforge@gmail.com';
-    const emailPass = process.env.EMAIL_PASS || 'kmgg xews mvdm ejwu';
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: emailUser,
-        pass: emailPass
-      }
-    });
+    const resendApiKey = process.env.RESEND_API_KEY || 're_xxxxxxxxx';
+    const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    const resend = new Resend(resendApiKey);
 
     const passUrl = `${originUrl}/events/${event.id}/rsvp`;
 
@@ -334,20 +327,22 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       </html>
     `;
 
-    const mailOptions = {
-      from: `"Student Forge" <${emailUser}>`,
+    await resend.emails.send({
+      from: `Student Forge <${resendFromEmail}>`,
       to,
       subject,
       text: isPending 
         ? `Pending Approval: Your details for ${event.title} were sent to the organizer.` 
         : `Confirmed: Your RSVP for ${event.title} is successful! Ticket Code: ${registration.ticketCode}`,
       html: mailHtml,
-      attachments
-    };
-
-    await transporter.sendMail(mailOptions);
+      attachments: attachments.map(att => ({
+        filename: att.filename,
+        content: att.content,
+        cid: att.cid
+      }))
+    });
     console.log(`Email sent successfully to ${to} (${type})`);
   } catch (error) {
-    console.error('Nodemailer sendEventMail error:', error);
+    console.error('Resend sendEventMail error:', error);
   }
 }

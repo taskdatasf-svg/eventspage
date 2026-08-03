@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
@@ -26,24 +26,12 @@ export async function POST(request: Request) {
     // Generate a random 6-digit verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Configure Nodemailer transporter with Gmail SMTP credentials from environment variables
-    const emailUser = process.env.EMAIL_USER || 'rishirohank.studentforge@gmail.com';
-    const emailPass = process.env.EMAIL_PASS || 'kmgg xews mvdm ejwu';
+    // Configure Resend API Client
+    const resendApiKey = process.env.RESEND_API_KEY || 're_xxxxxxxxx';
+    const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    const resend = new Resend(resendApiKey);
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: emailUser,
-        pass: emailPass
-      }
-    });
-
-    const mailOptions = {
-      from: `"Student Forge" <${emailUser}>`,
-      to: email,
-      subject: 'Confirm Your Email - Student Forge',
-      text: `Your verification code is: ${code}`,
-      html: `
+    const mailHtml = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -128,10 +116,15 @@ export async function POST(request: Request) {
           </table>
         </body>
         </html>
-      `
-    };
+      `;
 
-    await transporter.sendMail(mailOptions);
+    await resend.emails.send({
+      from: `Student Forge <${resendFromEmail}>`,
+      to: email,
+      subject: 'Confirm Your Email - Student Forge',
+      text: `Your verification code is: ${code}`,
+      html: mailHtml
+    });
 
     return NextResponse.json({
       success: true,
@@ -140,7 +133,7 @@ export async function POST(request: Request) {
       message: `Verification code sent to ${email}`
     });
   } catch (error: any) {
-    console.error('Nodemailer sendMail error:', error);
+    console.error('Resend sendMail error:', error);
     return NextResponse.json({ error: 'Failed to send verification email: ' + error.message }, { status: 500 });
   }
 }
