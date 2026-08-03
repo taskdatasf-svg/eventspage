@@ -34,7 +34,7 @@ interface ResponsiveHeroBannerProps {
 
 const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     logoUrl = "https://ik.imagekit.io/dypkhqxip/eventssflo",
-    backgroundImageUrl = "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=2000&q=80",
+    backgroundImageUrl = "https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/0e2dbea0-c0a9-413f-a57b-af279633c0df_3840w.jpg",
     navLinks = [
         { label: "Home", href: "/", isActive: true },
         { label: "Events", href: "/events" },
@@ -61,13 +61,13 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
-        <section className="w-full isolate min-h-screen overflow-hidden relative bg-[#161618]">
+        <section className="w-full isolate min-h-screen overflow-hidden relative bg-[#09090b]">
             <img
                 src={backgroundImageUrl}
                 alt=""
-                className="w-full h-full object-cover absolute top-0 right-0 bottom-0 left-0 opacity-40 mix-blend-overlay"
+                className="w-full h-full object-cover absolute inset-0 z-0"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#161618]/80 via-[#161618]/60 to-[#161618]" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#161618] z-0" />
 
             <header className="z-10 xl:top-4 relative">
                 <div className="mx-6">
