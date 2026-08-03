@@ -8,6 +8,7 @@ import Grainient from '@/components/Grainient';
 import { EventData } from '@/lib/eventsStore';
 import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck } from 'react-icons/go';
 import { ShinyButton } from '@/components/ui/shiny-button';
+import { useViewerCount } from '@/lib/useViewerCount';
 
 const themes = [
   { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
@@ -106,6 +107,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
   const [user, setUser] = useState<any>(null);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [extractedColor, setExtractedColor] = useState<string>('#ff6b6b');
+  const viewerCount = useViewerCount(eventId);
 
   useEffect(() => {
     if (!event?.coverImage) {
@@ -357,6 +359,17 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 </span>
                 <span className="text-[10px] font-mono uppercase bg-[#222226] border border-[#333339] text-neutral-300 px-2.5 py-1 rounded-md">
                   {event.visibility || 'Public'}
+                </span>
+                {/* Live viewer count badge */}
+                <span
+                  className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase bg-[#0d1f12] border border-[#1e3a24] text-emerald-400 px-2.5 py-1 rounded-md"
+                  title="People currently viewing this event"
+                >
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                  </span>
+                  {viewerCount} {viewerCount === 1 ? 'viewer' : 'viewers'}
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-tight leading-tight">
