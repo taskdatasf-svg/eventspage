@@ -1,23 +1,11 @@
 import { Resend } from 'resend';
 import puppeteer from 'puppeteer';
+import QRCode from 'qrcode';
+import fs from 'fs';
+import path from 'path';
 
 // ─── Shared Branding ─────────────────────────────────────────────────────────
 const LOGO_URL = 'https://ik.imagekit.io/dypkhqxip/eventssflo';
-const FOOTER_HTML = `
-  <tr>
-    <td style="padding: 28px 24px; text-align: center; background-color: #f6f8fa; border-top: 1px solid #e1e4e8;">
-      <div style="margin-bottom: 14px;">
-        <img src="${LOGO_URL}" alt="Student Forge" height="28" style="height: 28px; width: auto; display: inline-block; vertical-align: middle; border: 0;" />
-      </div>
-      <p style="margin: 0 0 6px 0; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069;">
-        © 2026 Student Forge Technologies Private Limited. All rights reserved.
-      </p>
-      <p style="margin: 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #959da5;">
-        Powered by <strong style="color: #24292e;">Studio Redlix</strong>
-      </p>
-    </td>
-  </tr>
-`;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface SendMailParams {
@@ -49,15 +37,6 @@ interface SendMailParams {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const getHexColor = (bgClass: string) => {
-  if (bgClass.includes('[#818cf8]')) return '#4f46e5';
-  if (bgClass.includes('[#fef08a]')) return '#b45309';
-  if (bgClass.includes('[#6ee7b7]')) return '#059669';
-  if (bgClass.includes('[#fbcfe8]')) return '#db2777';
-  if (bgClass.includes('[#fed7aa]')) return '#ea580c';
-  return '#4f46e5';
-};
-
 const getFallbackSoftColor = (headerBg: string | null | undefined): string => {
   if (!headerBg) return '#ff6b6b';
   const c = headerBg.toLowerCase();
@@ -69,6 +48,67 @@ const getFallbackSoftColor = (headerBg: string | null | undefined): string => {
   return '#ff6b6b';
 };
 
+// ─── Robust Cover Image Buffer Loader ─────────────────────────────────────────
+async function getCoverImageBuffer(coverImage: string | null | undefined): Promise<{ buffer: Buffer; contentType: string } | null> {
+  if (!coverImage) return null;
+  try {
+    // 1. Base64 Data URI
+    if (coverImage.startsWith('data:image/')) {
+      const matches = coverImage.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+      if (matches) {
+        return {
+          contentType: matches[1],
+          buffer: Buffer.from(matches[2], 'base64'),
+        };
+      }
+    }
+
+    // 2. Relative file path (e.g. /uploads/...)
+    if (coverImage.startsWith('/')) {
+      const publicPath = path.join(process.cwd(), 'public', coverImage);
+      if (fs.existsSync(publicPath)) {
+        const buffer = fs.readFileSync(publicPath);
+        const ext = path.extname(publicPath).toLowerCase();
+        const contentType = ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
+        return { buffer, contentType };
+      }
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const fullUrl = `${appUrl}${coverImage}`;
+      const res = await fetch(fullUrl);
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        return { buffer: Buffer.from(arrayBuf), contentType: res.headers.get('content-type') || 'image/jpeg' };
+      }
+    }
+
+    // 3. HTTP / HTTPS URL
+    if (coverImage.startsWith('http://') || coverImage.startsWith('https://')) {
+      const res = await fetch(coverImage);
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        return { buffer: Buffer.from(arrayBuf), contentType: res.headers.get('content-type') || 'image/jpeg' };
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching cover image buffer:', err);
+  }
+  return null;
+}
+
+// ─── Logo Image Buffer Loader ────────────────────────────────────────────────
+async function getLogoBuffer(): Promise<{ buffer: Buffer; contentType: string } | null> {
+  try {
+    const res = await fetch(LOGO_URL);
+    if (res.ok) {
+      const arrayBuf = await res.arrayBuffer();
+      return { buffer: Buffer.from(arrayBuf), contentType: res.headers.get('content-type') || 'image/png' };
+    }
+  } catch (err) {
+    console.error('Error fetching logo image buffer:', err);
+  }
+  return null;
+}
+
 // ─── Generate ticket PDF buffer via Puppeteer ─────────────────────────────────
 async function generateTicketPdfBuffer(
   event: SendMailParams['event'],
@@ -77,6 +117,9 @@ async function generateTicketPdfBuffer(
   try {
     const { name, email, ticketCode, paymentMethod, paymentAccountName, paymentTxnId } = registration;
     const extractedColor = getFallbackSoftColor(event.headerBg);
+    
+    // Generate QR Code data URL locally for Puppeteer
+    const qrDataUrl = await QRCode.toDataURL(ticketCode, { width: 240, margin: 1 });
 
     const htmlContent = `<!DOCTYPE html>
 <html>
@@ -157,7 +200,7 @@ async function generateTicketPdfBuffer(
     <div class="tear-line"></div>
     <div class="right-stub">
       <div class="qr-wrapper">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${ticketCode}" width="120" height="120" alt="QR Code" />
+        <img src="${qrDataUrl}" width="120" height="120" alt="QR Code" />
       </div>
       <div class="stub-footer">
         <span class="stub-title">Presenter Pass</span>
@@ -191,7 +234,52 @@ export async function sendEventMail({ to, subject, event, registration, type, or
     const passUrl = `${originUrl}/events/${event.id}/register`;
     const isPending = type === 'PENDING';
 
-    // ── Answers HTML ──────────────────────────────────────────────────────────
+    const attachments: { filename: string; content: Buffer; cid?: string }[] = [];
+
+    // ── 1. Fetch & Attach Logo as CID ──────────────────────────────────────────
+    const logoData = await getLogoBuffer();
+    let logoImgHtml = `<img src="${LOGO_URL}" alt="Student Forge" height="24" style="height:24px;width:auto;display:inline-block;vertical-align:middle;border:0;" />`;
+    if (logoData) {
+      attachments.push({ filename: 'logo.png', content: logoData.buffer, cid: 'sf-logo' });
+      logoImgHtml = `<img src="cid:sf-logo" alt="Student Forge" height="24" style="height:24px;width:auto;display:inline-block;vertical-align:middle;border:0;" />`;
+    }
+
+    // ── 2. Fetch & Attach Cover Image as CID ────────────────────────────────────
+    const coverData = await getCoverImageBuffer(event.coverImage);
+    let hasCoverCid = false;
+    let headerBannerHtml = '';
+
+    if (coverData) {
+      hasCoverCid = true;
+      attachments.push({ filename: 'coverimage.jpg', content: coverData.buffer, cid: 'event-cover' });
+      headerBannerHtml = `<div style="width:100%;text-align:center;background-color:#f6f8fa;border-bottom:1px solid #e1e4e8;"><img src="cid:event-cover" alt="${event.title}" width="500" style="width:100%;max-width:500px;height:auto;display:block;margin:0 auto;border:0;" /></div>`;
+    } else if (event.coverImage && (event.coverImage.startsWith('http://') || event.coverImage.startsWith('https://'))) {
+      headerBannerHtml = `<div style="width:100%;text-align:center;background-color:#f6f8fa;border-bottom:1px solid #e1e4e8;"><img src="${event.coverImage}" alt="${event.title}" width="500" style="width:100%;max-width:500px;height:auto;display:block;margin:0 auto;border:0;" /></div>`;
+    } else {
+      headerBannerHtml = `<div style="width:100%;height:100px;background-color:#f6f8fa;border-bottom:1px solid #e1e4e8;text-align:center;"><div style="padding-top:38px;text-align:center;"><span style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:600;color:#586069;letter-spacing:1px;">${event.organizer || 'Student Forge Events'}</span></div></div>`;
+    }
+
+    // ── 3. Generate QR Code locally & attach as CID ────────────────────────────
+    if (!isPending) {
+      try {
+        const qrBuffer = await QRCode.toBuffer(registration.ticketCode, { width: 300, margin: 1 });
+        attachments.push({ filename: 'qrcode.png', content: qrBuffer, cid: 'ticket-qrcode' });
+      } catch (e) {
+        console.error('Failed to generate local QR code buffer for email:', e);
+      }
+    }
+
+    // ── 4. Generate Ticket PDF attachment ──────────────────────────────────────
+    let ticketPdfAttachment: { filename: string; content: Buffer } | null = null;
+    if (!isPending) {
+      const pdfBuffer = await generateTicketPdfBuffer(event, registration);
+      if (pdfBuffer) {
+        ticketPdfAttachment = { filename: `ticket-${registration.ticketCode}.pdf`, content: pdfBuffer };
+        attachments.push(ticketPdfAttachment);
+      }
+    }
+
+    // ── 5. Answers & Payment HTML ──────────────────────────────────────────────
     let answersHtml = '';
     if (registration.answers) {
       try {
@@ -214,7 +302,6 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       } catch (e) { console.error('Error parsing answers for email:', e); }
     }
 
-    // ── Payment HTML ──────────────────────────────────────────────────────────
     let paymentHtml = '';
     if (registration.paymentTxnId) {
       paymentHtml = `
@@ -228,58 +315,13 @@ export async function sendEventMail({ to, subject, event, registration, type, or
         </div>`;
     }
 
-    // ── Header Banner ─────────────────────────────────────────────────────────
-    const attachments: { filename: string; content: Buffer; cid?: string }[] = [];
-    let headerBannerHtml = '';
-
-    if (event.coverImage) {
-      let bannerSrc = event.coverImage;
-      if (bannerSrc.startsWith('/')) {
-        bannerSrc = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${bannerSrc}`;
-      }
-      try {
-        const coverRes = await fetch(bannerSrc);
-        if (coverRes.ok) {
-          const buf = await coverRes.arrayBuffer();
-          attachments.push({ filename: 'coverimage.jpg', content: Buffer.from(buf), cid: 'event-cover' });
-          headerBannerHtml = `<div style="width:100%;text-align:center;background-color:#f6f8fa;border-bottom:1px solid #e1e4e8;"><img src="cid:event-cover" alt="${event.title}" width="500" style="width:100%;max-width:500px;height:auto;display:block;margin:0 auto;border:0;" /></div>`;
-        } else {
-          headerBannerHtml = `<div style="width:100%;text-align:center;background-color:#f6f8fa;border-bottom:1px solid #e1e4e8;"><img src="${bannerSrc}" alt="${event.title}" width="500" style="width:100%;max-width:500px;height:auto;display:block;margin:0 auto;border:0;" /></div>`;
-        }
-      } catch {
-        headerBannerHtml = `<div style="width:100%;text-align:center;background-color:#f6f8fa;border-bottom:1px solid #e1e4e8;"><img src="${bannerSrc}" alt="${event.title}" width="500" style="width:100%;max-width:500px;height:auto;display:block;margin:0 auto;border:0;" /></div>`;
-      }
-    } else {
-      headerBannerHtml = `<div style="width:100%;height:100px;background-color:#f6f8fa;border-bottom:1px solid #e1e4e8;text-align:center;"><div style="padding-top:38px;text-align:center;"><span style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:600;color:#586069;letter-spacing:1px;">${event.organizer || 'Student Forge Events'}</span></div></div>`;
-    }
-
-    // ── QR Code attachment (inline in mail body) ───────────────────────────────
-    if (!isPending) {
-      try {
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(registration.ticketCode)}`;
-        const qrRes = await fetch(qrUrl);
-        if (qrRes.ok) {
-          attachments.push({ filename: 'qrcode.png', content: Buffer.from(await qrRes.arrayBuffer()), cid: 'ticket-qrcode' });
-        }
-      } catch (e) { console.error('Failed to pre-fetch QR code buffer:', e); }
-    }
-
-    // ── Ticket PDF attachment ─────────────────────────────────────────────────
-    let ticketPdfAttachment: { filename: string; content: Buffer } | null = null;
-    if (!isPending) {
-      const pdfBuffer = await generateTicketPdfBuffer(event, registration);
-      if (pdfBuffer) {
-        ticketPdfAttachment = { filename: `ticket-${registration.ticketCode}.pdf`, content: pdfBuffer };
-        attachments.push(ticketPdfAttachment);
-      }
-    }
-
-    // ── Event card block at the bottom of confirmed emails ─────────────────────
-    const eventCardHtml = !isPending && event.coverImage ? `
+    // ── 6. Bottom Event Card HTML ──────────────────────────────────────────────
+    let bottomCoverSrc = hasCoverCid ? 'cid:event-cover' : event.coverImage;
+    const eventCardHtml = !isPending && bottomCoverSrc ? `
       <tr>
         <td style="padding: 0 24px 24px 24px;">
           <div style="border: 1px solid #e1e4e8; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
-            <img src="cid:event-cover" alt="${event.title}" width="452" style="width:100%;max-width:452px;height:auto;display:block;border:0;" />
+            <img src="${bottomCoverSrc}" alt="${event.title}" width="452" style="width:100%;max-width:452px;height:auto;display:block;border:0;" />
             <div style="padding: 12px 16px;">
               <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #24292e; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">${event.title}</p>
               <p style="margin: 0; font-size: 11px; color: #586069; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
@@ -293,7 +335,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       </tr>
     ` : '';
 
-    // ── Main HTML ─────────────────────────────────────────────────────────────
+    // ── 7. Main HTML Template ──────────────────────────────────────────────────
     const mailHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -404,7 +446,19 @@ export async function sendEventMail({ to, subject, event, registration, type, or
           ${eventCardHtml}
 
           <!-- Footer -->
-          ${FOOTER_HTML}
+          <tr>
+            <td style="padding: 28px 24px; text-align: center; background-color: #f6f8fa; border-top: 1px solid #e1e4e8;">
+              <div style="margin-bottom: 14px;">
+                ${logoImgHtml}
+              </div>
+              <p style="margin: 0 0 6px 0; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069;">
+                © 2026 Student Forge Technologies Private Limited. All rights reserved.
+              </p>
+              <p style="margin: 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #959da5;">
+                Powered by <strong style="color: #24292e;">Studio Redlix</strong>
+              </p>
+            </td>
+          </tr>
 
         </table>
       </td>
