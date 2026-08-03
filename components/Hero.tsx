@@ -32,19 +32,19 @@ const FALLBACK_IMAGES = [
 // The S-curve path in a 1400×580 viewBox
 // Creates a flowing loop + wave shape matching the reference
 const PATH_VIEWBOX_W = 1400;
-const PATH_VIEWBOX_H = 580;
+const PATH_VIEWBOX_H = 480;
 const PATH_D = `
-  M -120 440
-  C 80 440, 210 80, 420 260
-  C 630 440, 490 620, 370 490
-  C 250 360, 330 60, 560 180
-  C 790 300, 920 520, 1160 370
-  C 1400 220, 1520 140, 1720 280
+  M -120 360
+  C 80 360, 210 20, 420 180
+  C 630 360, 490 520, 370 400
+  C 250 280, 330 -20, 560 100
+  C 790 220, 920 430, 1160 290
+  C 1400 150, 1520 60, 1720 200
 `;
 
 const NUM_CARDS = 22;
-const CARD_W = 112; // px
-const CARD_H = 84;  // px
+const CARD_W = 160; // px
+const CARD_H = 120; // px
 const BASE_SPEED = 0.00065; // progress units per frame (0–1 range)
 const HOVER_SPEED = 0.00012;
 
@@ -139,7 +139,7 @@ function PathMarquee({ images }: PathMarqueeProps) {
     <div
       ref={containerRef}
       className="relative w-full"
-      style={{ height: 520 }}
+      style={{ height: 420 }}
       onMouseEnter={() => { hoveredRef.current = true; }}
       onMouseLeave={() => { hoveredRef.current = false; }}
     >
@@ -258,7 +258,7 @@ const Hero: React.FC<HeroProps> = ({
     <section className="relative w-full bg-[#161618] text-white flex flex-col items-center overflow-hidden">
 
       {/* ── Text block ── */}
-      <div className="relative z-10 max-w-3xl text-center flex flex-col items-center gap-4 px-4 sm:px-8 pt-20 pb-8">
+      <div className="relative z-10 max-w-3xl text-center flex flex-col items-center gap-4 px-4 sm:px-8 pt-20 pb-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#222226] border border-[#333339] text-[10px] uppercase tracking-widest text-neutral-400 font-mono rounded-md">
           <span className="w-1.5 h-1.5 bg-[#f6602d] rounded-full animate-pulse" />
           Student Forge Platform
