@@ -41,6 +41,59 @@ const getHighlightColor = (bgClass: string) => {
   return 'text-[#ffe600]';
 };
 
+function rgbToSoftHex(r: number, g: number, b: number): string {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+
+  // Set HSL to a soft, rich, bright range for dark mode
+  s = 0.75;
+  l = 0.65;
+
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+  };
+
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const newR = Math.round(hue2rgb(p, q, h + 1/3) * 255);
+  const newG = Math.round(hue2rgb(p, q, h) * 255);
+  const newB = Math.round(hue2rgb(p, q, h - 1/3) * 255);
+
+  const toHex = (c: number) => {
+    const hex = c.toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
+}
+
+function getFallbackSoftColor(headerBg: string | undefined): string {
+  if (!headerBg) return '#ff6b6b';
+  const clean = headerBg.toLowerCase();
+  if (clean.includes('818cf8')) return '#ff6b6b';
+  if (clean.includes('fef08a') || clean.includes('ffe600')) return '#fde047';
+  if (clean.includes('6ee7b7')) return '#86efac';
+  if (clean.includes('fbcfe8')) return '#fbcfe8';
+  if (clean.includes('fed7aa')) return '#fdba74';
+  return '#ff6b6b';
+}
+
 interface EventDetailClientProps {
   eventId: string;
   initialEvent: EventData | null;
@@ -52,6 +105,54 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
   const [registered, setRegistered] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
+  const [extractedColor, setExtractedColor] = useState<string>('#ff6b6b');
+
+  useEffect(() => {
+    if (!event?.coverImage) {
+      setExtractedColor(getFallbackSoftColor(event?.headerBg));
+      return;
+    }
+
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = event.coverImage;
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 10;
+        canvas.height = 10;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, 10, 10);
+        const data = ctx.getImageData(0, 0, 10, 10).data;
+        
+        let r = 0, g = 0, b = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
+          if (brightness > 15 && brightness < 240) {
+            r += data[i];
+            g += data[i+1];
+            b += data[i+2];
+            count++;
+          }
+        }
+        if (count > 0) {
+          r = Math.round(r / count);
+          g = Math.round(g / count);
+          b = Math.round(b / count);
+          setExtractedColor(rgbToSoftHex(r, g, b));
+        } else {
+          setExtractedColor(getFallbackSoftColor(event?.headerBg));
+        }
+      } catch (e) {
+        console.warn('Color extraction failed:', e);
+        setExtractedColor(getFallbackSoftColor(event?.headerBg));
+      }
+    };
+    img.onerror = () => {
+      setExtractedColor(getFallbackSoftColor(event?.headerBg));
+    };
+  }, [event?.coverImage, event?.headerBg]);
 
   useEffect(() => {
     // If not loaded server-side, fetch it client-side
@@ -133,7 +234,13 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
   const highlightColor = getHighlightColor(event.headerBg);
 
   return (
-    <main className={`min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased relative overflow-hidden ${getPageFontFamilyClass(event.font)}`}>
+    <main 
+      className={`min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased relative overflow-hidden ${getPageFontFamilyClass(event.font)}`}
+      style={{
+        ['--event-highlight' as any]: extractedColor,
+        ['--event-highlight-bg' as any]: `${extractedColor}1a`
+      }}
+    >
       {/* Ambient Page Background Glow based on theme */}
       {!event.coverImage && event.themeIdx !== undefined && themes[event.themeIdx] && (
         event.themeIdx === 7 ? (
@@ -255,16 +362,16 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
               <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-tight leading-tight">
                 {event.title.split(' ').map((word, i) => {
                   if (i % 2 === 1) {
-                    return <span key={i} className={highlightColor}>{word} </span>;
+                    return <span key={i} style={{ color: 'var(--event-highlight)' }}>{word} </span>;
                   }
                   return <span key={i}>{word} </span>;
                 })}
               </h1>
             </div>
-
+ 
             {/* Event Description Section */}
             <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-4 shadow-[0_12px_45px_rgba(0,0,0,0.65)]">
-              <h3 className={`text-xs uppercase font-mono tracking-wider ${highlightColor}`}>About the Event</h3>
+              <h3 className="text-xs uppercase font-mono tracking-wider" style={{ color: 'var(--event-highlight)' }}>About the Event</h3>
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">
                   {event.description 
@@ -284,7 +391,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 )}
               </div>
             </div>
-
+ 
             {/* Speakers Section */}
             {event.speakers && (() => {
               try {
@@ -292,7 +399,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 if (parsedSpeakers.length === 0) return null;
                 return (
                   <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-4 shadow-[0_12px_45px_rgba(0,0,0,0.65)] animate-fade-in">
-                    <h3 className={`text-xs uppercase font-mono tracking-wider ${highlightColor}`}>Speakers</h3>
+                    <h3 className="text-xs uppercase font-mono tracking-wider" style={{ color: 'var(--event-highlight)' }}>Speakers</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {parsedSpeakers.map((sp, idx) => (
                         <div key={idx} className="bg-[#18181b] border border-[#232329] rounded-xl p-3.5 flex items-center gap-3">
@@ -329,12 +436,15 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
             {/* Registration Card Console */}
             <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-6 shadow-[0_12px_45px_rgba(0,0,0,0.65)] relative overflow-hidden">
               {/* Glowing accent border line */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#ff6b6b] to-transparent" />
+              <div 
+                className="absolute top-0 left-0 right-0 h-[2px]" 
+                style={{ background: 'linear-gradient(90deg, transparent, var(--event-highlight), transparent)' }}
+              />
               
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-400">Admission Price</span>
-                  <span className={`text-3xl font-normal leading-none ${highlightColor}`}>{event.price || 'Free'}</span>
+                  <span className="text-3xl font-normal leading-none" style={{ color: 'var(--event-highlight)' }}>{event.price || 'Free'}</span>
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-wider bg-[#1c1c21] border border-[#232329] text-neutral-300 px-3 py-1 rounded-md">
                   {event.visibility || 'Public'}
@@ -388,8 +498,11 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
               {/* Date & Time row */}
               <div className="flex items-start gap-4">
-                <div className="w-8.5 h-8.5 rounded-xl bg-neutral-950/40 border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner">
-                  <GoCalendar className={`w-4 h-4 ${highlightColor}`} />
+                <div 
+                  className="w-8.5 h-8.5 rounded-xl border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner"
+                  style={{ backgroundColor: 'var(--event-highlight-bg)' }}
+                >
+                  <GoCalendar className="w-4 h-4" style={{ color: 'var(--event-highlight)' }} />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Date &amp; Time</span>
@@ -402,8 +515,11 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
               {/* Location row */}
               <div className="flex items-start gap-4">
-                <div className="w-8.5 h-8.5 rounded-xl bg-neutral-950/40 border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner">
-                  <GoLocation className={`w-4 h-4 ${highlightColor}`} />
+                <div 
+                  className="w-8.5 h-8.5 rounded-xl border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner"
+                  style={{ backgroundColor: 'var(--event-highlight-bg)' }}
+                >
+                  <GoLocation className="w-4 h-4" style={{ color: 'var(--event-highlight)' }} />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Location</span>
@@ -413,8 +529,11 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
               {/* Organizer row */}
               <div className="flex items-start gap-4">
-                <div className="w-8.5 h-8.5 rounded-xl bg-neutral-950/40 border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner">
-                  <GoPerson className={`w-4 h-4 ${highlightColor}`} />
+                <div 
+                  className="w-8.5 h-8.5 rounded-xl border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner"
+                  style={{ backgroundColor: 'var(--event-highlight-bg)' }}
+                >
+                  <GoPerson className="w-4 h-4" style={{ color: 'var(--event-highlight)' }} />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Organizer</span>
@@ -424,8 +543,11 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
               {/* Capacity row */}
               <div className="flex items-start gap-4">
-                <div className="w-8.5 h-8.5 rounded-xl bg-neutral-950/40 border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner">
-                  <GoPeople className={`w-4 h-4 ${highlightColor}`} />
+                <div 
+                  className="w-8.5 h-8.5 rounded-xl border border-white/[0.04] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-inner"
+                  style={{ backgroundColor: 'var(--event-highlight-bg)' }}
+                >
+                  <GoPeople className="w-4 h-4" style={{ color: 'var(--event-highlight)' }} />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Capacity</span>
