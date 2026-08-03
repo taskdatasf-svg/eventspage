@@ -118,13 +118,21 @@ export async function POST(request: Request) {
         </html>
       `;
 
-    await resend.emails.send({
-      from: `Student Forge <${resendFromEmail}>`,
-      to: email,
-      subject: 'Confirm Your Email - Student Forge',
-      text: `Your verification code is: ${code}`,
-      html: mailHtml
-    });
+    // Always log code to terminal for easy development testing
+    console.log('\n\x1b[43m\x1b[30m%s\x1b[0m', ` [SANDBOX MODE] VERIFICATION CODE FOR ${email}: ${code} `);
+    console.log(`Use this code to authorize your action if Resend sandbox limits prevent delivery.\n`);
+
+    try {
+      await resend.emails.send({
+        from: `Student Forge <${resendFromEmail}>`,
+        to: email,
+        subject: 'Confirm Your Email - Student Forge',
+        text: `Your verification code is: ${code}`,
+        html: mailHtml
+      });
+    } catch (mailError: any) {
+      console.warn('Resend mail delivery failed (proceeding using terminal logs):', mailError.message);
+    }
 
     return NextResponse.json({
       success: true,
