@@ -251,7 +251,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   {event.visibility || 'Public'}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-medium text-white tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-tight leading-tight">
                 {event.title.split(' ').map((word, i) => {
                   if (i % 2 === 1) {
                     return <span key={i} className={highlightColor}>{word} </span>;
@@ -262,7 +262,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
             </div>
 
             {/* Event Description Section */}
-            <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col gap-3.5 shadow-sm">
+            <div className="bg-[#18181b]/90 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col gap-3.5 shadow-2xl">
               <h3 className={`text-xs uppercase font-mono tracking-wider ${highlightColor}`}>About the Event</h3>
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">
@@ -290,11 +290,11 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 const parsedSpeakers = JSON.parse(event.speakers) as { name: string; role: string; image?: string | null }[];
                 if (parsedSpeakers.length === 0) return null;
                 return (
-                  <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col gap-4 shadow-sm animate-fade-in">
+                  <div className="bg-[#18181b]/90 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col gap-4 shadow-2xl animate-fade-in">
                     <h3 className={`text-xs uppercase font-mono tracking-wider ${highlightColor}`}>Speakers</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {parsedSpeakers.map((sp, idx) => (
-                        <div key={idx} className="bg-[#222226] border border-[#2e2e34] rounded-xl p-3.5 flex items-center gap-3">
+                        <div key={idx} className="bg-[#1c1c21]/50 border border-white/5 rounded-xl p-3.5 flex items-center gap-3">
                           {sp.image ? (
                             <img
                               src={sp.image}
@@ -326,15 +326,15 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
           <div className="lg:col-span-4 flex flex-col gap-4">
 
             {/* Registration Card */}
-            <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl overflow-hidden shadow-2xl">
+            <div className="bg-[#18181b]/90 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
 
               {/* Price header strip */}
-              <div className="px-5 pt-5 pb-4 border-b border-[#2e2e34] flex items-end justify-between">
+              <div className="px-5 pt-5 pb-4 border-b border-white/5 flex items-end justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Admission Price</span>
-                  <span className={`text-3xl font-medium leading-none ${highlightColor}`}>{event.price || 'Free'}</span>
+                  <span className={`text-3xl font-normal leading-none ${highlightColor}`}>{event.price || 'Free'}</span>
                 </div>
-                <span className="text-[9px] font-mono uppercase tracking-wider bg-[#222226] border border-[#333339] text-neutral-400 px-2 py-1 rounded-md">
+                <span className="text-[9px] font-mono uppercase tracking-wider bg-[#222226] border border-white/5 text-neutral-400 px-2 py-1 rounded-md">
                   {event.visibility || 'Public'}
                 </span>
               </div>
@@ -380,54 +380,54 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
             </div>
 
             {/* Event Meta Info Card */}
-            <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-[#18181b]/90 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col gap-5 shadow-2xl">
 
               {/* Date & Time row */}
-              <div className="px-5 py-4 flex items-center gap-4 border-b border-[#2e2e34]">
-                <div className="w-9 h-9 rounded-xl bg-[#222226] border border-[#2e2e34] flex flex-col items-center justify-center text-center flex-shrink-0">
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-[#ff6b6b]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <GoCalendar className={`w-4 h-4 ${highlightColor}`} />
                 </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
+                <div className="flex flex-col min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Date &amp; Time</span>
-                  <span className="text-sm font-medium text-white leading-tight">{event.startDate}</span>
-                  <span className="text-xs text-neutral-400 font-mono">
+                  <span className="text-sm font-normal text-white mt-0.5 leading-snug">{event.startDate}</span>
+                  <span className="text-xs text-neutral-400 font-mono mt-0.5">
                     {event.startTime}{event.endTime ? ` → ${event.endTime}` : ''}
                   </span>
                 </div>
               </div>
 
               {/* Location row */}
-              <div className="px-5 py-4 flex items-start gap-4 border-b border-[#2e2e34]">
-                <div className="w-9 h-9 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-[#ff6b6b]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <GoLocation className={`w-4 h-4 ${highlightColor}`} />
                 </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
+                <div className="flex flex-col min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Location</span>
-                  <span className="text-xs text-white font-medium break-words leading-relaxed">{event.location || 'Online / Virtual'}</span>
+                  <span className="text-xs text-white font-normal mt-0.5 leading-relaxed break-words">{event.location || 'Online / Virtual'}</span>
                 </div>
               </div>
 
               {/* Organizer row */}
-              <div className="px-5 py-4 flex items-center gap-4 border-b border-[#2e2e34]">
-                <div className="w-9 h-9 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-[#ff6b6b]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <GoPerson className={`w-4 h-4 ${highlightColor}`} />
                 </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
+                <div className="flex flex-col min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Organizer</span>
-                  <span className="text-xs font-medium text-white truncate">{event.organizer || 'Infinity Event Organizer'}</span>
+                  <span className="text-xs font-normal text-white mt-0.5 truncate">{event.organizer || 'Infinity Event Organizer'}</span>
                 </div>
               </div>
 
               {/* Capacity row */}
-              <div className="px-5 py-4 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-xl bg-[#222226] border border-[#2e2e34] flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-full bg-[#ff6b6b]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <GoPeople className={`w-4 h-4 ${highlightColor}`} />
                 </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
+                <div className="flex flex-col min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Capacity</span>
-                  <span className="text-xs font-medium text-white">{event.capacity || 'Unlimited'} seats</span>
-                  <span className="text-[10px] text-neutral-500">
-                    {event.requireApproval ? 'Approval required' : 'Open to all'}
+                  <span className="text-xs font-normal text-white mt-0.5">{event.capacity || 'Unlimited'} seats</span>
+                  <span className="text-[10px] text-neutral-400 mt-0.5">
+                    {event.requireApproval ? 'Requires host approval' : 'Instant enrollment'}
                   </span>
                 </div>
               </div>
