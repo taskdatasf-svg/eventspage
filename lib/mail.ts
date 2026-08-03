@@ -28,12 +28,12 @@ interface SendMailParams {
 }
 
 const getHexColor = (bgClass: string) => {
-  if (bgClass.includes('[#818cf8]')) return '#38bdf8';
+  if (bgClass.includes('[#818cf8]')) return '#ff6b6b';
   if (bgClass.includes('[#fef08a]')) return '#fef08a';
   if (bgClass.includes('[#6ee7b7]')) return '#6ee7b7';
   if (bgClass.includes('[#fbcfe8]')) return '#fbcfe8';
   if (bgClass.includes('[#fed7aa]')) return '#fed7aa';
-  return '#38bdf8'; // Sky blue default
+  return '#ff6b6b'; // Soft red default
 };
 
 export async function sendEventMail({ to, subject, event, registration, type, originUrl }: SendMailParams) {

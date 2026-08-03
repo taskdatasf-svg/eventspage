@@ -30,9 +30,9 @@ const getPageFontFamilyClass = (fontName: string | undefined) => {
 };
 
 const getHighlightColor = (bgClass: string) => {
-  if (!bgClass) return 'text-[#38bdf8]';
+  if (!bgClass) return 'text-[#ff6b6b]';
   const clean = bgClass.toLowerCase();
-  if (clean.includes('818cf8')) return 'text-[#38bdf8]';
+  if (clean.includes('818cf8')) return 'text-[#ff6b6b]';
   if (clean.includes('fef08a') || clean.includes('ffe600')) return 'text-[#ffe600]';
   if (clean.includes('6ee7b7')) return 'text-[#6ee7b7]';
   if (clean.includes('fbcfe8')) return 'text-[#fbcfe8]';

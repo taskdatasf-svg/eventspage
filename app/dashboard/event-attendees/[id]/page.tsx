@@ -189,7 +189,7 @@ export default function EventAttendeesPage() {
               <GoArrowLeft className="w-3.5 h-3.5" /> Back to Admin Dashboard
             </button>
             <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-              <GoPeople className="text-[#38bdf8]" /> Event Attendees
+              <GoPeople className="text-[#ff6b6b]" /> Event Attendees
             </h1>
             {event && (
               <p className="text-xs text-neutral-400 font-medium">
@@ -230,7 +230,7 @@ export default function EventAttendeesPage() {
             <div className="flex items-center gap-1.5"><GoCalendar className="w-3.5 h-3.5 text-neutral-500" /> Date: <span className="text-white font-medium">{event.startDate} at {event.startTime}</span></div>
             <div className="flex items-center gap-1.5"><GoLocation className="w-3.5 h-3.5 text-neutral-500" /> Venue: <span className="text-white font-medium truncate max-w-[200px]">{event.location || 'Online'}</span></div>
             <div className="flex items-center gap-1.5"><GoTag className="w-3.5 h-3.5 text-neutral-500" /> Price: <span className="text-white font-medium">{event.price}</span></div>
-            <div className="ml-auto bg-[#222226] border border-[#2e2e34] px-2.5 py-1 rounded text-neutral-300 font-medium">Total Registered: <span className="text-[#38bdf8] font-bold">{registrations.length}</span></div>
+            <div className="ml-auto bg-[#222226] border border-[#2e2e34] px-2.5 py-1 rounded text-neutral-300 font-medium">Total Registered: <span className="text-[#ff6b6b] font-bold">{registrations.length}</span></div>
           </div>
         )}
 

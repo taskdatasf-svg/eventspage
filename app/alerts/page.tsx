@@ -138,7 +138,7 @@ export default function AlertsPage() {
       case 'rejected':
         return <GoAlert className="w-5 h-5 text-rose-400" />;
       case 'new_event':
-        return <GoCalendar className="w-5 h-5 text-[#38bdf8]" />;
+        return <GoCalendar className="w-5 h-5 text-[#ff6b6b]" />;
       default:
         return <GoClock className="w-5 h-5 text-amber-400" />;
     }
@@ -151,7 +151,7 @@ export default function AlertsPage() {
       case 'rejected':
         return 'border-[#f43f5e]/25 hover:border-[#f43f5e]/40';
       case 'new_event':
-        return 'border-[#38bdf8]/25 hover:border-[#38bdf8]/40';
+        return 'border-[#ff6b6b]/25 hover:border-[#ff6b6b]/40';
       default:
         return 'border-[#f59e0b]/25 hover:border-[#f59e0b]/40';
     }
