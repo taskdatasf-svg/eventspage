@@ -61,13 +61,16 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
-        <section className="w-full isolate min-h-screen overflow-hidden relative bg-[#09090b]">
-            <img
-                src={backgroundImageUrl}
-                alt=""
-                className="w-full h-full object-cover absolute inset-0 z-0"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#161618] z-0" />
+        <section
+            className="w-full isolate min-h-screen overflow-hidden relative"
+            style={{
+                backgroundImage: `url(${backgroundImageUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+            }}
+        >
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-[#161618]" />
 
             <header className="z-10 xl:top-4 relative">
                 <div className="mx-6">
