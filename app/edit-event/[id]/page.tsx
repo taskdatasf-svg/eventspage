@@ -21,7 +21,7 @@ const themes = [
 ];
 
 const headerBgOptions = [
-  'bg-[#818cf8]',
+  'bg-[#38bdf8]',
   'bg-[#fef08a]',
   'bg-[#6ee7b7]',
   'bg-[#fbcfe8]',

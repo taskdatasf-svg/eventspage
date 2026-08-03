@@ -24,15 +24,15 @@ const getPageFontFamilyClass = (fontName: string | undefined) => {
   switch (fontName) {
     case 'Serif': return 'font-serif';
     case 'Mono': return 'font-mono';
-    case 'Display': return 'font-sans font-bold';
+    case 'Display': return 'font-sans font-medium';
     default: return 'font-sans';
   }
 };
 
 const getHighlightColor = (bgClass: string) => {
-  if (!bgClass) return 'text-[#818cf8]';
+  if (!bgClass) return 'text-[#38bdf8]';
   const clean = bgClass.toLowerCase();
-  if (clean.includes('818cf8')) return 'text-[#818cf8]';
+  if (clean.includes('818cf8')) return 'text-[#38bdf8]';
   if (clean.includes('fef08a') || clean.includes('ffe600')) return 'text-[#ffe600]';
   if (clean.includes('6ee7b7')) return 'text-[#6ee7b7]';
   if (clean.includes('fbcfe8')) return 'text-[#fbcfe8]';
@@ -113,7 +113,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
             <GoCalendar className="w-7 h-7 text-neutral-500" />
           </div>
           <div className="text-center">
-            <h2 className="text-lg font-bold text-white">Event Not Found</h2>
+            <h2 className="text-lg font-medium text-white">Event Not Found</h2>
             <p className="text-xs text-neutral-400 mt-1">This event may have been removed or the link is invalid.</p>
           </div>
           <a
@@ -226,10 +226,10 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
               ) : (
                 <div className="w-full h-full flex flex-col justify-between p-8 sm:p-12 relative overflow-hidden text-white">
                   <div className="flex flex-col gap-3 z-10">
-                    <span className="text-[10px] font-mono uppercase tracking-wider font-extrabold opacity-60">
+                    <span className="text-[10px] font-mono uppercase tracking-wider font-medium opacity-60">
                       {event.calendarType || 'Student Forge Gathering'}
                     </span>
-                    <h2 className="text-3xl sm:text-5xl font-black uppercase leading-[0.9] tracking-tighter line-clamp-5">
+                    <h2 className="text-3xl sm:text-5xl font-medium uppercase leading-[0.9] tracking-tighter line-clamp-5">
                       {event.title}
                     </h2>
                   </div>
@@ -251,7 +251,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   {event.visibility || 'Public'}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-medium text-white tracking-tight leading-tight">
                 {event.title.split(' ').map((word, i) => {
                   if (i % 2 === 1) {
                     return <span key={i} className={highlightColor}>{word} </span>;
@@ -276,7 +276,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   <button
                     type="button"
                     onClick={() => setIsDescExpanded(!isDescExpanded)}
-                    className="text-xs font-semibold text-neutral-400 hover:text-white transition-colors text-left underline underline-offset-4 cursor-pointer mt-1 py-2.5 pr-6 block outline-none select-none"
+                    className="text-xs font-normal text-neutral-400 hover:text-white transition-colors text-left underline underline-offset-4 cursor-pointer mt-1 py-2.5 pr-6 block outline-none select-none"
                   >
                     {isDescExpanded ? 'Read Less' : 'Read More'}
                   </button>
@@ -302,12 +302,12 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                               className="w-9 h-9 rounded-full object-cover border border-[#3e3e46] flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-9 h-9 rounded-full bg-[#2d2d34] border border-[#3e3e46] flex items-center justify-center text-sm font-bold text-[#ffec27] flex-shrink-0 select-none">
+                            <div className="w-9 h-9 rounded-full bg-[#2d2d34] border border-[#3e3e46] flex items-center justify-center text-sm font-medium text-[#ffec27] flex-shrink-0 select-none">
                               {sp.name.substring(0, 1).toUpperCase()}
                             </div>
                           )}
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold text-white truncate">{sp.name}</span>
+                            <span className="text-xs font-medium text-white truncate">{sp.name}</span>
                             <span className="text-[10px] text-neutral-400 font-mono truncate">{sp.role}</span>
                           </div>
                         </div>
@@ -332,7 +332,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
               <div className="px-5 pt-5 pb-4 border-b border-[#2e2e34] flex items-end justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Admission Price</span>
-                  <span className={`text-3xl font-black leading-none ${highlightColor}`}>{event.price || 'Free'}</span>
+                  <span className={`text-3xl font-medium leading-none ${highlightColor}`}>{event.price || 'Free'}</span>
                 </div>
                 <span className="text-[9px] font-mono uppercase tracking-wider bg-[#222226] border border-[#333339] text-neutral-400 px-2 py-1 rounded-md">
                   {event.visibility || 'Public'}
@@ -349,7 +349,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                     </div>
                     <a
                       href={`/events/${event.id}/rsvp`}
-                      className="w-full py-3 bg-white hover:bg-neutral-100 font-bold text-xs rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-lg text-center"
+                      className="w-full py-3 bg-white hover:bg-neutral-100 font-medium text-xs rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-lg text-center"
                       style={{ color: 'black' }}
                     >
                       View Ticket Pass (QR Code)
@@ -365,7 +365,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                         window.location.href = `/events/${event.id}/rsvp`;
                       }
                     }}
-                    className="w-full py-3.5 bg-white text-black hover:bg-neutral-100 font-bold text-sm rounded-xl transition-all cursor-pointer shadow-lg tracking-tight"
+                    className="w-full py-3.5 bg-white text-black hover:bg-neutral-100 font-medium text-sm rounded-xl transition-all cursor-pointer shadow-lg tracking-tight"
                   >
                     {user ? 'Register for Event' : 'Sign Up to Register'}
                   </button>
@@ -389,7 +389,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Date &amp; Time</span>
-                  <span className="text-sm font-semibold text-white leading-tight">{event.startDate}</span>
+                  <span className="text-sm font-medium text-white leading-tight">{event.startDate}</span>
                   <span className="text-xs text-neutral-400 font-mono">
                     {event.startTime}{event.endTime ? ` → ${event.endTime}` : ''}
                   </span>
@@ -414,7 +414,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Organizer</span>
-                  <span className="text-xs font-semibold text-white truncate">{event.organizer || 'Infinity Event Organizer'}</span>
+                  <span className="text-xs font-medium text-white truncate">{event.organizer || 'Infinity Event Organizer'}</span>
                 </div>
               </div>
 
@@ -425,7 +425,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 </div>
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Capacity</span>
-                  <span className="text-xs font-semibold text-white">{event.capacity || 'Unlimited'} seats</span>
+                  <span className="text-xs font-medium text-white">{event.capacity || 'Unlimited'} seats</span>
                   <span className="text-[10px] text-neutral-500">
                     {event.requireApproval ? 'Approval required' : 'Open to all'}
                   </span>
