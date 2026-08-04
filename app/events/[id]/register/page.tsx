@@ -23,26 +23,160 @@ const isEventFree = (price: string) => {
 };
 
 const COUNTRY_CODES = [
-  { code: '+91', country: 'IN', name: 'India', placeholder: '98765 43210' },
-  { code: '+1', country: 'US', name: 'United States', placeholder: '(555) 000-0000' },
-  { code: '+44', country: 'GB', name: 'United Kingdom', placeholder: '7911 123456' },
-  { code: '+1', country: 'CA', name: 'Canada', placeholder: '(555) 000-0000' },
-  { code: '+61', country: 'AU', name: 'Australia', placeholder: '412 345 678' },
-  { code: '+65', country: 'SG', name: 'Singapore', placeholder: '8123 4567' },
-  { code: '+971', country: 'AE', name: 'UAE', placeholder: '50 123 4567' },
-  { code: '+49', country: 'DE', name: 'Germany', placeholder: '151 12345678' },
-  { code: '+33', country: 'FR', name: 'France', placeholder: '6 12 34 56 78' },
-  { code: '+81', country: 'JP', name: 'Japan', placeholder: '90 1234 5678' },
-  { code: '+86', country: 'CN', name: 'China', placeholder: '139 1234 5678' },
-  { code: '+55', country: 'BR', name: 'Brazil', placeholder: '11 91234-5678' },
-  { code: '+27', country: 'ZA', name: 'South Africa', placeholder: '82 123 4567' },
-  { code: '+234', country: 'NG', name: 'Nigeria', placeholder: '802 123 4567' },
-  { code: '+60', country: 'MY', name: 'Malaysia', placeholder: '12-345 6789' },
-  { code: '+92', country: 'PK', name: 'Pakistan', placeholder: '300 1234567' },
-  { code: '+880', country: 'BD', name: 'Bangladesh', placeholder: '1712-345678' },
-  { code: '+977', country: 'NP', name: 'Nepal', placeholder: '984-1234567' },
-  { code: '+94', country: 'LK', name: 'Sri Lanka', placeholder: '71 234 5678' },
+  { code: '+91', country: 'IN', placeholder: '98765 43210' },
+  { code: '+1', country: 'US', placeholder: '(555) 000-0000' },
+  { code: '+44', country: 'GB', placeholder: '7911 123456' },
+  { code: '+1', country: 'CA', placeholder: '(555) 000-0000' },
+  { code: '+61', country: 'AU', placeholder: '412 345 678' },
+  { code: '+65', country: 'SG', placeholder: '8123 4567' },
+  { code: '+971', country: 'AE', placeholder: '50 123 4567' },
+  { code: '+49', country: 'DE', placeholder: '151 12345678' },
+  { code: '+33', country: 'FR', placeholder: '6 12 34 56 78' },
+  { code: '+81', country: 'JP', placeholder: '90 1234 5678' },
+  { code: '+86', country: 'CN', placeholder: '139 1234 5678' },
+  { code: '+55', country: 'BR', placeholder: '11 91234-5678' },
+  { code: '+27', country: 'ZA', placeholder: '82 123 4567' },
+  { code: '+234', country: 'NG', placeholder: '802 123 4567' },
+  { code: '+60', country: 'MY', placeholder: '12-345 6789' },
+  { code: '+92', country: 'PK', placeholder: '300 1234567' },
+  { code: '+880', country: 'BD', placeholder: '1712-345678' },
+  { code: '+977', country: 'NP', placeholder: '984-1234567' },
+  { code: '+94', country: 'LK', placeholder: '71 234 5678' },
 ];
+
+const CountryFlagIcon = ({ country }: { country: string }) => {
+  switch (country) {
+    case 'IN':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#f93" d="0 0h640v160H0z"/>
+          <path fill="#fff" d="0 160h640v160H0z"/>
+          <path fill="#128807" d="0 320h640v160H0z"/>
+          <circle cx="320" cy="240" r="50" fill="none" stroke="#000080" strokeWidth="8"/>
+        </svg>
+      );
+    case 'US':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#bd3d44" d="0 0h640v480H0z"/>
+          <path fill="#fff" stroke="#fff" strokeWidth="37" d="0 55h640M0 129h640M0 203h640M0 277h640M0 351h640M0 425h640"/>
+          <path fill="#192f5d" d="0 0h256v258H0z"/>
+        </svg>
+      );
+    case 'GB':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#012169" d="0 0h640v480H0z"/>
+          <path stroke="#fff" strokeWidth="60" d="m0 0 640 480M0 480 640 0"/>
+          <path stroke="#C8102E" strokeWidth="40" d="m0 0 640 480M0 480 640 0"/>
+          <path stroke="#fff" strokeWidth="100" d="M320 0v480M0 240h640"/>
+          <path stroke="#C8102E" strokeWidth="60" d="M320 0v480M0 240h640"/>
+        </svg>
+      );
+    case 'CA':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#ff0000" d="0 0h160v480H0zm480 0h160v480H480z"/>
+          <path fill="#fff" d="160 0h320v480H160z"/>
+          <path fill="#ff0000" d="m320 120 20 40 40-10-20 40 30 30-40 10 10 50-40-30-40 30 10-50-40-10 30-30-20-40 40 10z"/>
+        </svg>
+      );
+    case 'DE':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#000" d="0 0h640v160H0z"/>
+          <path fill="#dd0000" d="0 160h640v160H0z"/>
+          <path fill="#ffce00" d="0 320h640v160H0z"/>
+        </svg>
+      );
+    case 'FR':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#002395" d="0 0h213v480H0z"/>
+          <path fill="#fff" d="213 0h214v480H213z"/>
+          <path fill="#ed2939" d="427 0h213v480H427z"/>
+        </svg>
+      );
+    case 'JP':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#fff" d="0 0h640v480H0z"/>
+          <circle cx="320" cy="240" r="140" fill="#bc002d"/>
+        </svg>
+      );
+    case 'AU':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#00008b" d="0 0h640v480H0z"/>
+          <path stroke="#fff" strokeWidth="30" d="m0 0 320 240M0 240l320-240M160 0v240M0 120h320"/>
+          <path stroke="#ff0000" strokeWidth="20" d="M160 0v240M0 120h320"/>
+        </svg>
+      );
+    case 'SG':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#ed2939" d="0 0h640v240H0z"/>
+          <path fill="#fff" d="0 240h640v240H0z"/>
+          <circle cx="120" cy="120" r="60" fill="#fff"/>
+          <circle cx="140" cy="120" r="50" fill="#ed2939"/>
+        </svg>
+      );
+    case 'AE':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#00732f" d="160 0h480v160H160z"/>
+          <path fill="#fff" d="160 160h480v160H160z"/>
+          <path fill="#000" d="160 320h480v160H160z"/>
+          <path fill="#ff0000" d="0 0h160v480H0z"/>
+        </svg>
+      );
+    case 'CN':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#ee1c25" d="0 0h640v480H0z"/>
+          <circle cx="100" cy="100" r="40" fill="#ffde00"/>
+        </svg>
+      );
+    case 'BR':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#009b3a" d="0 0h640v480H0z"/>
+          <path fill="#fedf00" d="M320 40 600 240 320 440 40 240z"/>
+          <circle cx="320" cy="240" r="110" fill="#002776"/>
+        </svg>
+      );
+    case 'NG':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#008753" d="0 0h213v480H0z"/>
+          <path fill="#fff" d="213 0h214v480H213z"/>
+          <path fill="#008753" d="427 0h213v480H427z"/>
+        </svg>
+      );
+    case 'PK':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#fff" d="0 0h160v480H0z"/>
+          <path fill="#00401a" d="160 0h480v480H160z"/>
+          <circle cx="400" cy="240" r="90" fill="#fff"/>
+          <circle cx="430" cy="220" r="80" fill="#00401a"/>
+        </svg>
+      );
+    case 'BD':
+      return (
+        <svg viewBox="0 0 640 480" className="w-5 h-3.5 rounded-[2px] shadow-sm flex-shrink-0">
+          <path fill="#006a4e" d="0 0h640v480H0z"/>
+          <circle cx="280" cy="240" r="140" fill="#f42a41"/>
+        </svg>
+      );
+    default:
+      return (
+        <div className="w-5 h-3.5 bg-neutral-800 border border-neutral-700 text-[9px] font-bold text-neutral-300 rounded-[2px] flex items-center justify-center flex-shrink-0 font-mono">
+          {country}
+        </div>
+      );
+  }
+};
 
 function rgbToSoftHex(r: number, g: number, b: number): string {
   r /= 255; g /= 255; b /= 255;
@@ -579,19 +713,15 @@ export default function RegisterPage() {
                       </label>
                       <div className="flex items-center gap-2.5 border-b border-neutral-700 focus-within:border-[var(--event-highlight)] transition-all pb-1">
                         <div className="flex items-center gap-2 bg-[#18181b] border border-neutral-700 rounded-lg px-2.5 py-1.5 flex-shrink-0">
-                          <img
-                            src={`https://flagcdn.com/w40/${(COUNTRY_CODES.find((c) => c.code === countryCode)?.country || 'IN').toLowerCase()}.png`}
-                            alt="Flag"
-                            className="w-5 h-3.5 object-cover rounded-[2px] shadow-sm flex-shrink-0"
-                          />
+                          <CountryFlagIcon country={COUNTRY_CODES.find((c) => c.code === countryCode)?.country || 'IN'} />
                           <select
                             value={countryCode}
                             onChange={(e) => setCountryCode(e.target.value)}
                             className="bg-transparent text-xs font-mono font-medium text-white outline-none cursor-pointer pr-1"
                           >
                             {COUNTRY_CODES.map((c, i) => (
-                              <option key={i} value={c.code} className="bg-[#18181b] text-white font-sans">
-                                {c.country} ({c.code}) - {c.name}
+                              <option key={i} value={c.code} className="bg-[#18181b] text-white font-mono">
+                                {c.code} ({c.country})
                               </option>
                             ))}
                           </select>
