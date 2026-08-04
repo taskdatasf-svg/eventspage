@@ -251,7 +251,7 @@ export default function ExplorePage() {
 
         {/* ── Hero ── */}
         <div className="flex flex-col gap-3">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
+          <h1 className="text-3xl sm:text-4xl font-normal tracking-tight text-white">
             Discover Events
           </h1>
           <p className="text-sm sm:text-base text-[#6a6a76] font-normal leading-relaxed max-w-xl">
@@ -308,7 +308,7 @@ export default function ExplorePage() {
                     {cat.icon}
                   </div>
                   <div className="min-w-0 flex flex-col justify-center">
-                    <p className={`text-base font-semibold leading-tight truncate ${isActive ? cat.color : 'text-white group-hover:' + cat.color}`}>
+                    <p className={`text-base font-medium leading-tight truncate ${isActive ? cat.color : 'text-white group-hover:' + cat.color}`}>
                       {cat.label}
                     </p>
                     <p className="text-xs text-[#8a8a96] mt-1 font-medium">
