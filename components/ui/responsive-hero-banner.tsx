@@ -42,8 +42,8 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
         { label: "Dashboard", href: "/dashboard" },
         { label: "Help", href: "/help" }
     ],
-    ctaButtonText = "Host Event +",
-    ctaButtonHref = "/create-event",
+    ctaButtonText = "Sign In",
+    ctaButtonHref = "/auth",
     badgeLabel = "New",
     badgeText = "Student Forge Events Platform 2026",
     title = "Discover & Host",
@@ -95,10 +95,10 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                     </a>
                                 ))}
                                 <a
-                                    href={ctaButtonHref}
-                                    className="ml-1 inline-flex items-center gap-1 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
+                                    href="/auth"
+                                    className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
                                 >
-                                    Host Event <span className="material-symbols-outlined">add_box</span>
+                                    Sign In
                                 </a>
                             </div>
                         </nav>
@@ -129,10 +129,10 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                 </a>
                             ))}
                             <a
-                                href={ctaButtonHref}
+                                href="/auth"
                                 className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-white/90 transition-colors"
                             >
-                                {ctaButtonText}
+                                Sign In
                             </a>
                         </div>
                     )}
