@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { GoBell, GoCheckCircle, GoClock, GoAlert, GoCalendar, GoTag, GoPerson, GoShield } from 'react-icons/go';
+import { GoBell, GoCheckCircle, GoClock, GoAlert, GoCalendar, GoShield } from 'react-icons/go';
 
 interface NotificationItem {
   id: string;
@@ -23,7 +23,6 @@ export default function AlertsPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'registrations' | 'events'>('all');
 
   useEffect(() => {
-    // 1. Load active user session
     let currentUser: any = null;
     try {
       const stored = localStorage.getItem('student_forge_user');
@@ -35,18 +34,15 @@ export default function AlertsPage() {
       console.error(e);
     }
 
-    // 2. Fetch notifications data (events & registrations)
     const fetchAlerts = async () => {
       setLoading(true);
       const items: NotificationItem[] = [];
 
       try {
-        // Fetch all active events
         const eventsRes = await fetch('/api/events');
         const eventsData = await eventsRes.json();
         const events = eventsData.events || [];
 
-        // Add "New Event Posted" notifications
         events.forEach((ev: any) => {
           items.push({
             id: `ev-${ev.id}`,
@@ -65,13 +61,11 @@ export default function AlertsPage() {
           });
         });
 
-        // Fetch current user registrations
         if (currentUser && currentUser.email) {
           const regsRes = await fetch(`/api/registrations?email=${encodeURIComponent(currentUser.email)}`);
           const regsData = await regsRes.json();
           const registrations = regsData.registrations || [];
 
-          // Add registration status updates
           registrations.forEach((reg: any) => {
             let type: 'approved' | 'pending' | 'rejected' = 'pending';
             let title = 'Registration Pending';
@@ -107,7 +101,6 @@ export default function AlertsPage() {
         console.error('Failed to load notifications:', err);
       }
 
-      // Sort notifications by date descending
       items.sort((a, b) => {
         const dateA = new Date(a.rawDate).getTime();
         const dateB = new Date(b.rawDate).getTime();
@@ -138,9 +131,9 @@ export default function AlertsPage() {
       case 'rejected':
         return <GoAlert className="w-5 h-5 text-rose-400" />;
       case 'new_event':
-        return <GoCalendar className="w-5 h-5 text-[#ff6b6b]" />;
+        return <GoCalendar className="w-5 h-5 text-amber-400" />;
       default:
-        return <GoClock className="w-5 h-5 text-amber-400" />;
+        return <GoClock className="w-5 h-5 text-[#ce6f36]" />;
     }
   };
 
@@ -151,44 +144,50 @@ export default function AlertsPage() {
       case 'rejected':
         return 'border-[#f43f5e]/25 hover:border-[#f43f5e]/40';
       case 'new_event':
-        return 'border-[#ff6b6b]/25 hover:border-[#ff6b6b]/40';
+        return 'border-amber-500/25 hover:border-amber-500/40';
       default:
-        return 'border-[#f59e0b]/25 hover:border-[#f59e0b]/40';
+        return 'border-[#ce6f36]/25 hover:border-[#ce6f36]/40';
     }
   };
 
   return (
-    <main className="relative min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans select-none">
+    <main className="relative min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans select-none overflow-x-hidden">
       <Navbar />
 
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-12 flex-1 flex flex-col gap-8 mt-4">
+      {/* Grid texture */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#232329_1px,transparent_1px),linear-gradient(to_bottom,#232329_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_40%_at_50%_0%,#000_60%,transparent_100%)] opacity-15" />
+
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16 flex-1 flex flex-col gap-8 z-10 relative">
         
         {/* Page Top Header */}
-        <div className="flex flex-col gap-2 pb-6 border-b border-[#222226]">
-          <nav className="flex items-center gap-2 text-xs text-[#8a8a90] font-normal">
+        <div className="flex flex-col gap-3 pb-6 border-b border-[#232329]">
+          <nav className="flex items-center gap-1.5 text-[11px] text-[#5a5a64] font-normal tracking-wide">
             <a href="/" className="hover:text-white transition-colors">Home</a>
-            <span>/</span>
-            <span className="text-white font-medium">Alerts</span>
+            <span className="opacity-40">/</span>
+            <span className="text-[#8a8a96]">Alerts</span>
           </nav>
           
-          <div className="flex items-center justify-between mt-1 flex-wrap gap-4">
-            <div className="flex flex-col gap-0.5">
-              <h1 className="text-2xl sm:text-3xl font-normal text-white tracking-tight">
-                Notifications &amp; Alerts
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-3xl sm:text-4xl font-normal tracking-tight leading-tight">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">
+                  Notifications
+                </span>
+                <span className="text-white"> & Alerts</span>
               </h1>
-              <p className="text-xs text-neutral-500 font-normal">
+              <p className="text-xs sm:text-sm text-[#6a6a72] font-normal leading-relaxed">
                 Real-time updates regarding event signups, approved ticket status, and host publications.
               </p>
             </div>
 
             {/* Filter Toggle Buttons */}
-            <div className="flex items-center gap-1 bg-[#1c1c1f] border border-[#2e2e34] p-1 rounded-xl">
+            <div className="flex items-center gap-1 bg-[#1a1a1d] border border-[#262629] p-1 rounded-xl flex-shrink-0 self-start sm:self-auto">
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                   activeFilter === 'all'
-                    ? 'bg-neutral-800 text-white font-medium'
-                    : 'text-neutral-400 hover:text-white'
+                    ? 'bg-[#26262b] text-white font-medium shadow-sm'
+                    : 'text-[#5a5a64] hover:text-white'
                 }`}
               >
                 All
@@ -197,8 +196,8 @@ export default function AlertsPage() {
                 onClick={() => setActiveFilter('registrations')}
                 className={`px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                   activeFilter === 'registrations'
-                    ? 'bg-neutral-800 text-white font-medium'
-                    : 'text-neutral-400 hover:text-white'
+                    ? 'bg-[#26262b] text-white font-medium shadow-sm'
+                    : 'text-[#5a5a64] hover:text-white'
                 }`}
               >
                 Registrations
@@ -207,8 +206,8 @@ export default function AlertsPage() {
                 onClick={() => setActiveFilter('events')}
                 className={`px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                   activeFilter === 'events'
-                    ? 'bg-neutral-800 text-white font-medium'
-                    : 'text-neutral-400 hover:text-white'
+                    ? 'bg-[#26262b] text-white font-medium shadow-sm'
+                    : 'text-[#5a5a64] hover:text-white'
                 }`}
               >
                 Event Posts
@@ -222,92 +221,92 @@ export default function AlertsPage() {
           {loading ? (
             <div className="flex flex-col gap-4 animate-pulse">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="w-full h-24 bg-[#121214] border border-[#232329] rounded-2xl" />
+                <div key={i} className="w-full h-24 bg-[#1a1a1d] border border-[#262629] rounded-2xl" />
               ))}
             </div>
           ) : (
             <>
-              {/* Subtle sign in prompt banner */}
+              {/* Sign in prompt banner if signed out */}
               {!user && activeFilter === 'all' && (
-                <div className="mb-4 bg-[#1c1c1f] border border-[#2e2e34] rounded-xl p-3 flex items-center justify-between text-xs text-neutral-400">
+                <div className="mb-4 bg-[#1a1a1d] border border-[#262629] rounded-xl p-3.5 flex items-center justify-between text-xs text-[#8a8a96]">
                   <span>Sign in with your student account to check registration status approvals.</span>
-                  <a href="/auth" className="text-white hover:underline font-semibold ml-2">Sign In &rarr;</a>
+                  <a href="/auth" className="text-white hover:underline font-medium ml-2 whitespace-nowrap">Sign In &rarr;</a>
                 </div>
               )}
 
               {!user && activeFilter === 'registrations' ? (
                 /* Unauthenticated Prompt for Registrations */
-                <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-10 sm:p-14 text-center flex flex-col items-center justify-center gap-4 shadow-xl">
-                  <div className="w-14 h-14 rounded-2xl bg-[#222226] border border-[#2e2e34] text-neutral-400 flex items-center justify-center">
+                <div className="bg-[#1a1a1d] border border-[#262629] rounded-2xl p-10 sm:p-14 text-center flex flex-col items-center justify-center gap-4 shadow-xl">
+                  <div className="w-14 h-14 rounded-2xl bg-[#222226] border border-[#2a2a30] text-[#5a5a64] flex items-center justify-center">
                     <GoShield className="w-7 h-7" />
                   </div>
 
                   <div className="flex flex-col gap-1 max-w-sm">
-                    <h3 className="text-lg font-bold text-white tracking-tight">Authentication Required</h3>
-                    <p className="text-xs text-[#9a9aa0] leading-relaxed">
+                    <h3 className="text-base font-medium text-white tracking-tight">Authentication Required</h3>
+                    <p className="text-xs text-[#6a6a72] leading-relaxed font-normal">
                       Please sign in with your student email to view real-time approvals and status updates for your event registrations.
                     </p>
                   </div>
 
                   <a
                     href="/auth"
-                    className="mt-2 px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-semibold rounded-md transition-all shadow-md cursor-pointer"
+                    className="mt-2 px-4 py-2 bg-white text-neutral-900 hover:bg-white/90 text-xs font-medium rounded-full transition-all cursor-pointer"
                   >
-                    Sign In / Sign Up
+                    Sign In
                   </a>
                 </div>
               ) : filteredNotifications.length === 0 ? (
                 /* Empty Notifications State */
-                <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-10 sm:p-14 text-center flex flex-col items-center justify-center gap-4 shadow-xl">
-              <div className="w-14 h-14 rounded-2xl bg-[#222226] border border-[#2e2e34] text-neutral-400 flex items-center justify-center">
-                <GoBell className="w-7 h-7" />
-              </div>
-
-              <div className="flex flex-col gap-1 max-w-sm">
-                <h3 className="text-lg font-bold text-white tracking-tight">No Alerts Found</h3>
-                <p className="text-xs text-[#9a9aa0] leading-relaxed">
-                  There are no updates or organizer notifications matching the active filter right now. Check back later!
-                </p>
-              </div>
-            </div>
-          ) : (
-            /* Notifications List */
-            <div className="flex flex-col gap-4">
-              {filteredNotifications.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => window.location.href = item.link}
-                  className={`bg-[#121214] border rounded-2xl p-5 flex items-start gap-4 transition-all hover:scale-[1.005] duration-200 cursor-pointer shadow-md ${getBorderColor(item.type)}`}
-                >
-                  {/* Left Side: Category Icon */}
-                  <div className="w-10 h-10 rounded-xl bg-[#1c1c1f] border border-[#2e2e34] flex items-center justify-center flex-shrink-0">
-                    {getIcon(item.type)}
+                <div className="bg-[#1a1a1d] border border-[#262629] rounded-2xl p-10 sm:p-14 text-center flex flex-col items-center justify-center gap-4 shadow-xl">
+                  <div className="w-14 h-14 rounded-2xl bg-[#222226] border border-[#2a2a30] text-[#5a5a64] flex items-center justify-center">
+                    <GoBell className="w-7 h-7" />
                   </div>
 
-                  {/* Right Side: Message & Date */}
-                  <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
-                        {item.title}
-                        {item.organizer && (
-                          <span className="text-[10px] font-mono font-normal text-neutral-500 bg-[#1c1c1f] border border-[#2e2e34] px-2 py-0.5 rounded">
-                            {item.organizer}
-                          </span>
-                        )}
-                      </span>
-                      <p className="text-xs text-neutral-400 leading-relaxed font-normal">
-                        {item.message}
-                      </p>
-                    </div>
-
-                    <span className="text-[10px] text-neutral-500 font-mono flex-shrink-0 whitespace-nowrap self-start">
-                      {item.date}
-                    </span>
+                  <div className="flex flex-col gap-1 max-w-sm">
+                    <h3 className="text-base font-medium text-white tracking-tight">No Alerts Found</h3>
+                    <p className="text-xs text-[#6a6a72] leading-relaxed font-normal">
+                      There are no updates or organizer notifications matching the active filter right now. Check back later!
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ) : (
+                /* Notifications List */
+                <div className="flex flex-col gap-3">
+                  {filteredNotifications.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => (window.location.href = item.link)}
+                      className={`bg-[#1a1a1d] hover:bg-[#1e1e22] border rounded-2xl p-4 sm:p-5 flex items-start gap-4 transition-all duration-200 cursor-pointer ${getBorderColor(item.type)}`}
+                    >
+                      {/* Left Side: Category Icon */}
+                      <div className="w-10 h-10 rounded-xl bg-[#222226] border border-[#2a2a30] flex items-center justify-center flex-shrink-0">
+                        {getIcon(item.type)}
+                      </div>
+
+                      {/* Right Side: Message & Date */}
+                      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-white tracking-tight flex items-center gap-2">
+                            {item.title}
+                            {item.organizer && (
+                              <span className="text-[10px] font-mono font-normal text-[#6a6a76] bg-[#222226] border border-[#2a2a30] px-2 py-0.5 rounded">
+                                {item.organizer}
+                              </span>
+                            )}
+                          </span>
+                          <p className="text-xs text-[#8a8a96] leading-relaxed font-normal">
+                            {item.message}
+                          </p>
+                        </div>
+
+                        <span className="text-[10px] text-[#5a5a64] font-mono flex-shrink-0 whitespace-nowrap self-start">
+                          {item.date}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
         </div>
