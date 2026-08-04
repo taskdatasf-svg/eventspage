@@ -90,7 +90,7 @@ export default function EventsPage() {
               <span className="opacity-40">/</span>
               <span className="text-[#8a8a96]">Events</span>
             </nav>
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-normal tracking-tight leading-tight">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">
                 Events
               </span>
