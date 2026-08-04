@@ -91,7 +91,7 @@ export default function EventsPage() {
               <span className="text-[#8a8a96]">Events</span>
             </nav>
             <h1 className="text-3xl sm:text-4xl font-normal tracking-tight leading-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] animate-gradient-flow">
                 Events
               </span>
               <span className="text-white"> & Gatherings</span>

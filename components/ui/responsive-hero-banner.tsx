@@ -199,7 +199,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                         <h1 className="text-3xl sm:text-4xl md:text-5xl leading-tight text-white tracking-tight font-normal animate-fade-slide-in-2">
                             {title}
                             <br className="hidden sm:block" />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">{titleLine2}</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] animate-gradient-flow">{titleLine2}</span>
                         </h1>
 
                         <p className="text-sm sm:text-base animate-fade-slide-in-3 text-white/70 max-w-xl mt-4">

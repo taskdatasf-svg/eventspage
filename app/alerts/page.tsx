@@ -170,7 +170,7 @@ export default function AlertsPage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="flex flex-col gap-1">
               <h1 className="text-3xl sm:text-4xl font-normal tracking-tight leading-tight">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] animate-gradient-flow">
                   Notifications
                 </span>
                 <span className="text-white"> & Alerts</span>
