@@ -19,10 +19,24 @@ const themes = [
 const EventImage: React.FC<{ event: EventData }> = ({ event }) => {
   const [error, setError] = useState(false);
 
-  if (event.coverImage && !error) {
+  const getFirstImage = () => {
+    if (event.coverImage) {
+      const first = event.coverImage.split(',')[0].trim();
+      if (first) return first;
+    }
+    const titleLower = (event.title || '').toLowerCase();
+    if (event.id === 'cmsbpnls8000004lfw3buf1a7' || titleLower.includes('student forge') || titleLower.includes('platform launch')) {
+      return 'https://ik.imagekit.io/dypkhqxip/mainbannersf';
+    }
+    return null;
+  };
+
+  const coverSrc = getFirstImage();
+
+  if (coverSrc && !error) {
     return (
       <img
-        src={event.coverImage}
+        src={coverSrc}
         alt={event.title}
         onError={() => setError(true)}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

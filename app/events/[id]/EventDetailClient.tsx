@@ -6,10 +6,37 @@ import Footer from '@/components/Footer';
 import PixelBlast from '@/components/PixelBlast';
 import Grainient from '@/components/Grainient';
 import { EventData } from '@/lib/eventsStore';
-import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck } from 'react-icons/go';
+import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck, GoChevronLeft, GoChevronRight, GoImage, GoVideo, GoArrowUpRight } from 'react-icons/go';
 import { ShinyButton } from '@/components/ui/shiny-button';
 import { useViewerCount } from '@/lib/useViewerCount';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
+
+const GoogleDriveLogo = ({ className = "w-5 h-5" }: { className?: string }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7.71 3.5H16.29L19.72 9.5L13.15 21H4.58L7.71 3.5Z" fill="#FFC107"/>
+        <path d="M1.15 15L4.58 9.5L7.71 3.5H16.29L12.86 9.5L6.29 21H1.15Z" fill="#0066DA"/>
+        <path d="M7.71 3.5L11.14 9.5H19.72L16.29 3.5H7.71Z" fill="#00AC47"/>
+        <path d="M19.72 9.5L13.15 21H22.85L19.72 9.5Z" fill="#EA4335"/>
+        <path d="M19.72 9.5H11.14L4.58 21H13.15L19.72 9.5Z" fill="#2684FC"/>
+      </svg>
+    );
+  }
+
+  return (
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg"
+      alt="Google Drive"
+      width={20}
+      height={20}
+      className={`${className} object-contain`}
+      onError={() => setHasError(true)}
+    />
+  );
+};
 
 const themes = [
   { name: 'Minimal', bg: 'bg-[#f4f4f5]', textColor: 'text-black', subText: '*HOW LUCKY YOU ARE' },
@@ -96,6 +123,107 @@ function getFallbackSoftColor(headerBg: string | undefined): string {
   return '#ff6b6b';
 }
 
+const SidePromoBanners: React.FC<{ banners?: string[] }> = ({ 
+  banners = [
+    'https://ik.imagekit.io/dypkhqxip/mainbannersf',
+    'https://ik.imagekit.io/dypkhqxip/viralloop'
+  ] 
+}) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (banners.length <= 1 || isHovered) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % banners.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [banners.length, isHovered]);
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % banners.length);
+  };
+
+  return (
+    <div className="w-full flex flex-col items-center gap-3 group select-none">
+      {/* Image Container Frame */}
+      <div
+        className="w-full aspect-[3/4] rounded-2xl overflow-hidden relative bg-black border border-[#2e2e34]"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {banners.map((url, idx) => (
+          <div
+            key={url + idx}
+            className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
+              idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            }`}
+          >
+            <img
+              src={url}
+              alt={`Student Forge Feature Banner ${idx + 1}`}
+              width={1200}
+              height={1200}
+              className="w-full h-full object-cover object-center"
+              style={{ imageRendering: 'auto' }}
+            />
+          </div>
+        ))}
+
+        {banners.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous Banner"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-black/70 border border-white/10 text-white/80 hover:text-white transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer"
+            >
+              <GoChevronLeft className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next Banner"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-black/70 border border-white/10 text-white/80 hover:text-white transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer"
+            >
+              <GoChevronRight className="w-4 h-4" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Two Dots Navigation Indicator Container BELOW THE CONTAINER ("two dote") */}
+      {banners.length > 1 && (
+        <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-[#131315] border border-[#2e2e34]">
+          {banners.map((_, idx) => {
+            const isActive = idx === currentIndex;
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setCurrentIndex(idx)}
+                aria-label={`Go to banner slide ${idx + 1}`}
+                className={`transition-all duration-300 rounded-full cursor-pointer focus:outline-none ${
+                  isActive
+                    ? 'w-5 h-2 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                    : 'w-2 h-2 bg-white/30 hover:bg-white/70'
+                }`}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface EventDetailClientProps {
   eventId: string;
   initialEvent: EventData | null;
@@ -109,6 +237,13 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [extractedColor, setExtractedColor] = useState<string>('#ff6b6b');
   const viewerCount = useViewerCount(eventId);
+
+  const isStudentForgeLaunch =
+    event?.id === 'cmsbpnls8000004lfw3buf1a7' ||
+    (event?.title && (
+      event.title.toLowerCase().includes('student forge') ||
+      event.title.toLowerCase().includes('platform launch')
+    ));
 
   useEffect(() => {
     if (!event?.coverImage) {
@@ -301,8 +436,20 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
       <Navbar />
 
-      <div className="w-full max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 flex-1 flex flex-col gap-6 relative z-10">
+      <div className="w-full max-w-4xl sm:max-w-5xl mx-auto py-8 sm:py-12 px-4 sm:px-6 flex-1 flex flex-col gap-6 relative z-10">
         
+        {/* Far Left Promo Banner (ONLY for Student Forge Launch) */}
+        {isStudentForgeLaunch && (
+          <aside className="hidden xl:block absolute -left-72 2xl:-left-80 top-12 w-64 2xl:w-72 z-30">
+            <SidePromoBanners
+              banners={[
+                'https://ik.imagekit.io/dypkhqxip/mainbannersf',
+                'https://ik.imagekit.io/dypkhqxip/viralloop'
+              ]}
+            />
+          </aside>
+        )}
+
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-[#8a8a90] font-normal pb-4 border-b border-[#2e2e34] mb-4">
           <a href="/" className="hover:text-white transition-colors">Home</a>
@@ -312,13 +459,25 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
           <span className="text-white font-medium truncate max-w-[200px] sm:max-w-xs">{event.title}</span>
         </nav>
 
+        {/* Mobile/Tablet Fallback Banner (Student Forge Launch only on screens < 1280px) */}
+        {isStudentForgeLaunch && (
+          <div className="block xl:hidden w-full max-w-md mx-auto mb-2">
+            <SidePromoBanners
+              banners={[
+                'https://ik.imagekit.io/dypkhqxip/mainbannersf',
+                'https://ik.imagekit.io/dypkhqxip/viralloop'
+              ]}
+            />
+          </div>
+        )}
+
         {/* Outer Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Left Side: Event Cover & Basic Info Stack */}
-          <div className="lg:col-span-8 flex flex-col gap-6">
+          {/* Left Content Column: Poster & Details */}
+          <div className="lg:col-span-7 flex flex-col gap-6">
             
-            {/* Styled Event Cover Image */}
+            {/* Original Styled Event Cover Image */}
             <div className={`w-full aspect-square rounded-2xl overflow-hidden relative shadow-2xl ${
               event.coverImage 
                 ? 'bg-black border border-[#2e2e34]' 
@@ -443,8 +602,8 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
           </div>
 
-          {/* Right Side: Registration + Meta Info */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
+          {/* Right Side Column: Registration + Grab Pics & Videos + Meta Info */}
+          <div className="lg:col-span-5 flex flex-col gap-4">
 
             {/* Registration Card Console */}
             <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-6 shadow-[0_12px_45px_rgba(0,0,0,0.65)] relative overflow-hidden">
@@ -505,6 +664,67 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 )}
               </div>
             </div>
+
+            {/* Grab Pics & Videos Container Card (ONLY for Student Forge Launch) */}
+            {isStudentForgeLaunch && (
+              <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-4 shadow-[0_12px_45px_rgba(0,0,0,0.65)] relative overflow-hidden">
+                {/* Glowing accent border line */}
+                <div 
+                  className="absolute top-0 left-0 right-0 h-[2px]" 
+                  style={{ background: 'linear-gradient(90deg, transparent, var(--event-highlight), transparent)' }}
+                />
+                
+                <h3 className="text-xs uppercase font-mono tracking-wider" style={{ color: 'var(--event-highlight)' }}>
+                  Grab Pics &amp; Videos from Here
+                </h3>
+
+                <div className="flex flex-col gap-3">
+                  {/* Photos Button */}
+                  <a
+                    href="https://drive.google.com/drive/folders/1LdhVFoQzA6jnRYVbVB4ySX0QMugT8RF0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-[#18181b] border border-[#26262e] hover:border-white/30 hover:bg-[#202026] text-white transition-all group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-[#22222a] border border-[#333340] flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                        <GoogleDriveLogo className="w-4.5 h-4.5" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-semibold text-white tracking-wide">Event Photos</span>
+                        <span className="text-[10px] text-neutral-400 font-mono">Google Drive Folder</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-neutral-400 group-hover:text-white font-mono flex-shrink-0 ml-2">
+                      <span className="text-[10px] hidden sm:inline opacity-75">View Photos</span>
+                      <GoArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                    </div>
+                  </a>
+
+                  {/* Videos Button */}
+                  <a
+                    href="https://drive.google.com/drive/folders/1gFOufUzi2rcsWjvtN1xkBciV-f8KeM9N"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-[#18181b] border border-[#26262e] hover:border-white/30 hover:bg-[#202026] text-white transition-all group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-[#22222a] border border-[#333340] flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                        <GoogleDriveLogo className="w-4.5 h-4.5" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-semibold text-white tracking-wide">Event Videos</span>
+                        <span className="text-[10px] text-neutral-400 font-mono">Google Drive Folder</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-neutral-400 group-hover:text-white font-mono flex-shrink-0 ml-2">
+                      <span className="text-[10px] hidden sm:inline opacity-75">View Videos</span>
+                      <GoArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                    </div>
+                  </a>
+                </div>
+              </div>
+            )}
 
             {/* Event Meta Info Card */}
             <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-5 shadow-[0_12px_45px_rgba(0,0,0,0.65)]">
