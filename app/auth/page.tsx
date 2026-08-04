@@ -263,16 +263,12 @@ export default function AuthPage() {
       {/* Crisp grid background pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#232329_1px,transparent_1px),linear-gradient(to_bottom,#232329_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
 
-      {/* Floating ambient radial glows */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-br from-amber-500/10 via-orange-600/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+
 
       {/* Centered Auth Card Workspace */}
       <div className="w-full max-w-md mx-auto py-12 px-4 flex-1 flex flex-col justify-center z-10 relative">
         
-        <div className="bg-[#141416]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-[0_12px_50px_rgba(0,0,0,0.6)] relative overflow-hidden">
-          
-          {/* Subtle top edge glow beam */}
-          <div className="absolute -top-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+        <div className="flex flex-col gap-6 relative">
 
           {/* Header Icon & Title */}
           <div className="flex flex-col items-center text-center gap-2.5">

@@ -78,8 +78,8 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                     <div className="flex items-center justify-between pt-4">
                         <a
                             href="/"
-                            className="inline-flex items-center justify-center bg-center w-[120px] h-[36px] bg-contain bg-no-repeat rounded"
-                            style={{ backgroundImage: `url(${logoUrl})` }}
+                            className="inline-flex items-center justify-center bg-center w-[150px] h-[44px] bg-contain bg-no-repeat rounded"
+                            style={{ backgroundImage: `url(${logoUrl})`, filter: 'brightness(0) invert(1)' }}
                         />
 
                         <nav className="hidden md:flex items-center gap-2">
