@@ -69,7 +69,7 @@ const EventsList: React.FC = () => {
         
         {/* Header Bar */}
         <div className="flex items-center justify-between border-b border-[#2e2e34] pb-4">
-          <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">
             Upcoming Events
           </h2>
         </div>
