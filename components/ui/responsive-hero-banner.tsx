@@ -96,9 +96,9 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                 ))}
                                 <a
                                     href={ctaButtonHref}
-                                    className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
+                                    className="ml-1 inline-flex items-center gap-1 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
                                 >
-                                    {ctaButtonText}
+                                    Host Event <span className="text-lg font-semibold leading-none">+</span>
                                 </a>
                             </div>
                         </nav>
@@ -174,9 +174,9 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                             </a>
                             <a
                                 href={secondaryButtonHref}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 text-sm font-medium text-white/90 hover:text-white font-sans transition-colors"
+                                className="inline-flex items-center gap-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 text-sm font-medium text-white/90 hover:text-white font-sans transition-colors"
                             >
-                                {secondaryButtonText}
+                                Host Event <span className="text-lg font-semibold leading-none">+</span>
                             </a>
                         </div>
                     </div>
