@@ -213,8 +213,8 @@ export default function EventsPage() {
                 className="group bg-[#1a1a1d] hover:bg-[#1e1e22] border border-[#262629] hover:border-[#35353c] rounded-2xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
                 style={{ transform: 'translateZ(0)' }}
               >
-                {/* Cover Image */}
-                <div className="relative h-44 w-full overflow-hidden bg-[#141416] flex-shrink-0">
+                {/* Cover Image — square 1:1 (1200×1200) */}
+                <div className="relative w-full aspect-square overflow-hidden bg-[#141416] flex-shrink-0">
                   <EventImage event={event} size="lg" />
                   {/* Ticket code badge */}
                   <span className="absolute top-3 left-3 text-[9px] font-mono bg-black/50 backdrop-blur-sm border border-white/10 px-2 py-1 rounded-md text-neutral-300 tracking-wide">
