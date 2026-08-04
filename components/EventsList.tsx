@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { GoLocation, GoCalendar, GoPlus, GoArrowRight } from 'react-icons/go';
+import { GoLocation, GoCalendar, GoPlus, GoArrowRight, GoSearch } from 'react-icons/go';
 import { EventData } from '@/lib/eventsStore';
 
 const themes = [
@@ -51,6 +51,7 @@ const EventImage: React.FC<{ event: EventData }> = ({ event }) => {
 
 const EventsList: React.FC = () => {
   const [events, setEvents] = useState<EventData[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -63,15 +64,37 @@ const EventsList: React.FC = () => {
       .catch(() => setIsLoaded(true));
   }, []);
 
+  const filteredEvents = events.filter((e) => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      e.title?.toLowerCase().includes(q) ||
+      e.location?.toLowerCase().includes(q) ||
+      e.organizer?.toLowerCase().includes(q) ||
+      e.ticketCode?.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <section className="w-full bg-[#161618] text-white py-12 px-4 sm:px-8 lg:px-12">
-      <div className="max-w-7xl mx-auto flex flex-col gap-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-6">
         
-        {/* Header Bar */}
-        <div className="flex items-center justify-between border-b border-[#2e2e34] pb-4">
-          <h2 className="text-2xl sm:text-3xl font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">
+        {/* Header & Search Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2e2e34] pb-5">
+          <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d]">
             Upcoming Events
           </h2>
+
+          <div className="relative w-full sm:w-72 md:w-80">
+            <GoSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search events by title or location..."
+              className="w-full bg-[#1c1c1f] border border-[#2e2e34] focus:border-neutral-500 text-white placeholder-neutral-500 text-xs sm:text-sm rounded-full pl-10 pr-4 py-2 outline-none transition-all"
+            />
+          </div>
         </div>
 
         {/* Loading Skeleton */}
@@ -110,7 +133,7 @@ const EventsList: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : events.length === 0 ? (
+        ) : filteredEvents.length === 0 ? (
           /* Empty State: "No Events Found" */
           <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-10 sm:p-14 text-center flex flex-col items-center justify-center gap-4 shadow-xl">
             <div className="w-14 h-14 rounded-2xl bg-[#222226] border border-[#2e2e34] text-neutral-400 flex items-center justify-center">
@@ -120,22 +143,31 @@ const EventsList: React.FC = () => {
             <div className="flex flex-col gap-1 max-w-sm">
               <h3 className="text-lg font-bold text-white tracking-tight">No Events Found</h3>
               <p className="text-xs text-[#9a9aa0] leading-relaxed">
-                There are no active events published yet. Create your first event to get started!
+                {searchQuery ? `No events match "${searchQuery}". Try a different keyword!` : 'There are no active events published yet. Create your first event to get started!'}
               </p>
             </div>
 
-            <a
-              href="/create-event"
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-md transition-all duration-200 cursor-pointer shadow-sm"
-            >
-              <GoPlus className="w-3.5 h-3.5 text-neutral-300" />
-              <span>Create Your First Event</span>
-            </a>
+            {searchQuery ? (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-full transition-all duration-200 cursor-pointer shadow-sm"
+              >
+                <span>Clear Search</span>
+              </button>
+            ) : (
+              <a
+                href="/create-event"
+                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-md transition-all duration-200 cursor-pointer shadow-sm"
+              >
+                <GoPlus className="w-3.5 h-3.5 text-neutral-300" />
+                <span>Create Your First Event</span>
+              </a>
+            )}
           </div>
         ) : (
           /* Real Published Events List */
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {events.map((event) => {
+            {filteredEvents.map((event) => {
               return (
                 <div
                   key={event.id}
