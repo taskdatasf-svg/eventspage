@@ -25,7 +25,7 @@ const EventImage: React.FC<{ event: EventData }> = ({ event }) => {
         src={event.coverImage}
         alt={event.title}
         onError={() => setError(true)}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
     );
   }
@@ -35,14 +35,14 @@ const EventImage: React.FC<{ event: EventData }> = ({ event }) => {
     : themes[0];
 
   return (
-    <div className={`w-full h-full relative overflow-hidden flex flex-col justify-between p-2 text-white bg-neutral-950/45 border border-white/10 rounded-md`}>
+    <div className={`w-full h-full relative overflow-hidden flex flex-col justify-between p-3.5 sm:p-4 text-white bg-neutral-950/45 border border-white/10 rounded-xl`}>
       <div className={`absolute inset-0 z-0 ${activeTheme.bg}`} />
-      <div className="z-10 flex flex-col gap-0.5">
-        <h5 className="text-[7px] font-black uppercase leading-[0.95] tracking-tighter line-clamp-3">
+      <div className="z-10 flex flex-col gap-1">
+        <h5 className="text-xs sm:text-sm font-black uppercase leading-snug tracking-tight line-clamp-3">
           {event.title}
         </h5>
       </div>
-      <div className="z-10 flex flex-col text-[5px] font-mono uppercase tracking-wider opacity-85 border-t border-white/20 pt-1">
+      <div className="z-10 flex flex-col text-[10px] sm:text-xs font-mono uppercase tracking-wider opacity-90 border-t border-white/20 pt-1.5">
         <span>{event.startDate}</span>
       </div>
     </div>
@@ -65,7 +65,7 @@ const EventsList: React.FC = () => {
 
   return (
     <section className="w-full bg-[#161618] text-white py-12 px-4 sm:px-8 lg:px-12">
-      <div className="max-w-5xl mx-auto flex flex-col gap-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-8">
         
         {/* Header Bar */}
         <div className="flex items-center justify-between border-b border-[#2e2e34] pb-4">
@@ -76,38 +76,35 @@ const EventsList: React.FC = () => {
 
         {/* Loading Skeleton */}
         {!isLoaded ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-[#222226] border border-[#333339] rounded-md p-4 flex items-center gap-4 animate-pulse select-none"
+                className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 animate-pulse select-none"
               >
                 {/* Left Side: Skeleton Image */}
-                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#1c1c1f] border border-[#333339] rounded-md flex-shrink-0" />
+                <div className="w-full sm:w-44 sm:h-44 md:w-52 md:h-52 h-52 bg-[#222226] border border-[#333339] rounded-xl flex-shrink-0" />
 
                 {/* Right Side: Skeleton Details */}
-                <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
-                  <div className="flex flex-col gap-2">
+                <div className="flex-1 w-full min-w-0 flex flex-col justify-between h-full py-1 gap-4">
+                  <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-12 h-4 bg-[#1c1c1f] rounded" />
-                      <div className="w-16 h-3 bg-[#1c1c1f] rounded" />
+                      <div className="w-16 h-5 bg-[#222226] rounded-full" />
+                      <div className="w-24 h-4 bg-[#222226] rounded" />
                     </div>
                     
-                    <div className="w-3/4 h-5 bg-[#1c1c1f] rounded mt-1" />
-                    <div className="w-1/2 h-3.5 bg-[#1c1c1f] rounded" />
+                    <div className="w-4/5 h-6 bg-[#222226] rounded mt-1" />
+                    <div className="w-3/5 h-4 bg-[#222226] rounded" />
                     
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <div className="w-3.5 h-3.5 bg-[#1c1c1f] rounded-full" />
-                      <div className="w-24 h-3 bg-[#1c1c1f] rounded" />
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="w-4 h-4 bg-[#222226] rounded-full" />
+                      <div className="w-32 h-4 bg-[#222226] rounded" />
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#333339]/50">
-                    <div className="flex items-center gap-1">
-                      <div className="w-8 h-3 bg-[#1c1c1f] rounded" />
-                      <div className="w-10 h-4 bg-[#1c1c1f] rounded" />
-                    </div>
-                    <div className="w-12 h-3 bg-[#1c1c1f] rounded" />
+                  <div className="flex items-center justify-between pt-3 border-t border-[#2e2e34]/70">
+                    <div className="w-16 h-5 bg-[#222226] rounded" />
+                    <div className="w-20 h-6 bg-[#222226] rounded-full" />
                   </div>
                 </div>
               </div>
@@ -137,54 +134,55 @@ const EventsList: React.FC = () => {
           </div>
         ) : (
           /* Real Published Events List */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {events.map((event) => {
               return (
                 <div
                   key={event.id}
                   onClick={() => window.location.href = `/events/${event.id}`}
-                  className="group bg-[#222226] hover:bg-[#2c2c32] border border-[#333339] hover:border-neutral-500/30 rounded-md transition-all duration-200 p-4 flex items-center gap-4 cursor-pointer"
+                  className="group bg-[#1c1c1f]/90 hover:bg-[#222226] border border-[#2e2e34] hover:border-neutral-500/40 rounded-2xl transition-all duration-300 p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-5 sm:gap-6 cursor-pointer shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
                 >
                   {/* Left Side: Image */}
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#161618] border border-[#333339] rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden select-none">
+                  <div className="w-full sm:w-44 sm:h-44 md:w-52 md:h-52 h-52 bg-[#161618] border border-[#333339] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden select-none shadow-md">
                     <EventImage event={event} />
                   </div>
 
-                  {/* Right Side: basic content */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
-                    <div className="flex flex-col gap-0.5 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[8px] font-mono bg-[#161618] border border-[#333339] px-1.5 py-0.5 rounded text-neutral-400">
+                  {/* Right Side: content details */}
+                  <div className="flex-1 w-full min-w-0 flex flex-col justify-between self-stretch py-0.5">
+                    <div className="flex flex-col gap-1.5 min-w-0">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <span className="text-[10px] font-mono bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-neutral-300 tracking-wider">
                           {event.ticketCode}
                         </span>
-                        <span className="text-[9px] text-neutral-400 font-mono">
+                        <span className="text-xs text-neutral-400 font-mono flex items-center gap-1">
+                          <GoCalendar className="w-3.5 h-3.5 text-neutral-500" />
                           {event.startDate}
                         </span>
                       </div>
                       
-                      <h4 className="text-sm font-bold text-white group-hover:text-neutral-200 transition-colors truncate mt-1">
+                      <h4 className="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-amber-400 transition-colors line-clamp-2 mt-1 leading-snug">
                         {event.title}
                       </h4>
 
-                      <span className="text-[11px] text-neutral-400 font-normal truncate">
+                      <span className="text-xs sm:text-sm text-neutral-400 font-medium truncate">
                         By {event.organizer || 'Infinity Event Organizer'}
                       </span>
 
-                      <div className="flex items-center gap-1 text-[11px] text-neutral-500 font-normal truncate mt-1">
-                        <GoLocation className="w-3 h-3 flex-shrink-0 text-neutral-400" />
+                      <div className="flex items-center gap-1.5 text-xs sm:text-sm text-neutral-400 font-normal truncate mt-1">
+                        <GoLocation className="w-3.5 h-3.5 flex-shrink-0 text-neutral-400" />
                         <span className="truncate">{event.location || 'Online'}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#333339]/50">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[8px] uppercase font-mono text-neutral-500">Price:</span>
-                        <span className="text-xs font-bold text-white">{event.price || 'Free'}</span>
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#2e2e34]/70">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-[10px] uppercase font-mono text-neutral-500 tracking-wider">Price:</span>
+                        <span className="text-sm sm:text-base font-bold text-white">{event.price || 'Free'}</span>
                       </div>
 
-                      <div className="inline-flex items-center gap-1 text-[10px] text-neutral-400 group-hover:text-white transition-colors">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-neutral-300 group-hover:bg-white group-hover:text-neutral-900 group-hover:border-white transition-all duration-300 shadow-sm">
                         <span>Details</span>
-                        <GoArrowRight className="w-2.5 h-2.5" />
+                        <GoArrowRight className="w-3.5 h-3.5" />
                       </div>
                     </div>
                   </div>
