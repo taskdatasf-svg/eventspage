@@ -263,21 +263,24 @@ export default function AuthPage() {
       {/* Crisp grid background pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#232329_1px,transparent_1px),linear-gradient(to_bottom,#232329_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
 
-      {/* Floating ambient radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      {/* Floating ambient radial glows */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-br from-amber-500/10 via-orange-600/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       {/* Centered Auth Card Workspace */}
       <div className="w-full max-w-md mx-auto py-12 px-4 flex-1 flex flex-col justify-center z-10 relative">
         
-        <div className="bg-[#121214] border border-[#232329] rounded-2xl p-6 sm:p-8 flex flex-col gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+        <div className="bg-[#141416]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-[0_12px_50px_rgba(0,0,0,0.6)] relative overflow-hidden">
           
+          {/* Subtle top edge glow beam */}
+          <div className="absolute -top-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+
           {/* Header Icon & Title */}
-          <div className="flex flex-col items-center text-center gap-2">
-            <div className="w-12 h-12 rounded-full bg-[#18181B] border border-[#232329] text-white flex items-center justify-center shadow-inner">
+          <div className="flex flex-col items-center text-center gap-2.5">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-[#222226] to-[#161618] border border-white/10 text-amber-400 flex items-center justify-center shadow-lg shadow-black/40 ring-1 ring-amber-500/10">
               {(mode === 'signup' && signupStep === 2) || (mode === 'forgot' && forgotStep === 2) ? (
-                <GoShieldCheck className="w-5 h-5 text-neutral-300" />
+                <GoShieldCheck className="w-6 h-6 text-amber-400" />
               ) : (
-                <GoPerson className="w-5 h-5" />
+                <GoPerson className="w-6 h-6 text-amber-400" />
               )}
             </div>
 
@@ -296,9 +299,9 @@ export default function AuthPage() {
                   ? 'Enter Verification Code'
                   : 'Reset Password')}
             </h1>
-            <p className="text-xs text-neutral-400 max-w-[280px]">
+            <p className="text-xs text-neutral-400 max-w-[290px] leading-relaxed">
               {mode === 'login'
-                ? 'Sign in to access your event dashboard'
+                ? 'Sign in to access your student event dashboard'
                 : mode === 'signup'
                 ? (signupStep === 1
                   ? 'Enter your email address to receive a 6-digit verification code'
@@ -311,11 +314,32 @@ export default function AuthPage() {
                   ? `Enter the 6-digit code sent to ${email}`
                   : 'Enter and confirm your new account password')}
             </p>
+
+            {/* Step Indicator Pills for Signup & Forgot */}
+            {mode !== 'login' && (
+              <div className="flex items-center gap-1.5 mt-1">
+                {[1, 2, 3].map((stepNum) => {
+                  const activeStep = mode === 'signup' ? signupStep : forgotStep;
+                  return (
+                    <div
+                      key={stepNum}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        activeStep === stepNum
+                          ? 'w-6 bg-gradient-to-r from-[#ffec27] to-[#f6602d]'
+                          : activeStep > stepNum
+                          ? 'w-3 bg-amber-500/50'
+                          : 'w-3 bg-white/10'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Mode Switcher Tabs */}
           {mode !== 'forgot' ? (
-            <div className="flex items-center gap-1 bg-[#18181B] border border-[#232329] rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-[#18181b] border border-white/10 rounded-2xl p-1">
               <button
                 type="button"
                 onClick={() => {
@@ -325,8 +349,10 @@ export default function AuthPage() {
                   setSignupStep(1);
                   setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                 }}
-                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
-                  mode === 'login' ? 'bg-[#27272A] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
+                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer ${
+                  mode === 'login'
+                    ? 'bg-gradient-to-r from-[#2a2a2e] to-[#222226] text-white shadow-md border border-white/10'
+                    : 'text-neutral-400 hover:text-white'
                 }`}
               >
                 Sign In
@@ -341,8 +367,10 @@ export default function AuthPage() {
                   setSignupStep(1);
                   setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                 }}
-                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
-                  mode === 'signup' ? 'bg-[#27272A] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
+                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer ${
+                  mode === 'signup'
+                    ? 'bg-gradient-to-r from-[#2a2a2e] to-[#222226] text-white shadow-md border border-white/10'
+                    : 'text-neutral-400 hover:text-white'
                 }`}
               >
                 Sign Up
@@ -375,8 +403,8 @@ export default function AuthPage() {
           )}
 
           {successMsg && (
-            <div className="p-3 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-neutral-200 text-center flex items-center justify-center gap-1.5 animate-fade-in">
-              <GoCheck className="w-4 h-4 text-neutral-400" />
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 text-center flex items-center justify-center gap-1.5 animate-fade-in">
+              <GoCheck className="w-4 h-4 text-amber-400" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -387,7 +415,7 @@ export default function AuthPage() {
             <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Email Address</span>
-                <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
+                <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                   <GoMail className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                   <input
                     type="email"
@@ -415,12 +443,12 @@ export default function AuthPage() {
                       setConfirmPassword('');
                       setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                     }}
-                    className="text-[10px] uppercase font-mono text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    className="text-[10px] uppercase font-mono text-neutral-400 hover:text-amber-400 transition-colors cursor-pointer"
                   >
                     Forgot Password?
                   </button>
                 </div>
-                <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
+                <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                   <GoLock className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                   <input
                     type="password"
@@ -439,7 +467,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={isLoading || (!isLocalhost && !turnstileToken)}
-                className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-60 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-sm rounded-xl transition-all shadow-[0_4px_20px_rgba(246,96,45,0.25)] hover:shadow-[0_4px_25px_rgba(246,96,45,0.4)] cursor-pointer mt-2 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50"
               >
                 {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Sign In'}
               </button>
@@ -454,7 +482,7 @@ export default function AuthPage() {
                 <form onSubmit={handleSendVerificationCode} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Registered Email</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                       <GoMail className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                       <input
                         type="email"
@@ -470,7 +498,7 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3.5 bg-[#18181B] text-white border border-[#232329] hover:bg-[#27272A] font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-sm rounded-xl transition-all shadow-[0_4px_20px_rgba(246,96,45,0.25)] hover:shadow-[0_4px_25px_rgba(246,96,45,0.4)] cursor-pointer mt-2 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50"
                   >
                     {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Send Verification Code'}
                   </button>
@@ -480,8 +508,8 @@ export default function AuthPage() {
               {signupStep === 2 && (
                 /* Step 2: Confirm 6-Digit OTP */
                 <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
-                  <div className="p-3 bg-neutral-900/60 border border-[#232329] rounded-xl text-[11px] text-neutral-300 flex flex-col gap-1.5 leading-relaxed">
-                    <span className="font-semibold text-white uppercase font-mono text-[9px] tracking-wider flex items-center gap-1.5">
+                  <div className="p-3 bg-neutral-900/80 border border-white/10 rounded-xl text-[11px] text-neutral-300 flex flex-col gap-1.5 leading-relaxed">
+                    <span className="font-semibold text-amber-400 uppercase font-mono text-[9px] tracking-wider flex items-center gap-1.5">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
                       Can't find the email?
                     </span>
@@ -490,8 +518,8 @@ export default function AuthPage() {
 
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">6-Digit Verification Code</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
-                      <GoShieldCheck className="w-4 h-4 text-neutral-300 flex-shrink-0" />
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
+                      <GoShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0" />
                       <input
                         type="text"
                         placeholder="123456"
@@ -509,7 +537,7 @@ export default function AuthPage() {
                     <button
                       type="button"
                       onClick={() => setSignupStep(1)}
-                      className="px-4 py-3 bg-[#18181B] hover:bg-[#27272A] text-neutral-300 text-xs font-medium rounded-xl border border-[#232329] transition-colors cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-3 bg-[#18181b] hover:bg-[#222226] text-neutral-300 text-xs font-medium rounded-xl border border-white/10 transition-colors cursor-pointer flex items-center gap-1.5"
                     >
                       <GoArrowLeft className="w-3.5 h-3.5" />
                       <span>Back</span>
@@ -517,7 +545,7 @@ export default function AuthPage() {
 
                     <button
                       type="submit"
-                      className="flex-1 py-3 bg-white hover:bg-neutral-200 text-black font-semibold text-xs rounded-xl transition-colors cursor-pointer shadow-md"
+                      className="flex-1 py-3 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-xs rounded-xl transition-colors cursor-pointer shadow-md"
                     >
                       Verify Email Code
                     </button>
@@ -530,7 +558,7 @@ export default function AuthPage() {
                 <form onSubmit={handleCompleteRegistration} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Full Name</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                       <GoPerson className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                       <input
                         type="text"
@@ -545,7 +573,7 @@ export default function AuthPage() {
 
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Create Password</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                       <GoLock className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                       <input
                         type="password"
@@ -560,7 +588,7 @@ export default function AuthPage() {
 
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Confirm Password</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                       <GoLock className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                       <input
                         type="password"
@@ -579,7 +607,7 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={isLoading || (!isLocalhost && !turnstileToken)}
-                    className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:opacity-60 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-sm rounded-xl transition-all shadow-[0_4px_20px_rgba(246,96,45,0.25)] hover:shadow-[0_4px_25px_rgba(246,96,45,0.4)] cursor-pointer mt-2 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50"
                   >
                     {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Complete Sign Up'}
                   </button>
@@ -596,7 +624,7 @@ export default function AuthPage() {
                 <form onSubmit={handleSendForgotCode} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Account Email</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                       <GoMail className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                       <input
                         type="email"
@@ -612,7 +640,7 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-sm rounded-xl transition-all shadow-[0_4px_20px_rgba(246,96,45,0.25)] hover:shadow-[0_4px_25px_rgba(246,96,45,0.4)] cursor-pointer mt-2 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50"
                   >
                     {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Verify Email & Send OTP'}
                   </button>
@@ -622,8 +650,8 @@ export default function AuthPage() {
               {forgotStep === 2 && (
                 /* Step 2: Confirm 6-Digit OTP */
                 <form onSubmit={handleVerifyForgotOtp} className="flex flex-col gap-4">
-                  <div className="p-3 bg-neutral-900/60 border border-[#232329] rounded-xl text-[11px] text-neutral-300 flex flex-col gap-1.5 leading-relaxed">
-                    <span className="font-semibold text-white uppercase font-mono text-[9px] tracking-wider flex items-center gap-1.5">
+                  <div className="p-3 bg-neutral-900/80 border border-white/10 rounded-xl text-[11px] text-neutral-300 flex flex-col gap-1.5 leading-relaxed">
+                    <span className="font-semibold text-amber-400 uppercase font-mono text-[9px] tracking-wider flex items-center gap-1.5">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
                       Can't find the email?
                     </span>
@@ -632,8 +660,8 @@ export default function AuthPage() {
 
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">6-Digit Verification Code</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
-                      <GoShieldCheck className="w-4 h-4 text-neutral-300 flex-shrink-0" />
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
+                      <GoShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0" />
                       <input
                         type="text"
                         placeholder="123456"
@@ -655,7 +683,7 @@ export default function AuthPage() {
                         setError('');
                         setSuccessMsg('');
                       }}
-                      className="px-4 py-3 bg-[#18181B] hover:bg-[#27272A] text-neutral-300 text-xs font-medium rounded-xl border border-[#232329] transition-colors cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-3 bg-[#18181b] hover:bg-[#222226] text-neutral-300 text-xs font-medium rounded-xl border border-white/10 transition-colors cursor-pointer flex items-center gap-1.5"
                     >
                       <GoArrowLeft className="w-3.5 h-3.5" />
                       <span>Back</span>
@@ -663,7 +691,7 @@ export default function AuthPage() {
 
                     <button
                       type="submit"
-                      className="flex-1 py-3 bg-white hover:bg-neutral-200 text-black font-semibold text-xs rounded-xl transition-colors cursor-pointer shadow-md"
+                      className="flex-1 py-3 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-xs rounded-xl transition-colors cursor-pointer shadow-md"
                     >
                       Verify Code
                     </button>
@@ -676,7 +704,7 @@ export default function AuthPage() {
                 <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">New Password</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-neutral-700 rounded-xl p-3 flex items-center gap-3 transition-colors">
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                       <GoLock className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                       <input
                         type="password"
@@ -691,7 +719,7 @@ export default function AuthPage() {
 
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">Confirm New Password</span>
-                    <div className="bg-[#18181B] border border-[#232329] focus-within:border-[#44444a] rounded-xl p-3 flex items-center gap-3">
+                    <div className="bg-[#18181b]/90 border border-white/10 focus-within:border-amber-500/60 focus-within:ring-1 focus-within:ring-amber-500/20 rounded-xl p-3 flex items-center gap-3 transition-all">
                       <GoLock className="w-4 h-4 text-neutral-400 flex-shrink-0" />
                       <input
                         type="password"
@@ -707,7 +735,7 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3.5 bg-white text-black hover:bg-neutral-200 font-semibold text-sm rounded-xl transition-all shadow-xl cursor-pointer mt-2 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-sm rounded-xl transition-all shadow-[0_4px_20px_rgba(246,96,45,0.25)] hover:shadow-[0_4px_25px_rgba(246,96,45,0.4)] cursor-pointer mt-2 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50"
                   >
                     {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Reset Password'}
                   </button>
