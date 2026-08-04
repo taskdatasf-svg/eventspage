@@ -393,14 +393,15 @@ export default function AuthPage() {
 
           {/* Feedback Messages */}
           {error && (
-            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400 text-center animate-fade-in">
-              {error}
+            <div className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-xs text-rose-400 text-center flex items-center justify-center gap-1.5 animate-fade-in">
+              <GoAlert className="w-4 h-4 text-rose-400 flex-shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 text-center flex items-center justify-center gap-1.5 animate-fade-in">
-              <GoCheck className="w-4 h-4 text-amber-400" />
+            <div className="p-3 bg-emerald-500/15 border border-emerald-500/30 rounded-xl text-xs text-emerald-400 text-center flex items-center justify-center gap-1.5 animate-fade-in font-medium">
+              <GoCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
