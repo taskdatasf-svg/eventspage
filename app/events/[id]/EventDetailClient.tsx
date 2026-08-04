@@ -459,18 +459,6 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
           <span className="text-white font-medium truncate max-w-[200px] sm:max-w-xs">{event.title}</span>
         </nav>
 
-        {/* Mobile/Tablet Fallback Banner (Student Forge Launch only on screens < 1280px) */}
-        {isStudentForgeLaunch && (
-          <div className="block xl:hidden w-full max-w-md mx-auto mb-2">
-            <SidePromoBanners
-              banners={[
-                'https://ik.imagekit.io/dypkhqxip/mainbannersf',
-                'https://ik.imagekit.io/dypkhqxip/viralloop'
-              ]}
-            />
-          </div>
-        )}
-
         {/* Outer Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -796,6 +784,18 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
           </div>
 
         </div>
+
+        {/* Mobile/Tablet Banner (Moved DOWN for Student Forge Launch on screens < 1280px) */}
+        {isStudentForgeLaunch && (
+          <div className="block xl:hidden w-full max-w-md mx-auto mt-4">
+            <SidePromoBanners
+              banners={[
+                'https://ik.imagekit.io/dypkhqxip/mainbannersf',
+                'https://ik.imagekit.io/dypkhqxip/viralloop'
+              ]}
+            />
+          </div>
+        )}
 
       </div>
 
