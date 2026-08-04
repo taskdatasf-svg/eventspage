@@ -504,13 +504,6 @@ export default function AuthPage() {
               {signupStep === 2 && (
                 /* Step 2: Confirm 6-Digit OTP */
                 <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
-                  <div className="p-3 bg-neutral-900/80 border border-white/10 rounded-xl text-[11px] text-neutral-300 flex flex-col gap-1.5 leading-relaxed">
-                    <span className="font-semibold text-amber-400 uppercase font-mono text-[9px] tracking-wider flex items-center gap-1.5">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                      Can't find the email?
-                    </span>
-                    <span>Please check your <strong>Spam or Junk box</strong> if you cannot find the verification code in your primary inbox.</span>
-                  </div>
 
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">6-Digit Verification Code</span>
@@ -646,13 +639,6 @@ export default function AuthPage() {
               {forgotStep === 2 && (
                 /* Step 2: Confirm 6-Digit OTP */
                 <form onSubmit={handleVerifyForgotOtp} className="flex flex-col gap-4">
-                  <div className="p-3 bg-neutral-900/80 border border-white/10 rounded-xl text-[11px] text-neutral-300 flex flex-col gap-1.5 leading-relaxed">
-                    <span className="font-semibold text-amber-400 uppercase font-mono text-[9px] tracking-wider flex items-center gap-1.5">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                      Can't find the email?
-                    </span>
-                    <span>Please check your <strong>Spam or Junk box</strong> if you cannot find the verification code in your primary inbox.</span>
-                  </div>
 
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider">6-Digit Verification Code</span>

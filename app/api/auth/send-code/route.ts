@@ -75,10 +75,7 @@ export async function POST(request: Request) {
                 <!-- Help Note -->
                 <tr>
                   <td style="padding: 24px 32px 32px 32px;">
-                    <p style="margin: 0 0 16px 0; font-size: 13px; line-height: 1.5; color: #586069; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
-                      If this verification email isn't in your inbox, please make sure to check your <strong>Spam or Junk folder</strong>.
-                    </p>
-                    <p style="margin: 0; color: #6a737d; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; border-top: 1px solid #eaecef; padding-top: 16px;">
+                    <p style="margin: 0; color: #6a737d; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                       For security reasons, this verification code will expire shortly. Please do not share it with anyone.
                     </p>
 
