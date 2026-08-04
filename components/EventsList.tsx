@@ -99,35 +99,35 @@ const EventsList: React.FC = () => {
 
         {/* Loading Skeleton */}
         {!isLoaded ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 animate-pulse select-none"
+                className="bg-[#1c1c1f] border border-[#2e2e34] rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 animate-pulse select-none"
               >
                 {/* Left Side: Skeleton Image */}
-                <div className="w-full sm:w-44 sm:h-44 md:w-52 md:h-52 h-52 bg-[#222226] border border-[#333339] rounded-xl flex-shrink-0" />
+                <div className="w-full aspect-square sm:w-36 sm:h-36 md:w-44 md:h-44 bg-[#222226] border border-[#333339] rounded-xl flex-shrink-0" />
 
                 {/* Right Side: Skeleton Details */}
-                <div className="flex-1 w-full min-w-0 flex flex-col justify-between h-full py-1 gap-4">
-                  <div className="flex flex-col gap-3">
+                <div className="flex-1 w-full min-w-0 flex flex-col justify-between h-full py-0.5 gap-3">
+                  <div className="flex flex-col gap-2.5">
                     <div className="flex items-center gap-2">
-                      <div className="w-16 h-5 bg-[#222226] rounded-full" />
-                      <div className="w-24 h-4 bg-[#222226] rounded" />
+                      <div className="w-16 h-4 bg-[#222226] rounded-full" />
+                      <div className="w-20 h-3.5 bg-[#222226] rounded" />
                     </div>
                     
-                    <div className="w-4/5 h-6 bg-[#222226] rounded mt-1" />
-                    <div className="w-3/5 h-4 bg-[#222226] rounded" />
+                    <div className="w-4/5 h-5 bg-[#222226] rounded mt-1" />
+                    <div className="w-3/5 h-3.5 bg-[#222226] rounded" />
                     
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="w-4 h-4 bg-[#222226] rounded-full" />
-                      <div className="w-32 h-4 bg-[#222226] rounded" />
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="w-3.5 h-3.5 bg-[#222226] rounded-full" />
+                      <div className="w-28 h-3.5 bg-[#222226] rounded" />
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-[#2e2e34]/70">
-                    <div className="w-16 h-5 bg-[#222226] rounded" />
-                    <div className="w-20 h-6 bg-[#222226] rounded-full" />
+                  <div className="flex items-center justify-between pt-2.5 border-t border-[#2e2e34]/70">
+                    <div className="w-14 h-4 bg-[#222226] rounded" />
+                    <div className="w-16 h-5 bg-[#222226] rounded-full" />
                   </div>
                 </div>
               </div>
@@ -166,16 +166,16 @@ const EventsList: React.FC = () => {
           </div>
         ) : (
           /* Real Published Events List */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {filteredEvents.map((event) => {
               return (
                 <div
                   key={event.id}
                   onClick={() => window.location.href = `/events/${event.id}`}
-                  className="group bg-[#1c1c1f]/90 hover:bg-[#222226] border border-[#2e2e34] hover:border-neutral-500/40 rounded-2xl transition-all duration-300 p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-5 sm:gap-6 cursor-pointer shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                  className="group bg-[#1c1c1f]/90 hover:bg-[#222226] border border-[#2e2e34] hover:border-neutral-500/40 rounded-xl sm:rounded-2xl transition-all duration-300 p-4 sm:p-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-5 cursor-pointer shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
                 >
                   {/* Left Side: Image */}
-                  <div className="w-full sm:w-44 sm:h-44 md:w-52 md:h-52 h-52 bg-[#161618] border border-[#333339] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden select-none shadow-md">
+                  <div className="w-full aspect-square sm:w-36 sm:h-36 md:w-44 md:h-44 bg-[#161618] border border-[#333339] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden select-none shadow-md">
                     <EventImage event={event} />
                   </div>
 
