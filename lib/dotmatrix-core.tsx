@@ -28,36 +28,36 @@ const DOT_MATRIX_COLOR_PRESETS: Record<
   }
 > = {
   "solid-theme": {
-    fill: "var(--color-dot-on)",
-    glow: "var(--color-dot-on)"
+    fill: "#ffec27",
+    glow: "#ffec27"
   },
   "solid-mint": {
-    fill: "#34d399",
-    glow: "#34d399"
+    fill: "#ffec27",
+    glow: "#ffec27"
   },
   "grad-sunset": {
-    fill: "linear-gradient(135deg, #ff5f6d 0%, #ffc371 52%, #ffe29a 100%)",
-    glow: "#ff8b73"
+    fill: "linear-gradient(135deg, #ffec27 0%, #ce6f36 50%, #f6602d 100%)",
+    glow: "#ffec27"
   },
   "grad-ocean": {
-    fill: "linear-gradient(140deg, #00c6ff 0%, #0072ff 48%, #4facfe 100%)",
-    glow: "#2f8fff"
+    fill: "linear-gradient(135deg, #ffec27 0%, #ce6f36 50%, #f6602d 100%)",
+    glow: "#ffec27"
   },
   "grad-neon": {
-    fill: "linear-gradient(145deg, #b4ff39 0%, #39ffb6 46%, #00d4ff 100%)",
-    glow: "#59ffc8"
+    fill: "linear-gradient(135deg, #ffec27 0%, #ce6f36 50%, #f6602d 100%)",
+    glow: "#ffec27"
   },
   "grad-aurora": {
-    fill: "linear-gradient(145deg, #ff3cac 0%, #784ba0 45%, #2b86c5 100%)",
-    glow: "#9c64bf"
+    fill: "linear-gradient(135deg, #ffec27 0%, #ce6f36 50%, #f6602d 100%)",
+    glow: "#ffec27"
   },
   "grad-fire": {
-    fill: "linear-gradient(145deg, #ff512f 0%, #dd2476 45%, #ffb347 100%)",
-    glow: "#f96a5f"
+    fill: "linear-gradient(135deg, #ffec27 0%, #ce6f36 50%, #f6602d 100%)",
+    glow: "#ffec27"
   },
   "grad-prism": {
-    fill: "linear-gradient(145deg, #12c2e9 0%, #c471ed 45%, #f64f59 100%)",
-    glow: "#9e7de8"
+    fill: "linear-gradient(135deg, #ffec27 0%, #ce6f36 50%, #f6602d 100%)",
+    glow: "#ffec27"
   }
 };
 
@@ -693,8 +693,8 @@ interface DotMatrixBaseProps extends DotMatrixCommonProps {
 export function DotMatrixBase({
   size = 24,
   dotSize = 3,
-  color = "currentColor",
-  colorPreset,
+  color = "#ffec27",
+  colorPreset = "grad-aurora",
   speed = 1,
   ariaLabel = "Loading",
   className,
