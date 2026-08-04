@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface NavLink {
     label: string;
@@ -59,6 +59,18 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     ]
 }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem('student_forge_user');
+            if (stored) {
+                setUser(JSON.parse(stored));
+            }
+        } catch (e) {
+            console.error('Hero banner session error:', e);
+        }
+    }, []);
 
     return (
         <section
@@ -94,12 +106,29 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                         {link.label}
                                     </a>
                                 ))}
-                                <a
-                                    href="/auth"
-                                    className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
-                                >
-                                    Sign In
-                                </a>
+                                {user ? (
+                                    <a
+                                        href="/dashboard"
+                                        className="ml-1 inline-flex items-center gap-2 rounded-full bg-white text-neutral-900 px-3.5 py-1.5 text-xs font-semibold hover:bg-white/90 font-sans transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+                                        title={user.name || user.email}
+                                    >
+                                        <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-neutral-200 border border-neutral-300">
+                                            {user.profileImage ? (
+                                                <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.email)}`} alt="Avatar" className="w-full h-full object-cover" />
+                                            )}
+                                        </div>
+                                        <span className="truncate max-w-[110px]">{user.name ? user.name.trim().split(' ')[0] : 'Account'}</span>
+                                    </a>
+                                ) : (
+                                    <a
+                                        href="/auth"
+                                        className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
+                                    >
+                                        Sign In
+                                    </a>
+                                )}
                             </div>
                         </nav>
 
@@ -128,12 +157,28 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                     {link.label}
                                 </a>
                             ))}
-                            <a
-                                href="/auth"
-                                className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-white/90 transition-colors"
-                            >
-                                Sign In
-                            </a>
+                            {user ? (
+                                <a
+                                    href="/dashboard"
+                                    className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-white/90 transition-colors"
+                                >
+                                    <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-neutral-200">
+                                        {user.profileImage ? (
+                                            <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.email)}`} alt="Avatar" className="w-full h-full object-cover" />
+                                        )}
+                                    </div>
+                                    <span>{user.name ? user.name.trim().split(' ')[0] : 'Account'}</span>
+                                </a>
+                            ) : (
+                                <a
+                                    href="/auth"
+                                    className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900 hover:bg-white/90 transition-colors"
+                                >
+                                    Sign In
+                                </a>
+                            )}
                         </div>
                     )}
                 </div>

@@ -158,18 +158,21 @@ export default function Navbar() {
             {/* Profile Dropdown / Sign In Button */}
             <div className="relative" ref={profileRef}>
               {user ? (
-                /* Signed In Avatar Button */
+                /* Signed In Avatar + First Name Pill Button */
                 <button
                   type="button"
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="w-9 h-9 rounded-full bg-[#222226] text-white border border-white/15 hover:border-amber-400/50 flex items-center justify-center shadow-md cursor-pointer transition-all hover:scale-105 overflow-hidden"
+                  className="inline-flex items-center gap-2 rounded-full bg-white text-neutral-900 px-3 py-1.5 text-xs font-semibold hover:bg-white/90 font-sans transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
                   title={user.name || user.email}
                 >
-                  {user.profileImage ? (
-                    <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.email)}`} alt="Avatar" className="w-full h-full object-cover" />
-                  )}
+                  <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-neutral-200 border border-neutral-300">
+                    {user.profileImage ? (
+                      <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(user.email)}`} alt="Avatar" className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  <span className="truncate max-w-[110px]">{user.name ? user.name.trim().split(' ')[0] : 'Account'}</span>
                 </button>
               ) : (
                 /* Signed Out Sign In Button */
