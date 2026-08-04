@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { GoCheck, GoPerson, GoLock, GoMail, GoShieldCheck, GoArrowLeft } from 'react-icons/go';
+import { GoCheck, GoPerson, GoLock, GoMail, GoShieldCheck, GoArrowLeft, GoAlert } from 'react-icons/go';
 import TurnstileWidget from '@/components/TurnstileWidget';
 import Link from 'next/link';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';

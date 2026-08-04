@@ -22,6 +22,28 @@ const isEventFree = (price: string) => {
   return clean === 'free' || clean === '0' || clean === '0.00' || clean === 'free entry';
 };
 
+const COUNTRY_CODES = [
+  { code: '+91', country: 'IN', name: 'India', placeholder: '98765 43210' },
+  { code: '+1', country: 'US', name: 'United States', placeholder: '(555) 000-0000' },
+  { code: '+44', country: 'GB', name: 'United Kingdom', placeholder: '7911 123456' },
+  { code: '+1', country: 'CA', name: 'Canada', placeholder: '(555) 000-0000' },
+  { code: '+61', country: 'AU', name: 'Australia', placeholder: '412 345 678' },
+  { code: '+65', country: 'SG', name: 'Singapore', placeholder: '8123 4567' },
+  { code: '+971', country: 'AE', name: 'UAE', placeholder: '50 123 4567' },
+  { code: '+49', country: 'DE', name: 'Germany', placeholder: '151 12345678' },
+  { code: '+33', country: 'FR', name: 'France', placeholder: '6 12 34 56 78' },
+  { code: '+81', country: 'JP', name: 'Japan', placeholder: '90 1234 5678' },
+  { code: '+86', country: 'CN', name: 'China', placeholder: '139 1234 5678' },
+  { code: '+55', country: 'BR', name: 'Brazil', placeholder: '11 91234-5678' },
+  { code: '+27', country: 'ZA', name: 'South Africa', placeholder: '82 123 4567' },
+  { code: '+234', country: 'NG', name: 'Nigeria', placeholder: '802 123 4567' },
+  { code: '+60', country: 'MY', name: 'Malaysia', placeholder: '12-345 6789' },
+  { code: '+92', country: 'PK', name: 'Pakistan', placeholder: '300 1234567' },
+  { code: '+880', country: 'BD', name: 'Bangladesh', placeholder: '1712-345678' },
+  { code: '+977', country: 'NP', name: 'Nepal', placeholder: '984-1234567' },
+  { code: '+94', country: 'LK', name: 'Sri Lanka', placeholder: '71 234 5678' },
+];
+
 function rgbToSoftHex(r: number, g: number, b: number): string {
   r /= 255; g /= 255; b /= 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -556,23 +578,30 @@ export default function RegisterPage() {
                         <GoDeviceMobile className="w-3.5 h-3.5" /> Phone Number (Optional)
                       </label>
                       <div className="flex items-center gap-2.5 border-b border-neutral-700 focus-within:border-[var(--event-highlight)] transition-all pb-1">
-                        <select
-                          value={countryCode}
-                          onChange={(e) => setCountryCode(e.target.value)}
-                          className="bg-[#18181b] border border-neutral-700 rounded-lg px-2 py-1.5 text-xs text-white outline-none cursor-pointer hover:border-neutral-500 transition-colors flex-shrink-0"
-                        >
-                          {COUNTRY_CODES.map((c, i) => (
-                            <option key={i} value={c.code} className="bg-[#18181b] text-white">
-                              {c.flag} {c.code} ({c.country})
-                            </option>
-                          ))}
-                        </select>
+                        <div className="flex items-center gap-2 bg-[#18181b] border border-neutral-700 rounded-lg px-2.5 py-1.5 flex-shrink-0">
+                          <img
+                            src={`https://flagcdn.com/w40/${(COUNTRY_CODES.find((c) => c.code === countryCode)?.country || 'IN').toLowerCase()}.png`}
+                            alt="Flag"
+                            className="w-5 h-3.5 object-cover rounded-[2px] shadow-sm flex-shrink-0"
+                          />
+                          <select
+                            value={countryCode}
+                            onChange={(e) => setCountryCode(e.target.value)}
+                            className="bg-transparent text-xs font-mono font-medium text-white outline-none cursor-pointer pr-1"
+                          >
+                            {COUNTRY_CODES.map((c, i) => (
+                              <option key={i} value={c.code} className="bg-[#18181b] text-white font-sans">
+                                {c.country} ({c.code}) - {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <input
                           type="tel"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder={COUNTRY_CODES.find((c) => c.code === countryCode)?.placeholder || '98765 43210'}
-                          className="w-full bg-transparent px-2 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600 font-sans"
+                          className="w-full bg-transparent px-2 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600 font-mono"
                         />
                       </div>
                     </div>
