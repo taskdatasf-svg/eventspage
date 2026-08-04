@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "../components/dotmatrix-loader.css";
 
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 1rem;
+  line-height: 1;
+  vertical-align: middle;
+  display: inline-block;
+}
+
 :root {
   --background: #161618;
   --foreground: #ffffff;
