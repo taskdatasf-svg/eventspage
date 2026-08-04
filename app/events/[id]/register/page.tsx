@@ -140,6 +140,7 @@ export default function RegisterPage() {
   // Form states
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
   const [phone, setPhone] = useState('');
   const [answers, setAnswers] = useState<Record<string, string | boolean>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -284,7 +285,7 @@ export default function RegisterPage() {
         body: JSON.stringify({ 
           name, 
           email, 
-          phone, 
+          phone: phone.trim() ? `${countryCode} ${phone.trim()}` : '', 
           answers,
           paymentAccountName: paymentAccountName || null,
           paymentMethod: paymentMethod || null,
@@ -554,13 +555,26 @@ export default function RegisterPage() {
                       <label className="text-[10px] uppercase font-mono text-neutral-400 tracking-wider flex items-center gap-1.5">
                         <GoDeviceMobile className="w-3.5 h-3.5" /> Phone Number (Optional)
                       </label>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+1 (555) 000-0000"
-                        className="w-full bg-transparent border-b border-neutral-700 focus:border-[var(--event-highlight)] rounded-none px-0 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600"
-                      />
+                      <div className="flex items-center gap-2.5 border-b border-neutral-700 focus-within:border-[var(--event-highlight)] transition-all pb-1">
+                        <select
+                          value={countryCode}
+                          onChange={(e) => setCountryCode(e.target.value)}
+                          className="bg-[#18181b] border border-neutral-700 rounded-lg px-2 py-1.5 text-xs text-white outline-none cursor-pointer hover:border-neutral-500 transition-colors flex-shrink-0"
+                        >
+                          {COUNTRY_CODES.map((c, i) => (
+                            <option key={i} value={c.code} className="bg-[#18181b] text-white">
+                              {c.flag} {c.code} ({c.country})
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder={COUNTRY_CODES.find((c) => c.code === countryCode)?.placeholder || '98765 43210'}
+                          className="w-full bg-transparent px-2 py-3 text-sm text-white outline-none transition-all placeholder:text-neutral-600 font-sans"
+                        />
+                      </div>
                     </div>
 
                     {/* Custom RSVP Fields */}
