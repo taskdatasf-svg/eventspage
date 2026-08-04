@@ -42,7 +42,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
         { label: "Dashboard", href: "/dashboard" },
         { label: "Help", href: "/help" }
     ],
-    ctaButtonText = "Host Event",
+    ctaButtonText = "+ Host Event",
     ctaButtonHref = "/create-event",
     badgeLabel = "New",
     badgeText = "Student Forge Events Platform 2026",
@@ -51,7 +51,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     description = "Host, discover, and scale technical hackathons, summits, and workshops across global university chapters with automated ticket generation and check-in QR passes.",
     primaryButtonText = "Explore Events",
     primaryButtonHref = "/explore",
-    secondaryButtonText = "Host Event",
+    secondaryButtonText = "+ Host Event",
     secondaryButtonHref = "/create-event",
     partnersTitle = "Partnering with leading student tech communities nationwide",
     partners = [
