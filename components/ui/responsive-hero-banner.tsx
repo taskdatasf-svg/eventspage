@@ -42,7 +42,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
         { label: "Dashboard", href: "/dashboard" },
         { label: "Help", href: "/help" }
     ],
-    ctaButtonText = "+ Host Event",
+    ctaButtonText = "Host Event +",
     ctaButtonHref = "/create-event",
     badgeLabel = "New",
     badgeText = "Student Forge Events Platform 2026",
@@ -51,7 +51,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     description = "Host, discover, and scale technical hackathons, summits, and workshops across global university chapters with automated ticket generation and check-in QR passes.",
     primaryButtonText = "Explore Events",
     primaryButtonHref = "/explore",
-    secondaryButtonText = "+ Host Event",
+    secondaryButtonText = "Host Event +",
     secondaryButtonHref = "/create-event",
     partnersTitle = "Partnering with leading student tech communities nationwide",
     partners = [
@@ -96,13 +96,9 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                 ))}
                                 <a
                                     href={ctaButtonHref}
-                                    className="ml-1 inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
+                                    className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
                                 >
                                     {ctaButtonText}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                                        <path d="M7 7h10v10" />
-                                        <path d="M7 17 17 7" />
-                                    </svg>
                                 </a>
                             </div>
                         </nav>
@@ -178,12 +174,9 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                             </a>
                             <a
                                 href={secondaryButtonHref}
-                                className="inline-flex items-center gap-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 text-sm font-medium text-white/90 hover:text-white font-sans transition-colors"
+                                className="inline-flex items-center gap-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 text-sm font-medium text-white/90 hover:text-white font-sans transition-colors"
                             >
                                 {secondaryButtonText}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                                    <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
-                                </svg>
                             </a>
                         </div>
                     </div>

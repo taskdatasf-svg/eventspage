@@ -20,9 +20,9 @@ const Hero: React.FC<HeroProps> = () => {
       description="Host, discover, and scale technical hackathons, summits, and workshops across global university chapters with automated ticket generation and check-in QR passes."
       primaryButtonText="Explore Events"
       primaryButtonHref="/explore"
-      secondaryButtonText="+ Host Event"
+      secondaryButtonText="Host Event +"
       secondaryButtonHref="/create-event"
-      ctaButtonText="+ Host Event"
+      ctaButtonText="Host Event +"
       ctaButtonHref="/create-event"
     />
   );
