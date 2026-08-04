@@ -118,15 +118,6 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-40 flex flex-col">
 
-      {/* Sticky Announcement Banner — TOP */}
-      <div className="w-full bg-blue-600 border-b border-blue-500 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-center">
-          <span className="text-[10px] sm:text-xs md:text-sm font-semibold text-white font-sans tracking-tight whitespace-nowrap">
-            This platform is currently in early access &mdash; public launch coming soon.
-          </span>
-        </div>
-      </div>
-
     <nav className="w-full bg-[#161618] border-b border-[#2e2e34] py-3.5 px-4 sm:px-8 font-sans antialiased backdrop-blur-md bg-opacity-95">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         
