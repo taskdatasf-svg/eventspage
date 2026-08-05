@@ -8,7 +8,6 @@ StudentForge is a campus events and ticketing platform designed for university s
 
 ## Key Features & User Flows
 - **Authentication**: Email verification codes (OTP) for account creation and password recovery.
-- **Security Check**: Cloudflare Turnstile captcha check on login, registration, and paid/free checkouts.
 - **Event Catalog**: Visual grids of upcoming and active events, searchable by title, tag, or location.
 - **RSVPs & Ticketing**:
   - Free Events: Single-step, instant RSVPs.

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { GoCheck, GoPerson, GoLock, GoMail, GoShieldCheck, GoArrowLeft, GoAlert } from 'react-icons/go';
-import TurnstileWidget from '@/components/TurnstileWidget';
 import Link from 'next/link';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
@@ -27,18 +26,6 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState('');
-  const [isLocalhost, setIsLocalhost] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      setIsLocalhost(isLocal);
-      if (isLocal) {
-        setTurnstileToken('localhost_bypass');
-      }
-    }
-  }, []);
 
   // Step 1: Send Verification Email
   const handleSendVerificationCode = async (e: React.FormEvent) => {
@@ -102,17 +89,12 @@ export default function AuthPage() {
       return;
     }
 
-    if (!isLocalhost && !turnstileToken) {
-      setError('Please complete the security verification check.');
-      return;
-    }
-
     setIsLoading(true);
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name || email.split('@')[0], email, password, turnstileToken })
+        body: JSON.stringify({ name: name || email.split('@')[0], email, password })
       });
       const data = await res.json();
 
@@ -226,18 +208,13 @@ export default function AuthPage() {
     e.preventDefault();
     setError('');
 
-    if (!isLocalhost && !turnstileToken) {
-      setError('Please complete the security verification check.');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, turnstileToken })
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
 
@@ -343,7 +320,6 @@ export default function AuthPage() {
                   setError('');
                   setSuccessMsg('');
                   setSignupStep(1);
-                  setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                 }}
                 className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer ${
                   mode === 'login'
@@ -361,7 +337,6 @@ export default function AuthPage() {
                   setError('');
                   setSuccessMsg('');
                   setSignupStep(1);
-                  setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                 }}
                 className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer ${
                   mode === 'signup'
@@ -381,7 +356,6 @@ export default function AuthPage() {
                   setForgotStep(1);
                   setError('');
                   setSuccessMsg('');
-                  setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                 }}
                 className="text-xs text-neutral-400 hover:text-white font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               >
@@ -438,7 +412,6 @@ export default function AuthPage() {
                       setEnteredOtp('');
                       setPassword('');
                       setConfirmPassword('');
-                      setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
                     }}
                     className="text-[10px] uppercase font-mono text-neutral-400 hover:text-amber-400 transition-colors cursor-pointer"
                   >
@@ -458,12 +431,9 @@ export default function AuthPage() {
                 </div>
               </div>
 
-              {/* Turnstile Widget */}
-              {!isLocalhost && <TurnstileWidget onVerify={setTurnstileToken} />}
-
               <button
                 type="submit"
-                disabled={isLoading || (!isLocalhost && !turnstileToken)}
+                disabled={isLoading}
                 className="w-full py-3.5 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-sm rounded-xl transition-all shadow-[0_4px_20px_rgba(246,96,45,0.25)] hover:shadow-[0_4px_25px_rgba(246,96,45,0.4)] cursor-pointer mt-2 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50"
               >
                 {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Sign In'}
@@ -591,12 +561,9 @@ export default function AuthPage() {
                     </div>
                   </div>
 
-                  {/* Turnstile Widget */}
-                  {!isLocalhost && <TurnstileWidget onVerify={setTurnstileToken} />}
-
                   <button
                     type="submit"
-                    disabled={isLoading || (!isLocalhost && !turnstileToken)}
+                    disabled={isLoading}
                     className="w-full py-3.5 bg-gradient-to-r from-[#ffec27] via-[#ce6f36] to-[#f6602d] hover:brightness-110 text-neutral-950 font-bold text-sm rounded-xl transition-all shadow-[0_4px_20px_rgba(246,96,45,0.25)] hover:shadow-[0_4px_25px_rgba(246,96,45,0.4)] cursor-pointer mt-2 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50"
                   >
                     {isLoading ? <DotmSquare5 size={18} dotSize={2} speed={1.2} bloom colorPreset="grad-aurora" animated /> : 'Complete Sign Up'}

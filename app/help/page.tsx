@@ -41,24 +41,12 @@ export default function HelpPage() {
       id: 'security' as SectionKey,
       label: 'Security & Verification',
       title: 'Security & Verification',
-      subtitle: 'Information about human verification checks and login security.',
+      subtitle: 'Information about account security and ticket verification.',
       content: (
         <div className="flex flex-col gap-6 text-sm text-[#8a8a96] leading-relaxed font-normal">
           <p>
-            To keep our platform secure and prevent automated bot registrations or brute-force logins, we utilize Cloudflare Turnstile protection.
+            To keep our platform secure, we utilize email OTP verification and cryptographically signed QR code entry passes.
           </p>
-          
-          <div className="flex flex-col gap-2">
-            <h3 className="text-white text-base font-medium">Cloudflare Turnstile CAPTCHA</h3>
-            <p>
-              Turnstile checks your browser session for human integrity automatically without showing annoying image puzzle challenges.
-            </p>
-            <ul className="list-disc pl-5 flex flex-col gap-2 mt-2">
-              <li>The Sign In button is enabled only after Turnstile successfully verifies your browser session.</li>
-              <li>Free event RSVPs verify you directly on the RSVP form.</li>
-              <li>Paid event RSVPs verify you at the final step of checkout, ensuring security at the payment confirmation phase.</li>
-            </ul>
-          </div>
         </div>
       ),
     },
@@ -76,14 +64,14 @@ export default function HelpPage() {
           <div className="flex flex-col gap-2">
             <h3 className="text-white text-base font-medium">Free Event Registrations</h3>
             <p>
-              Select your RSVP details, complete the quick Turnstile security verification check, and click submit. Your seat will be confirmed instantly.
+              Select your RSVP details and click submit. Your seat will be confirmed instantly.
             </p>
           </div>
 
           <div className="flex flex-col gap-2">
             <h3 className="text-white text-base font-medium">Paid Event Registrations</h3>
             <p>
-              Paid tickets require selecting your ticket count, processing payment via the generated UPI QR code, uploading your reference details, and completing the Turnstile verification check.
+              Paid tickets require selecting your ticket count, processing payment via the generated UPI QR code, and submitting your transaction reference details.
             </p>
           </div>
         </div>

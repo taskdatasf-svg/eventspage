@@ -12,9 +12,7 @@ import { AntiMetalButton } from '@/components/ui/anti-metal-button';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
   GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock,
-  GoPlus, GoX
 } from 'react-icons/go';
-import TurnstileWidget from '@/components/TurnstileWidget';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
 const isEventFree = (price: string) => {
@@ -310,7 +308,6 @@ function RegisterPageInner() {
 
   // Flow step state: 'form' | 'payment' | 'confirm-txn'
   const [rsvpStep, setRsvpStep] = useState<'form' | 'payment' | 'confirm-txn'>('form');
-  const [turnstileToken, setTurnstileToken] = useState('');
   const [isLocalhost, setIsLocalhost] = useState(false);
 
   // Form states
@@ -355,9 +352,6 @@ function RegisterPageInner() {
       }
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       setIsLocalhost(isLocal);
-      if (isLocal) {
-        setTurnstileToken('localhost_bypass');
-      }
     } catch (e) {
       console.error(e);
     }
@@ -439,15 +433,10 @@ function RegisterPageInner() {
     }
 
     if (event && isEventFree(event.price)) {
-      if (!isLocalhost && !turnstileToken) {
-        alert('Please complete the security verification.');
-        return;
-      }
       submitRegistration();
     } else {
       setRevealQr(false); // Reset reveal state for next screen
       setRsvpStep('payment');
-      setTurnstileToken(isLocalhost ? 'localhost_bypass' : '');
     }
   };
 
@@ -465,8 +454,7 @@ function RegisterPageInner() {
           answers,
           paymentAccountName: paymentAccountName || null,
           paymentMethod: paymentMethod || null,
-          paymentTxnId: paymentTxnId || null,
-          turnstileToken
+          paymentTxnId: paymentTxnId || null
         }),
       });
       const data = await res.json();
@@ -491,8 +479,7 @@ function RegisterPageInner() {
               answers,
               paymentAccountName: paymentAccountName || null,
               paymentMethod: paymentMethod || null,
-              paymentTxnId: paymentTxnId || null,
-              turnstileToken
+              paymentTxnId: paymentTxnId || null
             }),
           });
           const friendData = await friendRes.json();
@@ -538,10 +525,6 @@ function RegisterPageInner() {
       return;
     }
 
-    if (!turnstileToken) {
-      alert('Please complete the security verification.');
-      return;
-    }
     submitRegistration();
   };
 
@@ -897,10 +880,7 @@ function RegisterPageInner() {
                       ))}
                     </div>
 
-                    {/* Turnstile Widget for Free Events */}
-                    {event && isEventFree(event.price) && !isLocalhost && (
-                      <TurnstileWidget onVerify={setTurnstileToken} />
-                    )}
+
 
                     {/* Submit button */}
                     <ShinyButton
@@ -922,7 +902,7 @@ function RegisterPageInner() {
               {rsvpStep === 'payment' && (
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
-                    <button onClick={() => { setRsvpStep('form'); setTurnstileToken(isLocalhost ? 'localhost_bypass' : ''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
+                    <button onClick={() => { setRsvpStep('form'); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
                       <GoArrowLeft className="w-3.5 h-3.5" /> Back to Registration Form
                     </button>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Scan &amp; Pay</h1>
@@ -992,7 +972,7 @@ function RegisterPageInner() {
               {rsvpStep === 'confirm-txn' && (
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
-                    <button onClick={() => { setRsvpStep('payment'); setTurnstileToken(isLocalhost ? 'localhost_bypass' : ''); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
+                    <button onClick={() => { setRsvpStep('payment'); }} className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors pb-1 text-left cursor-pointer">
                       <GoArrowLeft className="w-3.5 h-3.5" /> Back to Payment Scan
                     </button>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Confirm Transaction</h1>
@@ -1076,8 +1056,7 @@ function RegisterPageInner() {
                       />
                     </div>
 
-                    {/* Turnstile Widget for Paid Events */}
-                    {!isLocalhost && <TurnstileWidget onVerify={setTurnstileToken} />}
+
 
                     <ShinyButton
                       onClick={undefined}

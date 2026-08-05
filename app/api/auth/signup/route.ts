@@ -4,35 +4,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, turnstileToken } = await request.json();
+    const { name, email, password } = await request.json();
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: 'Please provide all required fields' }, { status: 400 });
-    }
-
-    const host = request.headers.get('host') || '';
-    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1') || process.env.NODE_ENV === 'development';
-
-    if (!isLocalhost) {
-      if (!turnstileToken) {
-        return NextResponse.json({ error: 'Please complete the security verification check' }, { status: 400 });
-      }
-
-      // Verify Cloudflare Turnstile token
-      const verifyUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-      const verifyRes = await fetch(verifyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          secret: process.env.TURNSTILE_SECRET_KEY,
-          response: turnstileToken,
-        }),
-      });
-
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success) {
-        return NextResponse.json({ error: 'Security verification failed. Please try again.' }, { status: 400 });
-      }
     }
 
     // Check if user already exists
