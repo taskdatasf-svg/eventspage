@@ -12,6 +12,7 @@ import { AntiMetalButton } from '@/components/ui/anti-metal-button';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
   GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock,
+  GoPlus, GoX
 } from 'react-icons/go';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
