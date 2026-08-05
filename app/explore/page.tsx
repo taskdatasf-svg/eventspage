@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {
@@ -181,6 +182,7 @@ const EventImage: React.FC<{ event: EventData }> = ({ event }) => {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function ExplorePage() {
+  const router = useRouter();
   const [events, setEvents] = useState<EventData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -392,7 +394,7 @@ export default function ExplorePage() {
               {displayedEvents.map((event) => (
                 <div
                   key={event.id}
-                  onClick={() => (window.location.href = `/events/${event.id}`)}
+                  onClick={() => router.push(`/events/${event.id}`)}
                   className="group bg-[#18181c] hover:bg-[#1d1d22] border border-[#242428] hover:border-[#32323c] rounded-2xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
                   style={{ transform: 'translateZ(0)' }}
                 >

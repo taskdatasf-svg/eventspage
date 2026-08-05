@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PixelBlast from '@/components/PixelBlast';
@@ -120,6 +121,7 @@ interface PageProps {
 export default function EditEventPage({ params }: PageProps) {
   const unwrappedParams = React.use(params);
   const eventId = unwrappedParams.id;
+  const router = useRouter();
 
   const [pageLoading, setPageLoading] = useState(true);
   const [currentThemeIdx, setCurrentThemeIdx] = useState(0);
@@ -189,7 +191,7 @@ export default function EditEventPage({ params }: PageProps) {
     try {
       const storedUser = localStorage.getItem('student_forge_user');
       if (!storedUser) {
-        window.location.href = '/auth';
+        router.push('/auth');
       }
     } catch (e) {
       console.error('Error checking authentication:', e);
@@ -204,7 +206,7 @@ export default function EditEventPage({ params }: PageProps) {
         const res = await fetch(`/api/events/${eventId}`);
         if (!res.ok) {
           alert('Failed to load event data.');
-          window.location.href = '/dashboard';
+          router.push('/dashboard');
           return;
         }
         const data = await res.json();
@@ -529,7 +531,7 @@ export default function EditEventPage({ params }: PageProps) {
       }
 
       setIsSubmitted(true);
-      setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
+      setTimeout(() => { router.push('/dashboard'); }, 1500);
     } catch (err) {
       console.error('Submit error:', err);
       alert('Network error — please try again.');

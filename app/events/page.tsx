@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { GoLocation, GoCalendar, GoPlus, GoSearch, GoArrowRight } from 'react-icons/go';
@@ -52,6 +53,7 @@ const EventImage: React.FC<{ event: EventData }> = ({ event }) => {
 };
 
 export default function EventsPage() {
+  const router = useRouter();
   const [events, setEvents] = useState<EventData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming'>('all');
@@ -200,7 +202,7 @@ export default function EventsPage() {
             {filteredEvents.map((event) => (
               <div
                 key={event.id}
-                onClick={() => window.location.href = `/events/${event.id}`}
+                onClick={() => router.push(`/events/${event.id}`)}
                 className="group bg-[#1a1a1d] hover:bg-[#1e1e22] border border-[#262629] hover:border-[#35353c] rounded-2xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
                 style={{ transform: 'translateZ(0)' }}
               >

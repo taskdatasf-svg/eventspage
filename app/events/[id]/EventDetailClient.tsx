@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PixelBlast from '@/components/PixelBlast';
@@ -230,6 +231,7 @@ interface EventDetailClientProps {
 }
 
 export default function EventDetailClient({ eventId, initialEvent }: EventDetailClientProps) {
+  const router = useRouter();
   const [event, setEvent] = useState<EventData | null>(initialEvent);
   const [loading, setLoading] = useState(!initialEvent);
   const [registered, setRegistered] = useState(false);
@@ -665,7 +667,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                     </div>
                     <ShinyButton
                       onClick={() => {
-                        window.location.href = `/events/${event.id}/register`;
+                        router.push(`/events/${event.id}/register`);
                       }}
                       className="w-full"
                     >
@@ -676,9 +678,9 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   <ShinyButton
                     onClick={() => {
                       if (!user) {
-                        window.location.href = '/auth';
+                        router.push('/auth');
                       } else {
-                        window.location.href = `/events/${event.id}/register?waitlist=true`;
+                        router.push(`/events/${event.id}/register?waitlist=true`);
                       }
                     }}
                     className="w-full bg-gradient-to-r from-amber-500 to-orange-600 border border-amber-400/40 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:brightness-110"
@@ -689,9 +691,9 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   <ShinyButton
                     onClick={() => {
                       if (!user) {
-                        window.location.href = '/auth';
+                        router.push('/auth');
                       } else {
-                        window.location.href = `/events/${event.id}/register`;
+                        router.push(`/events/${event.id}/register`);
                       }
                     }}
                     className="w-full"

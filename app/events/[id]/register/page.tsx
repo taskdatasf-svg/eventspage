@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import Navbar from '@/components/Navbar';
@@ -230,7 +230,7 @@ function getFallbackSoftColor(headerBg: string | undefined): string {
   return '#ff6b6b';
 }
 
-export default function RegisterPage() {
+function RegisterPageInner() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1441,5 +1441,17 @@ export default function RegisterPage() {
 
       <Footer />
     </main>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-[#111113] flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
+      </main>
+    }>
+      <RegisterPageInner />
+    </Suspense>
   );
 }

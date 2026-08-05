@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PixelBlast from '@/components/PixelBlast';
@@ -114,6 +115,7 @@ const regionalLocations: RegionLocationGroup[] = [
 ];
 
 export default function CreateEventPage() {
+  const router = useRouter();
   const [currentThemeIdx, setCurrentThemeIdx] = useState(0);
   const [eventName, setEventName] = useState('');
   const [startDate, setStartDate] = useState('Sat, 1 Aug');
@@ -181,7 +183,7 @@ export default function CreateEventPage() {
     try {
       const storedUser = localStorage.getItem('student_forge_user');
       if (!storedUser) {
-        window.location.href = '/auth';
+        router.push('/auth');
       }
     } catch (e) {
       console.error('Error checking authentication:', e);
@@ -467,7 +469,7 @@ export default function CreateEventPage() {
       }
 
       setIsSubmitted(true);
-      setTimeout(() => { window.location.href = '/events'; }, 1500);
+      setTimeout(() => { router.push('/events'); }, 1500);
     } catch (err) {
       console.error('Submit error:', err);
       alert('Network error — please try again.');
