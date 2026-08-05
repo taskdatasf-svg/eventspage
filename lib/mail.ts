@@ -467,23 +467,66 @@ export async function sendEventMail({ to, subject, event, registration, type, or
 </body>
 </html>`;
 
-    // ── Send via Resend ────────────────────────────────────────────────────────
-    await resend.emails.send({
-      from: `Student Forge <${resendFromEmail}>`,
-      to,
-      subject,
-      text: isPending
-        ? `Pending Approval: Your registration for ${event.title} is awaiting organizer approval.`
-        : `Confirmed: Your registration for ${event.title} is confirmed! Ticket Code: ${registration.ticketCode}. Your ticket PDF is attached.`,
-      html: mailHtml,
-      attachments: attachments.map(att => ({
-        filename: att.filename,
-        content: att.content,
-        ...(att.cid ? { contentId: att.cid } : {}),
-      })),
-    });
-    console.log(`Email sent successfully to ${to} (${type})`);
-  } catch (error) {
-    console.error('Resend sendEventMail error:', error);
+    // ── 1. Try Resend ─────────────────────────────────────────────────────────
+    if (resendApiKey && !resendApiKey.startsWith('re_xxxx')) {
+      try {
+        const resendResult = await resend.emails.send({
+          from: `Student Forge <${resendFromEmail}>`,
+          to,
+          subject,
+          text: isPending
+            ? `Pending Approval: Your registration for ${event.title} is awaiting organizer approval.`
+            : `Confirmed: Your registration for ${event.title} is confirmed! Ticket Code: ${registration.ticketCode}. Your ticket PDF is attached.`,
+          html: mailHtml,
+          attachments: attachments.map(att => ({
+            filename: att.filename,
+            content: att.content,
+            ...(att.cid ? { contentId: att.cid } : {}),
+          })),
+        });
+
+        if (resendResult.data?.id) {
+          console.log(`[Resend Success] Email sent successfully to ${to} (${type})`);
+          return { success: true, messageId: resendResult.data.id };
+        }
+
+        console.warn(`[Resend Error] API key or request invalid (${JSON.stringify(resendResult.error)}). Falling back to Gmail SMTP...`);
+      } catch (resendErr: any) {
+        console.warn(`[Resend Exception] ${resendErr?.message}. Falling back to Gmail SMTP...`);
+      }
+    }
+
+    // ── 2. Fallback to Nodemailer Gmail SMTP ──────────────────────────────────
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      console.log(`[Gmail SMTP Fallback] Sending event email to ${to} via ${process.env.EMAIL_USER}...`);
+      const nodemailerModule = await import('nodemailer');
+      const transporter = nodemailerModule.default.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const info = await transporter.sendMail({
+        from: `"Student Forge" <${process.env.EMAIL_USER}>`,
+        to,
+        subject,
+        html: mailHtml,
+        attachments: attachments.map(att => ({
+          filename: att.filename,
+          content: att.content,
+          ...(att.cid ? { cid: att.cid } : {}),
+        })),
+      });
+
+      return { success: true, messageId: info.messageId };
+    }
+
+    console.log(`[Mock Send] Event mail to ${to}: "${subject}"`);
+    return { success: true, messageId: `mock-${Date.now()}` };
+  } catch (error: any) {
+    console.error('sendEventMail error:', error);
+    return { success: false, error: error?.message || 'Failed to send event email' };
   }
 }

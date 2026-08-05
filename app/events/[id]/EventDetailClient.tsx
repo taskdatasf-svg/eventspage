@@ -591,26 +591,56 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                 const parsedSpeakers = JSON.parse(event.speakers) as { name: string; role: string; image?: string | null }[];
                 if (parsedSpeakers.length === 0) return null;
                 return (
-                  <div className="bg-[#131315] border border-[#232329] rounded-2xl p-6 flex flex-col gap-4 shadow-[0_12px_45px_rgba(0,0,0,0.65)] animate-fade-in">
-                    <h3 className="text-xs uppercase font-mono tracking-wider" style={{ color: 'var(--event-highlight)' }}>Speakers</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="py-3 flex flex-col gap-6 animate-fade-in">
+                    {/* Frameless Modern Header with Subtle Accent & Gradient Divider */}
+                    <div className="flex items-center gap-3">
+                      <span 
+                        className="w-2 h-2 rounded-full flex-shrink-0" 
+                        style={{ backgroundColor: 'var(--event-highlight)', boxShadow: '0 0 10px var(--event-highlight)' }} 
+                      />
+                      <h3 className="text-xs font-mono uppercase tracking-widest text-neutral-300 font-medium">
+                        Speakers
+                      </h3>
+                      <div className="flex-1 h-[1px] bg-gradient-to-r from-white/15 via-white/5 to-transparent" />
+                    </div>
+
+                    {/* Containerless Floating Speakers Layout */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 pt-1">
                       {parsedSpeakers.map((sp, idx) => (
-                        <div key={idx} className="bg-[#18181b] border border-[#232329] rounded-xl p-3.5 flex items-center gap-3">
-                          {sp.image ? (
-                            <img
-                              src={sp.image}
-                              alt={sp.name}
-                              className="w-9 h-9 rounded-full object-cover border border-[#3e3e46] flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-[#2d2d34] border border-[#3e3e46] flex items-center justify-center text-sm font-medium text-[#ffec27] flex-shrink-0 select-none">
-                              {sp.name.substring(0, 1).toUpperCase()}
-                            </div>
-                          )}
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-medium text-white truncate">{sp.name}</span>
-                            <span className="text-[10px] text-neutral-400 font-mono truncate">{sp.role}</span>
+                        <div 
+                          key={idx} 
+                          className="group flex flex-col items-center text-center relative cursor-pointer"
+                        >
+                          {/* Ambient Glow Aura on Hover */}
+                          <div 
+                            className="absolute -top-1 w-28 h-28 sm:w-32 sm:h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-40 transition-all duration-500 pointer-events-none"
+                            style={{ background: 'var(--event-highlight)' }}
+                          />
+
+                          {/* Avatar with Gradient Ring */}
+                          <div className="relative p-1 rounded-full bg-gradient-to-b from-white/20 via-white/5 to-transparent group-hover:from-[var(--event-highlight)] group-hover:to-white/30 transition-all duration-500 shadow-2xl">
+                            {sp.image ? (
+                              <img
+                                src={sp.image}
+                                alt={sp.name}
+                                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            ) : (
+                              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center text-2xl sm:text-3xl font-bold text-[#ffec27] select-none group-hover:scale-105 transition-transform duration-500">
+                                {sp.name.substring(0, 1).toUpperCase()}
+                              </div>
+                            )}
                           </div>
+
+                          {/* Speaker Name */}
+                          <h4 className="text-sm sm:text-base font-semibold text-white tracking-tight mt-3.5 group-hover:text-[var(--event-highlight)] transition-colors duration-300 leading-snug">
+                            {sp.name}
+                          </h4>
+
+                          {/* Speaker Role */}
+                          <p className="text-xs text-neutral-400 font-mono mt-1 leading-relaxed opacity-80 max-w-[180px]">
+                            {sp.role}
+                          </p>
                         </div>
                       ))}
                     </div>

@@ -7,10 +7,11 @@ import {
   GoTrash, GoPencil, GoCheck, GoX,
   GoChevronDown, GoChevronUp, GoSignOut,
   GoEye, GoPlus, GoArrowLeft, GoShield, GoTag, GoDeviceCameraVideo,
-  GoClock, GoPerson
+  GoClock, GoPerson, GoMail
 } from 'react-icons/go';
 import { EventData } from '@/lib/eventsStore';
 import { QRCodeSVG } from 'qrcode.react';
+import { formatBroadcastBodyHtml } from '@/lib/formatMailBody';
 
 interface UserSession { id: string; name: string; email: string; profileImage?: string | null; }
 interface RegUser {
@@ -85,7 +86,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserSession | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [activeTab, setActiveTab] = useState<'my-events' | 'my-tickets' | 'verify' | 'profile'>('my-events');
+  const [activeTab, setActiveTab] = useState<'my-events' | 'my-tickets' | 'verify' | 'broadcast' | 'profile'>('my-events');
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState<Record<string, RegUser[]>>({});
@@ -126,6 +127,116 @@ export default function DashboardPage() {
   const [verifiedReg, setVerifiedReg] = useState<RegUser | null>(null);
   const [verifyError, setVerifyError] = useState('');
   const [approvingIds, setApprovingIds] = useState<Record<string, boolean>>({});
+
+  // Broadcast / Update Sender state
+  const [broadcastAudience, setBroadcastAudience] = useState<string>('all');
+  const [broadcastHeaderBanner, setBroadcastHeaderBanner] = useState<string>('');
+  const [broadcastSubject, setBroadcastSubject] = useState<string>('');
+  const [broadcastBody, setBroadcastBody] = useState<string>('');
+  const [broadcastSending, setBroadcastSending] = useState<boolean>(false);
+  const [broadcastStatusData, setBroadcastStatusData] = useState<{
+    dailyLimit: number;
+    sentToday: number;
+    remainingToday: number;
+    totalAttendees: number;
+    events: { id: string; title: string; startDate: string }[];
+    logs: { id: string; to: string; subject: string; status: string; scheduledDelaySec: number; timestamp: string; error?: string }[];
+  } | null>(null);
+  const [broadcastStatusLoading, setBroadcastStatusLoading] = useState<boolean>(false);
+  const [broadcastSuccessMsg, setBroadcastSuccessMsg] = useState<string>('');
+  const [broadcastErrorMsg, setBroadcastErrorMsg] = useState<string>('');
+  const [broadcastTabPreview, setBroadcastTabPreview] = useState<'editor' | 'preview'>('editor');
+  const broadcastTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const fetchBroadcastStatus = async () => {
+    setBroadcastStatusLoading(true);
+    try {
+      const res = await fetch('/api/broadcast/status');
+      if (res.ok) {
+        const data = await res.json();
+        setBroadcastStatusData(data);
+      }
+    } catch (err) {
+      console.error('Failed to load broadcast status:', err);
+    } finally {
+      setBroadcastStatusLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'broadcast') {
+      fetchBroadcastStatus();
+    }
+  }, [activeTab]);
+
+  const applyTextFormat = (tag: 'b' | 'i' | 'u' | 'p' | 'h2' | 'a') => {
+    const textarea = broadcastTextareaRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const sel = textarea.value.substring(start, end);
+
+    let wrapped = '';
+    if (tag === 'b') wrapped = `<b>${sel || 'Bold Text'}</b>`;
+    if (tag === 'i') wrapped = `<i>${sel || 'Italic Text'}</i>`;
+    if (tag === 'u') wrapped = `<u>${sel || 'Underlined Text'}</u>`;
+    if (tag === 'p') wrapped = `<p style="margin-bottom:16px;">${sel || 'Paragraph Text'}</p>`;
+    if (tag === 'h2') wrapped = `<h2 style="font-size:18px;font-weight:bold;margin:16px 0 8px 0;color:#ffffff;">${sel || 'Heading'}</h2>`;
+    if (tag === 'a') {
+      const url = prompt('Enter website link URL (e.g. https://example.com):', 'https://');
+      if (!url || !url.trim()) return;
+      wrapped = `<a href="${url.trim()}" target="_blank" rel="noopener noreferrer" style="color:#3b82f6;text-decoration:underline;font-weight:500;">${sel || url.trim()}</a>`;
+    }
+
+    const nextVal = textarea.value.substring(0, start) + wrapped + textarea.value.substring(end);
+    setBroadcastBody(nextVal);
+  };
+
+  const handleSendBroadcast = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBroadcastSuccessMsg('');
+    setBroadcastErrorMsg('');
+
+    if (!broadcastSubject.trim()) {
+      setBroadcastErrorMsg('Please enter an email subject.');
+      return;
+    }
+
+    if (!broadcastBody.trim()) {
+      setBroadcastErrorMsg('Please enter email body content.');
+      return;
+    }
+
+    setBroadcastSending(true);
+    try {
+      const res = await fetch('/api/broadcast/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: broadcastAudience,
+          headerBannerUrl: broadcastHeaderBanner.trim(),
+          subject: broadcastSubject.trim(),
+          bodyHtml: broadcastBody.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setBroadcastErrorMsg(data.error || 'Failed to queue broadcast emails.');
+      } else {
+        setBroadcastSuccessMsg(data.message || 'Broadcast emails queued successfully!');
+        setBroadcastSubject('');
+        setBroadcastBody('');
+        setBroadcastHeaderBanner('');
+        fetchBroadcastStatus();
+      }
+    } catch (err) {
+      console.error(err);
+      setBroadcastErrorMsg('Network error while enqueuing broadcast.');
+    } finally {
+      setBroadcastSending(false);
+    }
+  };
 
   const handleApproveUser = async (eventId: string, regId: string | undefined) => {
     if (!regId) return;
@@ -539,6 +650,18 @@ export default function DashboardPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab('broadcast')}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer text-left transition-all active:scale-[0.98] ${
+              activeTab === 'broadcast'
+                ? 'bg-white/[0.06] text-white border border-[#333339]'
+                : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
+            }`}
+          >
+            <GoMail className="w-4.5 h-4.5 flex-shrink-0 text-[#60a5fa]" />
+            <span>Update Sender</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('profile')}
             className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer text-left transition-all active:scale-[0.98] ${
               activeTab === 'profile'
@@ -595,10 +718,21 @@ export default function DashboardPage() {
                 <span>Verify</span>
               </button>
               <button
+                onClick={() => setActiveTab('broadcast')}
+                className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[10px] font-bold transition-all active:scale-[0.97] ${
+                  activeTab === 'broadcast'
+                    ? 'bg-white/[0.06] text-white border border-[#333339]'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <GoMail className="w-3 h-3 text-[#60a5fa]" />
+                <span>Sender</span>
+              </button>
+              <button
                 onClick={() => setActiveTab('profile')}
                 className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[10px] font-bold transition-all active:scale-[0.97] ${
                   activeTab === 'profile'
-                    ? 'bg-white/[0.06] text-white border border-[#333339]'
+                    ? 'bg-[#18181b] text-white shadow-sm border border-[#333339]'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
@@ -895,6 +1029,370 @@ export default function DashboardPage() {
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Update Sender & Broadcast Mail Tab ── */}
+            {activeTab === 'broadcast' && (
+              <div className="flex flex-col gap-6 animate-fade-in font-sans">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-[#2e2e34] pb-5">
+                  <div>
+                    <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                      <GoMail className="text-[#60a5fa] w-5 h-5" /> Update Sender &amp; Broadcast
+                    </h1>
+                    <p className="text-xs text-neutral-400 mt-1">
+                      Send rich text updates with custom header images. Automatically queued with 3s rate-limiting and 90 mails/day quota.
+                    </p>
+                  </div>
+                  <button
+                    onClick={fetchBroadcastStatus}
+                    className="px-3 py-1.5 bg-[#222226] border border-[#333339] rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-[#2c2c32] transition-colors cursor-pointer"
+                  >
+                    Refresh Quota
+                  </button>
+                </div>
+
+                {/* Daily Quota Status Banner */}
+                <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-5 flex flex-col gap-4 shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[rgba(59,130,246,0.1)] border border-[rgba(59,130,246,0.2)] flex items-center justify-center text-[#60a5fa]">
+                        <GoMail className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-neutral-400">Daily Quota Usage</span>
+                        <h3 className="text-base font-bold text-white mt-0.5">
+                          {broadcastStatusData?.sentToday ?? 0} / {broadcastStatusData?.dailyLimit ?? 90} Mails Sent Today
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                      {/* RGB Status Badges */}
+                      <span className="text-xs font-medium px-3 py-1 rounded-lg bg-[rgba(59,130,246,0.1)] text-[rgb(96,165,250)] border border-[rgba(59,130,246,0.2)]">
+                        Rate: 1 Mail / 3s gap
+                      </span>
+                      <span className={`text-xs font-medium px-3 py-1 rounded-lg border ${
+                        (broadcastStatusData?.remainingToday ?? 90) <= 0
+                          ? 'bg-[rgba(239,68,68,0.1)] text-[rgb(239,68,68)] border-[rgba(239,68,68,0.2)]'
+                          : 'bg-[rgba(34,197,94,0.1)] text-[rgb(34,197,94)] border-[rgba(34,197,94,0.2)]'
+                      }`}>
+                        {(broadcastStatusData?.remainingToday ?? 90) <= 0
+                          ? 'Quota Limit Reached'
+                          : `${broadcastStatusData?.remainingToday ?? 90} Mails Remaining`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full h-2 bg-[#27272a] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[rgb(59,130,246)] transition-all duration-500 rounded-full"
+                      style={{
+                        width: `${Math.min(100, Math.round(((broadcastStatusData?.sentToday ?? 0) / (broadcastStatusData?.dailyLimit ?? 90)) * 100))}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Form & Live Preview Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  
+                  {/* Left Column: Form Controls */}
+                  <div className="lg:col-span-7 flex flex-col gap-5 bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 shadow-sm">
+                    
+                    <form onSubmit={handleSendBroadcast} className="flex flex-col gap-4">
+                      {/* Target Audience */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-neutral-300">Target Audience / Event</label>
+                        <select
+                          value={broadcastAudience}
+                          onChange={(e) => setBroadcastAudience(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-[#222226] border border-[#333339] rounded-xl text-xs text-white outline-none focus:border-blue-500 transition-colors font-sans"
+                        >
+                          <option value="all">All Registered Attendees Across All Events ({broadcastStatusData?.totalAttendees ?? 0} recipients)</option>
+                          {broadcastStatusData?.events?.map((ev) => (
+                            <option key={ev.id} value={ev.id}>
+                              {ev.title} ({ev.startDate})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Header Banner Image Link */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-neutral-300">Header Banner Link (Image URL)</label>
+                        <input
+                          type="url"
+                          placeholder="https://images.unsplash.com/... or image link"
+                          value={broadcastHeaderBanner}
+                          onChange={(e) => setBroadcastHeaderBanner(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-[#222226] border border-[#333339] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-blue-500 transition-colors font-sans"
+                        />
+                        <p className="text-[11px] text-neutral-400">Displays a full-width header banner at the top of the email.</p>
+                      </div>
+
+                      {/* Subject of the Mail */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-neutral-300">Subject of the Mail *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Important Announcement regarding Student Forge Launch"
+                          value={broadcastSubject}
+                          onChange={(e) => setBroadcastSubject(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-[#222226] border border-[#333339] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-blue-500 transition-colors font-sans font-medium"
+                        />
+                      </div>
+
+                      {/* Body of the Mail + Formatting Toolbar */}
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-semibold text-neutral-300">Body of the Mail (Rich Text) *</label>
+                          <div className="flex items-center gap-1 bg-[#222226] border border-[#333339] p-0.5 rounded-lg">
+                            <button
+                              type="button"
+                              onClick={() => setBroadcastTabPreview('editor')}
+                              className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                                broadcastTabPreview === 'editor' ? 'bg-[#333339] text-white' : 'text-neutral-400 hover:text-white'
+                              }`}
+                            >
+                              Editor
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setBroadcastTabPreview('preview')}
+                              className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                                broadcastTabPreview === 'preview' ? 'bg-[#333339] text-white' : 'text-neutral-400 hover:text-white'
+                              }`}
+                            >
+                              Live Preview
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Formatting Toolbar */}
+                        <div className="flex flex-wrap items-center gap-1.5 bg-[#222226] border border-[#333339] p-2 rounded-xl">
+                          <button
+                            type="button"
+                            onClick={() => applyTextFormat('b')}
+                            className="px-2.5 py-1 bg-[#2b2b32] hover:bg-[#34343d] border border-[#3e3e46] rounded-lg text-xs font-bold text-white transition-colors cursor-pointer"
+                            title="Format selection as Bold"
+                          >
+                            B
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => applyTextFormat('i')}
+                            className="px-2.5 py-1 bg-[#2b2b32] hover:bg-[#34343d] border border-[#3e3e46] rounded-lg text-xs italic font-medium text-white transition-colors cursor-pointer"
+                            title="Format selection as Italic"
+                          >
+                            I
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => applyTextFormat('u')}
+                            className="px-2.5 py-1 bg-[#2b2b32] hover:bg-[#34343d] border border-[#3e3e46] rounded-lg text-xs underline font-medium text-white transition-colors cursor-pointer"
+                            title="Format selection as Underline"
+                          >
+                            U
+                          </button>
+                          <span className="text-[#3e3e46]">|</span>
+                          <button
+                            type="button"
+                            onClick={() => applyTextFormat('h2')}
+                            className="px-2.5 py-1 bg-[#2b2b32] hover:bg-[#34343d] border border-[#3e3e46] rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer"
+                            title="Insert Heading"
+                          >
+                            H2
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => applyTextFormat('p')}
+                            className="px-2.5 py-1 bg-[#2b2b32] hover:bg-[#34343d] border border-[#3e3e46] rounded-lg text-xs font-medium text-white transition-colors cursor-pointer"
+                            title="Insert Paragraph"
+                          >
+                            Paragraph
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => applyTextFormat('a')}
+                            className="px-2.5 py-1 bg-[#2b2b32] hover:bg-[#34343d] border border-[#3e3e46] rounded-lg text-xs font-semibold text-[#60a5fa] transition-colors cursor-pointer"
+                            title="Insert Website Link"
+                          >
+                            Link
+                          </button>
+                          <span className="text-xs text-neutral-400 ml-auto">HTML &amp; Links enabled</span>
+                        </div>
+
+                        {/* Editor Mode vs Live Preview Mode */}
+                        {broadcastTabPreview === 'editor' ? (
+                          <textarea
+                            ref={broadcastTextareaRef}
+                            required
+                            rows={8}
+                            placeholder="Type your mail content here... Paste links like https://... or highlight text to click B, I, U, or Link above."
+                            value={broadcastBody}
+                            onChange={(e) => setBroadcastBody(e.target.value)}
+                            className="w-full px-3.5 py-3 bg-[#222226] border border-[#333339] rounded-xl text-xs text-white placeholder-neutral-500 outline-none focus:border-blue-500 transition-colors font-sans leading-relaxed"
+                          />
+                        ) : (
+                          <div className="w-full min-h-[180px] p-4 bg-[#121215] border border-[#333339] rounded-xl text-xs text-neutral-200 leading-relaxed overflow-y-auto font-sans">
+                            {broadcastBody ? (
+                              <div dangerouslySetInnerHTML={{ __html: formatBroadcastBodyHtml(broadcastBody) }} />
+                            ) : (
+                              <p className="text-neutral-500 italic text-center py-6">No body content typed yet.</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Error & Success Alerts */}
+                      {broadcastErrorMsg && (
+                        <div className="p-3.5 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] rounded-xl text-xs text-[rgb(239,68,68)] flex items-start gap-2 font-medium">
+                          <span className="font-bold">Error:</span>
+                          <span>{broadcastErrorMsg}</span>
+                        </div>
+                      )}
+
+                      {broadcastSuccessMsg && (
+                        <div className="p-3.5 bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)] rounded-xl text-xs text-[rgb(34,197,94)] flex items-start gap-2 font-medium">
+                          <span className="font-bold">Success:</span>
+                          <span>{broadcastSuccessMsg}</span>
+                        </div>
+                      )}
+
+                      {/* Submit Button */}
+                      <button
+                        type="submit"
+                        disabled={broadcastSending || (broadcastStatusData?.remainingToday ?? 90) <= 0}
+                        className="w-full py-3 bg-[#3b82f6] hover:bg-[#2563eb] disabled:opacity-50 text-white font-semibold text-xs rounded-xl border border-blue-400/20 transition-all cursor-pointer shadow-md active:scale-[0.99] flex items-center justify-center gap-2"
+                      >
+                        {broadcastSending ? (
+                          <span>Enqueuing to BullMQ Queue...</span>
+                        ) : (
+                          <>
+                            <GoMail className="w-4 h-4" />
+                            <span>Queue Broadcast Mails (3s Gap / 90 Limit)</span>
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Right Column: Live Rendered Email Preview */}
+                  <div className="lg:col-span-5 flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-neutral-300">Live Email Preview</span>
+                      <span className="text-xs text-neutral-400">HTML Delivery Simulation</span>
+                    </div>
+
+                    {/* Email Card Preview Mockup */}
+                    <div className="w-full bg-[#18181b] border border-[#27272a] rounded-2xl overflow-hidden shadow-xl flex flex-col font-sans">
+                      {/* Top Email Banner (1200x1200px Frame) */}
+                      {broadcastHeaderBanner.trim() ? (
+                        <div className="w-full aspect-square max-h-[360px] sm:max-h-[380px] bg-[#09090b] border-b border-[#27272a] overflow-hidden relative">
+                          <img
+                            src={broadcastHeaderBanner.trim()}
+                            alt="1200x1200px Banner Preview"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full py-8 bg-[#121215] border-b border-[#27272a] text-center flex flex-col items-center justify-center gap-1">
+                          <span className="text-xs text-neutral-400 font-medium">No Header Banner Image Set</span>
+                          <span className="text-[10px] text-neutral-500 font-mono">1200 x 1200 px Frame</span>
+                        </div>
+                      )}
+
+                      {/* Email Header Info */}
+                      <div className="p-4 border-b border-[#27272a] bg-[#141417] flex flex-col gap-1">
+                        <span className="text-xs text-neutral-400">From: Student Forge &lt;noreply@events.studentforge.in&gt;</span>
+                        <h4 className="text-sm font-semibold text-white mt-0.5">{broadcastSubject || 'Subject preview...'}</h4>
+                      </div>
+
+                      {/* Formatted Body Content Preview */}
+                      <div className="p-5 flex flex-col gap-3 min-h-[160px] bg-[#18181b]">
+                        <span className="text-xs text-neutral-400 font-medium">Hello [Attendee Name],</span>
+                        
+                        <div className="text-xs text-neutral-200 leading-relaxed">
+                          {broadcastBody ? (
+                            <div dangerouslySetInnerHTML={{ __html: formatBroadcastBodyHtml(broadcastBody) }} />
+                          ) : (
+                            <p className="text-neutral-500 italic">Your bold, italic, underlined, link, and spaced paragraph message content will render here...</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Footer Preview */}
+                      <div className="p-4 bg-[#111113] border-t border-[#27272a] text-center">
+                        <span className="text-xs text-neutral-400">© 2026 Student Forge. Sent via Admin Broadcast Console.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Queue Activity & Dispatch Logs Table */}
+                <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col gap-4 shadow-sm font-sans">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-white">BullMQ Activity &amp; Dispatch Logs</h3>
+                      <p className="text-xs text-neutral-400 mt-0.5">Shows recent emails queued, dispatched, or pending with 3-second spacing timer.</p>
+                    </div>
+                    <button
+                      onClick={fetchBroadcastStatus}
+                      className="px-2.5 py-1 bg-[#222226] border border-[#333339] rounded-lg text-xs text-neutral-300 hover:text-white"
+                    >
+                      Refresh Logs
+                    </button>
+                  </div>
+
+                  {!broadcastStatusData?.logs || broadcastStatusData.logs.length === 0 ? (
+                    <div className="p-8 text-center border border-[#2e2e34] border-dashed rounded-xl">
+                      <p className="text-xs text-neutral-500">No broadcast email dispatches recorded yet today.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="border-b border-[#2e2e34] text-xs font-semibold text-neutral-400">
+                            <th className="py-2.5 px-3">Status</th>
+                            <th className="py-2.5 px-3">Recipient</th>
+                            <th className="py-2.5 px-3">Subject</th>
+                            <th className="py-2.5 px-3">3s Delay Gap</th>
+                            <th className="py-2.5 px-3">Time</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#2e2e34]">
+                          {broadcastStatusData.logs.map((log) => (
+                            <tr key={log.id} className="hover:bg-white/[0.02]">
+                              <td className="py-2.5 px-3">
+                                <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                                  log.status === 'COMPLETED'
+                                    ? 'bg-[rgba(34,197,94,0.1)] text-[rgb(34,197,94)] border border-[rgba(34,197,94,0.2)]'
+                                    : log.status === 'QUEUED'
+                                    ? 'bg-[rgba(59,130,246,0.1)] text-[rgb(59,130,246)] border border-[rgba(59,130,246,0.2)]'
+                                    : 'bg-[rgba(239,68,68,0.1)] text-[rgb(239,68,68)] border border-[rgba(239,68,68,0.2)]'
+                                }`}>
+                                  {log.status}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-3 text-neutral-200">{log.to}</td>
+                              <td className="py-2.5 px-3 text-neutral-300 truncate max-w-[200px]">{log.subject}</td>
+                              <td className="py-2.5 px-3 text-neutral-400">{log.scheduledDelaySec}s delay</td>
+                              <td className="py-2.5 px-3 text-neutral-400">{log.timestamp}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

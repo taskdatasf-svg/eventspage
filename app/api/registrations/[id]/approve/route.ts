@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendEventMail } from '@/lib/mail';
+import { enqueueRegistrationMail } from '@/lib/mailQueue';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -30,19 +30,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         data: { status: 'APPROVED' }
       });
 
-      // Send approval confirmation email (soft dependency)
+      // Enqueue approval confirmation email via BullMQ Queue
       try {
         const origin = request.headers.get('origin') || 'http://localhost:3000';
-        await sendEventMail({
+        await enqueueRegistrationMail({
           to: updatedRegistration.email,
           subject: `Registration Approved & Ticket Confirmed - ${event.title}`,
           event,
           registration: updatedRegistration,
-          type: 'CONFIRMED',
+          regType: 'CONFIRMED',
           originUrl: origin
         });
       } catch (mailError) {
-        console.error('Failed to send approval email (proceeding anyway):', mailError);
+        console.error('Failed to queue approval email (proceeding anyway):', mailError);
       }
     }
 

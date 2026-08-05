@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendEventMail } from '@/lib/mail';
+import { enqueueRegistrationMail } from '@/lib/mailQueue';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -94,30 +94,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       },
     });
 
-    // Send registration email (soft dependency)
+    // Send registration email via BullMQ Queue (resilient against Resend daily quota limits)
     try {
       const origin = request.headers.get('origin') || 'http://localhost:3000';
       if (status === 'PENDING') {
-        await sendEventMail({
+        await enqueueRegistrationMail({
           to: email,
           subject: `Registration Pending Approval - ${event.title}`,
           event,
           registration,
-          type: 'PENDING',
+          regType: 'PENDING',
           originUrl: origin
         });
       } else {
-        await sendEventMail({
+        await enqueueRegistrationMail({
           to: email,
           subject: `Registration Confirmed - ${event.title}`,
           event,
           registration,
-          type: 'CONFIRMED',
+          regType: 'CONFIRMED',
           originUrl: origin
         });
       }
     } catch (mailError) {
-      console.error('Failed to send registration email (proceeding anyway):', mailError);
+      console.error('Failed to queue registration email (proceeding anyway):', mailError);
     }
 
     return NextResponse.json({ success: true, registration });

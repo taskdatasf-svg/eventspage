@@ -63,15 +63,17 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Cookiebot Consent Script */}
-        <script
-          id="Cookiebot"
-          src="https://consent.cookiebot.com/uc.js"
-          data-cbid="a1514766-7f6a-4019-9781-9e8a9e737583"
-          data-blockingmode="auto"
-          type="text/javascript"
-          async
-        />
+        {/* Cookiebot Consent Script (Loaded only in Production to prevent local dev blocking) */}
+        {process.env.NODE_ENV === 'production' && (
+          <script
+            id="Cookiebot"
+            src="https://consent.cookiebot.com/uc.js"
+            data-cbid="a1514766-7f6a-4019-9781-9e8a9e737583"
+            data-blockingmode="auto"
+            type="text/javascript"
+            async
+          />
+        )}
         {/* Material Symbols */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
