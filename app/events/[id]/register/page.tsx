@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -233,13 +233,33 @@ function getFallbackSoftColor(headerBg: string | undefined): string {
 export default function RegisterPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const id = params?.id as string;
+  const isWaitlistQuery = searchParams?.get('waitlist') === 'true';
 
   const [event, setEvent] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [downloading, setDownloading] = useState(false);
   const [extractedColor, setExtractedColor] = useState<string>('#ff6b6b');
+  const [registrationsCount, setRegistrationsCount] = useState<number>(0);
+
+  const parseCapacity = (capStr?: string): number | null => {
+    if (!capStr) return null;
+    const clean = capStr.toLowerCase().trim();
+    if (clean.includes('unlimited') || clean === '0' || clean === '') return null;
+    const match = capStr.match(/\d+/);
+    if (match) {
+      const num = parseInt(match[0], 10);
+      return isNaN(num) || num <= 0 ? null : num;
+    }
+    return null;
+  };
+
+  const maxCapacity = parseCapacity(event?.capacity);
+  const isLimited = maxCapacity !== null;
+  const remainingTickets = isLimited ? Math.max(0, maxCapacity - registrationsCount) : null;
+  const isFull = (isLimited && remainingTickets === 0) || isWaitlistQuery;
 
   useEffect(() => {
     if (!event?.coverImage) {
@@ -349,19 +369,19 @@ export default function RegisterPage() {
         .then((data) => {
           if (data.event) {
             setEvent(data.event);
-            // Check if user is already registered for this event to load ticket directly
-            if (emailCheck) {
-              fetch(`/api/events/${id}/register`)
-                .then((r) => r.json())
-                .then((regData) => {
-                  const regs = regData.registrations || [];
+            fetch(`/api/events/${id}/register`)
+              .then((r) => r.json())
+              .then((regData) => {
+                const regs = regData.registrations || [];
+                setRegistrationsCount(regs.length);
+                if (emailCheck) {
                   const userReg = regs.find((r: any) => r.email === emailCheck);
                   if (userReg) {
                     setTicket(userReg);
                   }
-                })
-                .catch((err) => console.error(err));
-            }
+                }
+              })
+              .catch((err) => console.error(err));
           }
         })
         .catch((err) => console.error(err))
@@ -671,9 +691,29 @@ export default function RegisterPage() {
               {rsvpStep === 'form' && (
                 <>
                   <div className="flex flex-col gap-1.5 animate-fade-in">
-                    <h1 className="text-2xl font-bold text-white tracking-tight">Complete your Registration</h1>
-                    <p className="text-xs text-neutral-400">Fill in your details below to secure your entry pass.</p>
+                    <h1 className="text-2xl font-bold text-white tracking-tight">
+                      {isFull ? 'Join Event Waitlist' : 'Complete your Registration'}
+                    </h1>
+                    <p className="text-xs text-neutral-400">
+                      {isFull
+                        ? 'Event capacity reached. Fill in your details to join the waitlist.'
+                        : 'Fill in your details below to secure your entry pass.'}
+                    </p>
                   </div>
+
+                  {isFull && (
+                    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-3 animate-fade-in">
+                      <GoClock className="w-5 h-5 flex-shrink-0 text-amber-400" />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold text-amber-200">
+                          Capacity Limit Reached ({registrationsCount}/{maxCapacity || 40} Seats Filled)
+                        </span>
+                        <span className="text-[11px] text-amber-300/80">
+                          0 tickets left. Submitting this form will place you on the waitlist.
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   <form onSubmit={handleFormSubmit} className="flex flex-col gap-6 animate-fade-in bg-transparent border-0 p-0 shadow-none">
                     {/* Full Name */}
@@ -865,9 +905,15 @@ export default function RegisterPage() {
                     {/* Submit button */}
                     <ShinyButton
                       onClick={undefined}
-                      className="mt-2 w-full"
+                      className={`mt-2 w-full ${isFull ? 'bg-gradient-to-r from-amber-500 to-orange-600 border border-amber-400/40 text-white' : ''}`}
                     >
-                      {submitting ? 'Submitting...' : (isEventFree(event.price) ? 'Submit Registration' : 'Proceed to Payment')}
+                      {submitting
+                        ? 'Submitting...'
+                        : isFull
+                          ? 'Join Waitlist'
+                          : isEventFree(event.price)
+                            ? 'Submit Registration'
+                            : 'Proceed to Payment'}
                     </ShinyButton>
                   </form>
                 </>

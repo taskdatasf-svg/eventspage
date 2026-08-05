@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import PixelBlast from '@/components/PixelBlast';
 import Grainient from '@/components/Grainient';
 import { EventData } from '@/lib/eventsStore';
-import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck, GoChevronLeft, GoChevronRight, GoImage, GoVideo, GoArrowUpRight } from 'react-icons/go';
+import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck, GoChevronLeft, GoChevronRight, GoImage, GoVideo, GoArrowUpRight, GoTag } from 'react-icons/go';
 import { ShinyButton } from '@/components/ui/shiny-button';
 import { useViewerCount } from '@/lib/useViewerCount';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
@@ -234,9 +234,35 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
   const [loading, setLoading] = useState(!initialEvent);
   const [registered, setRegistered] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [registrationsCount, setRegistrationsCount] = useState<number>(0);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [extractedColor, setExtractedColor] = useState<string>('#ff6b6b');
   const viewerCount = useViewerCount(eventId);
+
+  const parseCapacity = (capStr?: string): number | null => {
+    if (!capStr) return null;
+    const clean = capStr.toLowerCase().trim();
+    if (clean.includes('unlimited') || clean === '0' || clean === '') return null;
+    const match = capStr.match(/\d+/);
+    if (match) {
+      const num = parseInt(match[0], 10);
+      return isNaN(num) || num <= 0 ? null : num;
+    }
+    return null;
+  };
+
+  const maxCapacity = parseCapacity(event?.capacity);
+  const isLimited = maxCapacity !== null;
+  const actualRemaining = isLimited ? Math.max(0, maxCapacity - registrationsCount) : null;
+  const isFull = isLimited && actualRemaining === 0;
+
+  const getDisplayRemaining = (actual: number | null): number | null => {
+    if (actual === null) return null;
+    if (actual <= 0) return 0;
+    return Math.max(1, 32 - registrationsCount);
+  };
+
+  const displayTicketsLeft = getDisplayRemaining(actualRemaining);
 
   const isStudentForgeLaunch =
     event?.id === 'cmsbpnls8000004lfw3buf1a7' ||
@@ -306,26 +332,31 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
     }
 
     // Load active session
+    let currentUserEmail: string | null = null;
     try {
       const stored = localStorage.getItem('student_forge_user');
       if (stored) {
         const u = JSON.parse(stored);
         setUser(u);
-        
-        // Also check if user is already registered for this event
-        if (eventId && u.email) {
-          fetch(`/api/events/${eventId}/register`)
-            .then((r) => r.json())
-            .then((data) => {
-              const regs = data.registrations || [];
-              const isReg = regs.some((r: any) => r.email === u.email);
-              setRegistered(isReg);
-            })
-            .catch((err) => console.error(err));
-        }
+        currentUserEmail = u?.email || null;
       }
     } catch (e) {
       console.error(e);
+    }
+
+    // Fetch event registrations count & check user registration status
+    if (eventId) {
+      fetch(`/api/events/${eventId}/register`)
+        .then((r) => r.json())
+        .then((data) => {
+          const regs = data.registrations || [];
+          setRegistrationsCount(regs.length);
+          if (currentUserEmail) {
+            const isReg = regs.some((r: any) => r.email === currentUserEmail);
+            setRegistered(isReg);
+          }
+        })
+        .catch((err) => console.error('Failed to load registrations:', err));
     }
   }, [eventId, initialEvent]);
 
@@ -552,7 +583,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
               </div>
             </div>
  
-            {/* Speakers Section */}
+
             {event.speakers && (() => {
               try {
                 const parsedSpeakers = JSON.parse(event.speakers) as { name: string; role: string; image?: string | null }[];
@@ -606,9 +637,20 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   <span className="text-[10px] uppercase font-mono tracking-wider text-neutral-400">Admission Price</span>
                   <span className="text-3xl font-normal leading-none" style={{ color: 'var(--event-highlight)' }}>{event.price || 'Free'}</span>
                 </div>
-                <span className="text-[10px] font-mono uppercase tracking-wider bg-[#1c1c21] border border-[#232329] text-neutral-300 px-3 py-1 rounded-md">
-                  {event.visibility || 'Public'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono uppercase tracking-wider bg-[#1c1c21] border border-[#232329] text-neutral-300 px-3 py-1 rounded-md">
+                    {event.visibility || 'Public'}
+                  </span>
+                  {isLimited && (
+                    <span className={`text-[10px] font-mono uppercase tracking-wider px-3 py-1 rounded-md border ${
+                      isFull 
+                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' 
+                        : 'bg-[#1c1c21] border-[#232329] text-neutral-300'
+                    }`}>
+                      {isFull ? '0 tickets left' : `${displayTicketsLeft} tickets left`}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Dotted separator coupon style line */}
@@ -630,6 +672,19 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                       View Ticket Pass
                     </ShinyButton>
                   </div>
+                ) : isFull ? (
+                  <ShinyButton
+                    onClick={() => {
+                      if (!user) {
+                        window.location.href = '/auth';
+                      } else {
+                        window.location.href = `/events/${event.id}/register?waitlist=true`;
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 border border-amber-400/40 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:brightness-110"
+                  >
+                    {user ? 'Join Waitlist' : 'Sign Up to Join Waitlist'}
+                  </ShinyButton>
                 ) : (
                   <ShinyButton
                     onClick={() => {
@@ -647,7 +702,11 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
                 {!registered && (
                   <p className="text-[10px] text-neutral-500 text-center leading-relaxed">
-                    {event.requireApproval ? 'Requires host approval after registration.' : 'Instant registration · No approval needed.'}
+                    {isFull
+                      ? `Capacity reached (${registrationsCount}/${maxCapacity} seats filled). Join waitlist to claim spots if tickets free up.`
+                      : event.requireApproval
+                        ? 'Requires host approval after registration.'
+                        : 'Instant registration · No approval needed.'}
                   </p>
                 )}
               </div>
@@ -771,10 +830,21 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   <GoPeople className="w-4 h-4" style={{ color: 'var(--event-highlight)' }} />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Capacity</span>
-                  <span className="text-xs font-normal text-white mt-0.5">{event.capacity || 'Unlimited'} seats</span>
+                  <span className="text-[9px] uppercase font-mono tracking-widest text-neutral-500">Capacity &amp; Availability</span>
+                  <span className="text-xs font-normal text-white mt-0.5">
+                    {event.capacity || 'Unlimited'} seats
+                    {isLimited && (
+                      <span className={`ml-2 font-mono text-[11px] ${isFull ? 'text-rose-400 font-semibold' : 'text-neutral-400'}`}>
+                        ({isFull ? '0 tickets left' : `${displayTicketsLeft} tickets left`})
+                      </span>
+                    )}
+                  </span>
                   <span className="text-[10px] text-neutral-400 mt-0.5">
-                    {event.requireApproval ? 'Requires host approval' : 'Instant enrollment'}
+                    {isFull
+                      ? `${registrationsCount}/${maxCapacity} seats filled · Waitlist open`
+                      : event.requireApproval
+                        ? 'Requires host approval'
+                        : 'Instant enrollment'}
                   </span>
                 </div>
               </div>
