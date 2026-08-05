@@ -33,11 +33,17 @@ export async function POST(request: Request) {
 
     const mailHtml = `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="color-scheme" content="light dark">
+        <meta name="supported-color-schemes" content="light dark">
         <title>Confirm Your Email</title>
+        <style>
+          :root { color-scheme: light dark; supported-color-schemes: light dark; }
+          body, table, td, p, a, span { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; }
+        </style>
       </head>
       <body style="margin: 0; padding: 0; background-color: #fafbfc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #24292e;">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #fafbfc; width: 100%; min-height: 100%; padding: 40px 20px;">
@@ -52,8 +58,8 @@ export async function POST(request: Request) {
                       <img src="https://ik.imagekit.io/dypkhqxip/eventssflo" alt="Student Forge" height="28" style="height: 28px; width: auto; display: block; border: 0;" />
                     </div>
                     
-                    <h2 style="margin: 0 0 12px 0; color: #24292e; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">Confirm your email address</h2>
-                    <p style="margin: 0 0 20px 0; color: #586069; font-size: 14px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+                    <h2 style="margin: 0 0 12px 0; color: #24292e !important; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">Confirm your email address</h2>
+                    <p style="margin: 0 0 20px 0; color: #586069 !important; font-size: 14px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                       Please use the secure 6-digit verification code below to authorize your registration or request:
                     </p>
                   </td>
@@ -65,7 +71,7 @@ export async function POST(request: Request) {
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; text-align: center;">
                       <tr>
                         <td style="padding: 20px 0;">
-                          <span style="font-family: monospace; font-size: 36px; font-weight: bold; letter-spacing: 4px; color: #24292e; display: block; width: 100%;">${code}</span>
+                          <span style="font-family: monospace; font-size: 36px; font-weight: bold; letter-spacing: 4px; color: #24292e !important; display: block; width: 100%;">${code}</span>
                         </td>
                       </tr>
                     </table>
@@ -75,7 +81,7 @@ export async function POST(request: Request) {
                 <!-- Help Note -->
                 <tr>
                   <td style="padding: 24px 32px 32px 32px;">
-                    <p style="margin: 0; color: #6a737d; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+                    <p style="margin: 0; color: #6a737d !important; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                       For security reasons, this verification code will expire shortly. Please do not share it with anyone.
                     </p>
 
@@ -84,11 +90,11 @@ export async function POST(request: Request) {
                       <div style="margin-bottom: 12px;">
                         <img src="https://ik.imagekit.io/dypkhqxip/eventssflo" alt="Student Forge" height="24" style="height: 24px; width: auto; display: inline-block; vertical-align: middle; border: 0;" />
                       </div>
-                      <p style="margin: 0 0 6px 0; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069;">
+                      <p style="margin: 0 0 6px 0; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069 !important; line-height: 1.5;">
                         © 2026 Student Forge Technologies Private Limited. All rights reserved.
                       </p>
-                      <p style="margin: 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #959da5;">
-                        Powered by <strong style="color: #24292e;">Studio Redlix</strong>
+                      <p style="margin: 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #959da5 !important; line-height: 1.5;">
+                        Powered by <strong style="color: #24292e !important; font-weight: 600;">Studio Redlix</strong>
                       </p>
                     </div>
                   </td>

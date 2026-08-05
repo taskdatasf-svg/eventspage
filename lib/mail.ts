@@ -337,11 +337,18 @@ export async function sendEventMail({ to, subject, event, registration, type, or
 
     // ── 7. Main HTML Template ──────────────────────────────────────────────────
     const mailHtml = `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <meta name="x-apple-disable-message-reformatting">
   <title>${subject}</title>
+  <style>
+    :root { color-scheme: light dark; supported-color-schemes: light dark; }
+    body, table, td, p, a, span { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; }
+  </style>
 </head>
 <body style="margin:0;padding:0;background-color:#fafbfc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#24292e;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#fafbfc;width:100%;min-height:100%;padding:30px 10px;">
@@ -451,11 +458,11 @@ export async function sendEventMail({ to, subject, event, registration, type, or
               <div style="margin-bottom: 14px;">
                 ${logoImgHtml}
               </div>
-              <p style="margin: 0 0 6px 0; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069;">
+              <p style="margin: 0 0 6px 0; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #586069 !important; line-height: 1.5;">
                 © 2026 Student Forge Technologies Private Limited. All rights reserved.
               </p>
-              <p style="margin: 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #959da5;">
-                Powered by <strong style="color: #24292e;">Studio Redlix</strong>
+              <p style="margin: 0; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #959da5 !important; line-height: 1.5;">
+                Powered by <strong style="color: #24292e !important; font-weight: 600;">Studio Redlix</strong>
               </p>
             </td>
           </tr>

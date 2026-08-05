@@ -50,11 +50,15 @@ export async function sendBroadcastMail({
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <meta name="x-apple-disable-message-reformatting">
   <title>${subject}</title>
   <style>
+    :root { color-scheme: light dark; supported-color-schemes: light dark; }
     a { color: #3b82f6 !important; text-decoration: underline !important; font-weight: 500 !important; }
-    p { margin: 0 0 16px 0 !important; line-height: 1.7 !important; }
+    p { margin: 0 0 16px 0 !important; line-height: 1.7 !important; color: #f4f4f5 !important; }
+    h1, h2, h3, h4, h5, h6 { color: #ffffff !important; }
     @media only screen and (max-width: 620px) {
       .email-wrapper { padding: 10px 4px !important; }
       .email-container { width: 100% !important; max-width: 100% !important; border-radius: 12px !important; }
@@ -64,7 +68,7 @@ export async function sendBroadcastMail({
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#e4e4e7;">
+<body class="email-body-bg" style="margin:0;padding:0;background-color:#09090b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:#f4f4f5;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" class="email-wrapper" style="background-color:#09090b;width:100%;min-height:100%;padding:32px 12px;">
     <tr>
       <td align="center" valign="top">
@@ -76,25 +80,25 @@ export async function sendBroadcastMail({
           <!-- Main Content Body -->
           <tr>
             <td class="content-cell" style="padding: 32px 28px 24px 28px;">
-              <p style="margin:0 0 16px 0;font-size:15px;color:#a1a1aa;font-weight:500;">
+              <p style="margin:0 0 16px 0;font-size:15px;color:#a1a1aa !important;font-weight:500;">
                 ${greeting}
               </p>
 
               <!-- User Formatted Rich Text Message Body -->
-              <div class="body-text" style="font-size:14px;line-height:1.7;color:#f4f4f5;margin-bottom:24px;">
+              <div class="body-text" style="font-size:14px;line-height:1.7;color:#f4f4f5 !important;margin-bottom:24px;">
                 ${formattedBodyHtml}
               </div>
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Standard Footer -->
           <tr>
-            <td style="padding:22px 28px;text-align:center;background-color:#111113;border-top:1px solid #27272a;">
-              <p style="margin:0 0 6px 0;font-size:11px;color:#71717a;">
-                © 2026 Student Forge. Sent via Admin Broadcast Console.
+            <td style="padding:24px 28px;text-align:center;background-color:#111113;border-top:1px solid #27272a;">
+              <p style="margin:0 0 6px 0;font-size:11px;color:#a1a1aa !important;line-height:1.5;">
+                © 2026 Student Forge Technologies Private Limited. All rights reserved.
               </p>
-              <p style="margin:0;font-size:10px;color:#52525b;">
-                You received this update because you are registered for Student Forge events.
+              <p style="margin:0;font-size:10px;color:#71717a !important;line-height:1.5;">
+                Powered by <strong style="color:#e4e4e7 !important;font-weight:600;">Studio Redlix</strong>
               </p>
             </td>
           </tr>
