@@ -20,7 +20,12 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const payload = { events };
+    const formattedEvents = events.map(e => ({
+      ...e,
+      requireApproval: e.requireApproval || (e.title ? e.title.toLowerCase().includes('incept') : false)
+    }));
+
+    const payload = { events: formattedEvents };
     await cacheSet(CACHE_KEY, payload, CACHE_TTL);
 
     return NextResponse.json(payload, {
@@ -36,6 +41,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const isApprovalRequired = body.requireApproval === true || (body.title ? body.title.toLowerCase().includes('incept') : false);
 
     const event = await prisma.event.create({
       data: {
@@ -49,7 +55,7 @@ export async function POST(request: Request) {
         endDate: body.endDate || '',
         endTime: body.endTime || '',
         price: body.price || 'Free',
-        requireApproval: body.requireApproval ?? false,
+        requireApproval: isApprovalRequired,
         capacity: body.capacity || 'Unlimited',
         calendarType: body.calendarType || 'Personal Calendar',
         visibility: body.visibility || 'Public',

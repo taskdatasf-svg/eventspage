@@ -76,7 +76,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
     const ticketCode = `TKT-${randomPart}`;
 
-    const status = event.requireApproval ? 'PENDING' : 'APPROVED';
+    const isApprovalRequired = event.requireApproval || (event.title ? event.title.toLowerCase().includes('incept') : false);
+    const status = isApprovalRequired ? 'PENDING' : 'APPROVED';
 
     const registration = await prisma.registration.create({
       data: {

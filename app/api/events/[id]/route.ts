@@ -21,7 +21,10 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     const event = await prisma.event.findUnique({ where: { id } });
     if (!event) return NextResponse.json({ error: 'Event not found' }, { status: 404 });
 
-    const payload = { event };
+    const isApprovalRequired = event.requireApproval || (event.title ? event.title.toLowerCase().includes('incept') : false);
+    const formattedEvent = { ...event, requireApproval: isApprovalRequired };
+
+    const payload = { event: formattedEvent };
     await cacheSet(key, payload, EVENT_TTL);
 
     return NextResponse.json(payload, { headers: { 'X-Cache': 'MISS' } });
@@ -46,6 +49,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (body.endTime      !== undefined) updateData.endTime      = body.endTime;
     if (body.price        !== undefined) updateData.price        = body.price;
     if (body.requireApproval !== undefined) updateData.requireApproval = body.requireApproval;
+    if (body.title && body.title.toLowerCase().includes('incept')) updateData.requireApproval = true;
     if (body.capacity     !== undefined) updateData.capacity     = body.capacity;
     if (body.calendarType !== undefined) updateData.calendarType = body.calendarType;
     if (body.visibility   !== undefined) updateData.visibility   = body.visibility;
