@@ -126,10 +126,7 @@ export async function sendGuestInviteMail({
     const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const resend = new Resend(resendApiKey);
 
-    // 1. Generate Base64 QR Code Data URL directly for inline embedding (NO attachment file!)
-    const qrDataUrl = await QRCode.toDataURL(registration.ticketCode, { width: 320, margin: 1 });
-
-    // 2. Generate PDF Pass (The ONLY attachment!)
+    // Generate PDF Pass (The ONLY attachment!)
     const pdfBuffer = await generateVipTicketPdfBuffer(event, registration, guestRole);
     const attachments = pdfBuffer
       ? [
@@ -140,7 +137,6 @@ export async function sendGuestInviteMail({
         ]
       : [];
 
-    const regUrl = `${originUrl}/events/${event.id}/register?guestInvite=true&ticketCode=${registration.ticketCode}&role=${encodeURIComponent(guestRole)}`;
     const subject = `Official Guest & Speaker Invitation: ${event.title}`;
 
     // Header Event Banner HTML (ONLY Event Banner in Header!)
@@ -216,39 +212,15 @@ export async function sendGuestInviteMail({
                       <tr><td style="padding:5px 0;color:#a1a1aa;width:38%;">Invited Role:</td><td style="padding:5px 0;text-align:right;font-weight:700;color:#ffffff;">${guestRole}</td></tr>
                       <tr><td style="padding:5px 0;color:#a1a1aa;">Date &amp; Time:</td><td style="padding:5px 0;text-align:right;font-weight:600;color:#ffffff;">${event.startDate} at ${event.startTime}</td></tr>
                       <tr><td style="padding:5px 0;color:#a1a1aa;">Venue / Location:</td><td style="padding:5px 0;text-align:right;font-weight:600;color:#ffffff;">${event.location || 'Online'}</td></tr>
-                      <tr><td style="padding:5px 0;color:#a1a1aa;">Ticket Pass:</td><td style="padding:5px 0;text-align:right;font-weight:800;color:#ffffff;">FREE VIP PASS</td></tr>
+                      <tr><td style="padding:5px 0;color:#a1a1aa;">Ticket Pass:</td><td style="padding:5px 0;text-align:right;font-weight:800;color:#ffffff;">FREE VIP PASS (${registration.ticketCode})</td></tr>
                     </table>
                   </td>
                 </tr>
               </table>
 
-              <!-- Inline Base64 QR Code Ticket Pass Box -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#1a1b24;border:1px solid #272832;border-radius:12px;padding:24px;text-align:center;margin-bottom:28px;">
-                <tr>
-                  <td align="center">
-                    <span style="font-size:10px;font-weight:800;color:#a1a1aa;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:14px;">YOUR VIP ENTRY PASS</span>
-                    
-                    <!-- Native Inline Base64 Image -->
-                    <div style="display:inline-block;background:#ffffff;padding:10px;border-radius:12px;margin-bottom:12px;">
-                      <img src="${qrDataUrl}" width="140" height="140" alt="VIP Pass QR Code" style="display:block;margin:0 auto;border:0;width:140px;height:140px;" />
-                    </div>
-
-                    <div style="font-family:monospace;font-size:15px;font-weight:800;color:#ffffff;letter-spacing:1.5px;">${registration.ticketCode}</div>
-                    <span style="font-size:11px;color:#71717a;display:block;margin-top:6px;">Full Pass Attached as PDF Document</span>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Action CTA Button -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align:center;margin-bottom:24px;">
-                <tr>
-                  <td align="center">
-                    <a href="${regUrl}" target="_blank" style="display:inline-block;padding:14px 32px;background-color:#ffffff;color:#000000;font-size:14px;font-weight:800;text-decoration:none;border-radius:10px;box-shadow:0 4px 16px rgba(255,255,255,0.15);">
-                      Open Registration &amp; View Ticket Pass
-                    </a>
-                  </td>
-                </tr>
-              </table>
+              <p style="margin:0 0 16px 0;font-size:13px;color:#a1a1aa;text-align:center;">
+                Your official VIP ticket pass is attached to this email as a PDF document.
+              </p>
 
               <p style="margin:0;font-size:12px;color:#71717a;text-align:center;">
                 If you have any questions, reply directly to this email or contact ${event.organizer || 'StudentForge'}.
@@ -256,7 +228,7 @@ export async function sendGuestInviteMail({
             </td>
           </tr>
 
-          <!-- Bottom Footer (StudentForge Logo moved HERE to Bottom!) -->
+          <!-- Bottom Footer (StudentForge Logo at Bottom) -->
           <tr>
             <td style="padding:24px 24px;background-color:#0f1015;border-top:1px solid #272832;text-align:center;font-size:11px;color:#71717a;">
               <div style="margin-bottom:12px;">

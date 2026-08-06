@@ -124,20 +124,9 @@ export async function sendEventMail({ to, subject, event, registration, type, or
     const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const resend = new Resend(resendApiKey);
 
-    const passUrl = `${originUrl}/events/${event.id}/register`;
     const isPending = type === 'PENDING';
 
-    // 1. Generate Base64 Data URI for inline QR Code (NO separate attachment file!)
-    let qrDataUrl = '';
-    if (!isPending) {
-      try {
-        qrDataUrl = await QRCode.toDataURL(registration.ticketCode, { width: 320, margin: 1 });
-      } catch (e) {
-        console.error('Failed to generate local QR code Data URL for email:', e);
-      }
-    }
-
-    // 2. Generate Ticket PDF Pass (The ONLY attachment file!)
+    // Generate Ticket PDF Pass (The ONLY attachment file!)
     const attachments: { filename: string; content: Buffer }[] = [];
     if (!isPending) {
       const pdfBuffer = await generateTicketPdfBuffer(event, registration);
@@ -146,7 +135,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       }
     }
 
-    // 3. Header Event Cover Banner HTML (ONLY Event Banner in Header!)
+    // Header Event Cover Banner HTML (ONLY Event Banner in Header!)
     let headerBannerHtml = '';
     if (event.coverImage && (event.coverImage.startsWith('http://') || event.coverImage.startsWith('https://'))) {
       headerBannerHtml = `<div style="width:100%;text-align:center;background-color:#14151c;border-bottom:1px solid #272832;">
@@ -158,7 +147,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       </div>`;
     }
 
-    // 4. Registration Answers & Payment Details HTML
+    // Registration Answers & Payment Details HTML
     let answersHtml = '';
     if (registration.answers) {
       try {
@@ -194,7 +183,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
         </div>`;
     }
 
-    // 5. Main Email Template HTML
+    // Main Email Template HTML
     const mailHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -273,33 +262,10 @@ export async function sendEventMail({ to, subject, event, registration, type, or
 
               </table>
 
-              <!-- Native Inline Base64 QR Code (Confirmed only, NO attachment file!) -->
-              ${!isPending && qrDataUrl ? `
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#1a1b24;border:1px solid #272832;border-radius:12px;padding:24px;text-align:center;margin-bottom:28px;">
-                <tr>
-                  <td align="center">
-                    <span style="font-size:10px;font-weight:800;color:#a1a1aa;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:14px;">ENTRY PASS QR CODE</span>
-                    
-                    <div style="display:inline-block;background:#ffffff;padding:10px;border-radius:12px;margin-bottom:12px;">
-                      <img src="${qrDataUrl}" width="140" height="140" alt="Ticket QR Code" style="display:block;margin:0 auto;border:0;width:140px;height:140px;" />
-                    </div>
-
-                    <div style="font-family:monospace;font-size:15px;font-weight:800;color:#ffffff;letter-spacing:1.5px;">${registration.ticketCode}</div>
-                    <span style="font-size:11px;color:#71717a;display:block;margin-top:6px;">Full Pass Attached as PDF Document</span>
-                  </td>
-                </tr>
-              </table>` : ''}
-
-              <!-- Action CTA Button -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align:center;margin-bottom:24px;">
-                <tr>
-                  <td align="center">
-                    <a href="${passUrl}" style="display:inline-block;padding:14px 32px;background-color:#ffffff;color:#000000;font-size:14px;font-weight:800;text-decoration:none;border-radius:10px;box-shadow:0 4px 16px rgba(255,255,255,0.15);">
-                      ${isPending ? 'Check Registration Status' : 'View Ticket Pass Online'}
-                    </a>
-                  </td>
-                </tr>
-              </table>
+              ${!isPending ? `
+              <p style="margin:0 0 16px 0;font-size:13px;color:#a1a1aa;text-align:center;">
+                Your official entry ticket pass (with scannable QR code) is attached to this email as a PDF document.
+              </p>` : ''}
 
               <p style="margin:0;font-size:12px;color:#71717a;text-align:center;">
                 If you have any questions, reply directly to this email or contact ${event.organizer || 'StudentForge'}.
@@ -308,7 +274,7 @@ export async function sendEventMail({ to, subject, event, registration, type, or
             </td>
           </tr>
 
-          <!-- Bottom Footer (StudentForge Logo moved HERE to Bottom!) -->
+          <!-- Bottom Footer (StudentForge Logo at Bottom) -->
           <tr>
             <td style="padding:24px 24px;background-color:#0f1015;border-top:1px solid #272832;text-align:center;font-size:11px;color:#71717a;">
               <div style="margin-bottom:12px;">
