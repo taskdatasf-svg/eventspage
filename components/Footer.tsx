@@ -41,6 +41,9 @@ const Footer: React.FC<FooterProps> = ({ isLight = false }) => {
             <a href="/explore" className={`transition-colors ${linkHoverClass}`}>
               Explore
             </a>
+            <a href="/event-essentials" className={`transition-colors ${linkHoverClass}`}>
+              Essentials
+            </a>
             <a href="/help" className={`transition-colors ${linkHoverClass}`}>
               Help
             </a>

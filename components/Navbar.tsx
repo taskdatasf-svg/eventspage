@@ -104,6 +104,7 @@ export default function Navbar() {
     { label: 'Home', href: '/' },
     { label: 'Events', href: '/events' },
     { label: 'Explore', href: '/explore' },
+    { label: 'Essentials', href: '/event-essentials' },
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Help', href: '/help' },
   ];
