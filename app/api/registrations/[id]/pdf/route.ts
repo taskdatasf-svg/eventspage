@@ -294,7 +294,7 @@ export async function GET(
                 </div>
                 <div class="detail-col">
                   <span class="label">Amount</span>
-                  <span class="detail-value highlight">${event.price || 'Free'}</span>
+                  <span class="detail-value highlight">${(ticketCode.startsWith('TKT-VIP') || paymentMethod === 'VIP PASS') ? 'FREE VIP PASS' : (event.price || 'Free')}</span>
                 </div>
               </div>
 
@@ -330,7 +330,7 @@ export async function GET(
                 </div>
               `}
               <div class="stub-footer">
-                <span class="stub-title">Presenter Pass</span>
+                <span class="stub-title">${ticketCode.startsWith('TKT-VIP') ? 'VIP Speaker Pass' : 'Presenter Pass'}</span>
                 <span class="stub-subtitle">${status === 'PENDING' ? 'Status: Pending' : 'Scan for entry'}</span>
               </div>
             </div>

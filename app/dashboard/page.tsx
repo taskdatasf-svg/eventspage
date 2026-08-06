@@ -12,6 +12,7 @@ import {
 import { EventData } from '@/lib/eventsStore';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatBroadcastBodyHtml } from '@/lib/formatMailBody';
+import Footer from '@/components/Footer';
 
 interface UserSession { id: string; name: string; email: string; profileImage?: string | null; }
 interface RegUser {
@@ -127,6 +128,54 @@ export default function DashboardPage() {
   const [verifiedReg, setVerifiedReg] = useState<RegUser | null>(null);
   const [verifyError, setVerifyError] = useState('');
   const [approvingIds, setApprovingIds] = useState<Record<string, boolean>>({});
+
+  // Invite guest/speaker modal states
+  const [showInviteGuestModal, setShowInviteGuestModal] = useState(false);
+  const [inviteSelectedEventId, setInviteSelectedEventId] = useState('');
+  const [inviteGuestName, setInviteGuestName] = useState('');
+  const [inviteGuestEmail, setInviteGuestEmail] = useState('');
+  const [inviteGuestRole, setInviteGuestRole] = useState('Keynote Speaker');
+  const [invitePersonalMessage, setInvitePersonalMessage] = useState('');
+  const [inviteSending, setInviteSending] = useState(false);
+  const [inviteSuccessData, setInviteSuccessData] = useState<{ ticketCode: string; inviteUrl: string; guestName: string } | null>(null);
+
+  const handleSendGuestInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteSelectedEventId || !inviteGuestName || !inviteGuestEmail) {
+      alert('Please fill out all required fields.');
+      return;
+    }
+
+    setInviteSending(true);
+    try {
+      const res = await fetch(`/api/events/${inviteSelectedEventId}/invite-guest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guestName: inviteGuestName,
+          guestEmail: inviteGuestEmail,
+          guestRole: inviteGuestRole || 'Guest Speaker',
+          personalMessage: invitePersonalMessage,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setInviteSuccessData({
+          ticketCode: data.ticketCode,
+          inviteUrl: data.inviteUrl,
+          guestName: inviteGuestName,
+        });
+      } else {
+        alert(data.error || 'Failed to send guest invitation.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error while sending invitation.');
+    } finally {
+      setInviteSending(false);
+    }
+  };
 
   // Broadcast / Update Sender state
   const [broadcastAudience, setBroadcastAudience] = useState<string>('all');
@@ -743,14 +792,27 @@ export default function DashboardPage() {
 
             {activeTab === 'my-events' && (
               <>
-                <div className="flex items-center justify-between border-b border-[#2e2e34] pb-5">
+                <div className="flex items-center justify-between border-b border-[#2e2e34] pb-5 flex-wrap gap-3">
                   <div>
                     <h1 className="text-xl font-bold text-white tracking-tight">My Events</h1>
                     <p className="text-xs text-neutral-400 mt-0.5">Events you have published — view, edit, or delete.</p>
                   </div>
-                  <a href="/create-event" className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-md border border-[#333339] transition-all cursor-pointer">
-                    <GoPlus className="w-3.5 h-3.5 text-neutral-300" />New Event
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (events.length > 0) setInviteSelectedEventId(events[0].id);
+                        setShowInviteGuestModal(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold rounded-md border border-amber-500/30 transition-all cursor-pointer shadow-sm"
+                    >
+                      <GoPerson className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Invite Guest / Speaker</span>
+                    </button>
+                    <a href="/create-event" className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-md border border-[#333339] transition-all cursor-pointer">
+                      <GoPlus className="w-3.5 h-3.5 text-neutral-300" />New Event
+                    </a>
+                  </div>
                 </div>
 
                 {loading ? (
@@ -822,15 +884,28 @@ export default function DashboardPage() {
                               </div>
                             )}
 
-                            <div className="border-t border-[#2e2e34] pt-3 flex items-center justify-between">
+                            <div className="border-t border-[#2e2e34] pt-3 flex items-center justify-between flex-wrap gap-2">
                               <span className="text-[10px] uppercase font-mono text-neutral-500 tracking-wider">Registered Users ({regs.length})</span>
-                              <a
-                                href={`/dashboard/event-attendees/${event.id}`}
-                                className="px-3 py-1.5 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] hover:border-neutral-500/30 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 text-white"
-                                style={{ color: 'white' }}
-                              >
-                                <span>Show Attendees</span>
-                              </a>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setInviteSelectedEventId(event.id);
+                                    setShowInviteGuestModal(true);
+                                  }}
+                                  className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <GoPerson className="w-3.5 h-3.5" />
+                                  <span>Invite Speaker</span>
+                                </button>
+                                <a
+                                  href={`/dashboard/event-attendees/${event.id}`}
+                                  className="px-3 py-1.5 bg-[#222226] border border-[#333339] hover:bg-[#2c2c32] hover:border-neutral-500/30 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 text-white"
+                                  style={{ color: 'white' }}
+                                >
+                                  <span>Show Attendees</span>
+                                </a>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1557,8 +1632,156 @@ export default function DashboardPage() {
 
           </div>
         </main>
+
+        <Footer />
       </div>
 
+      {/* Invite Speaker / Guest Modal */}
+      {showInviteGuestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-[#14151a] border border-[#2e2e34] rounded-2xl p-6 shadow-2xl text-left flex flex-col gap-4">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#2e2e34] pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <GoPerson className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Invite Guest or Speaker</h3>
+                  <p className="text-xs text-neutral-400">Send an official VIP invitation email with attached PDF ticket pass</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowInviteGuestModal(false);
+                  setInviteSuccessData(null);
+                }}
+                className="p-1.5 text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition cursor-pointer"
+              >
+                <GoX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {inviteSuccessData ? (
+              /* Success View */
+              <div className="flex flex-col items-center text-center py-6 gap-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <GoCheck className="w-6 h-6" />
+                </div>
+                <h4 className="text-lg font-bold text-white">Invitation Sent to {inviteSuccessData.guestName}!</h4>
+                <p className="text-xs text-neutral-400 max-w-sm">
+                  An official VIP Speaker invitation email has been dispatched with the free VIP PDF ticket pass attached.
+                </p>
+                <div className="w-full bg-[#1c1c22] border border-[#2e2e34] rounded-xl p-3 text-left font-mono text-xs flex flex-col gap-1 mt-2">
+                  <span className="text-[10px] text-neutral-500 uppercase">VIP Ticket Code</span>
+                  <span className="text-amber-400 font-bold text-sm">{inviteSuccessData.ticketCode}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInviteGuestName('');
+                    setInviteGuestEmail('');
+                    setInvitePersonalMessage('');
+                    setInviteSuccessData(null);
+                  }}
+                  className="mt-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
+                >
+                  Invite Another Guest
+                </button>
+              </div>
+            ) : (
+              /* Form View */
+              <form onSubmit={handleSendGuestInvite} className="flex flex-col gap-4">
+                {/* 1. Select Event */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-neutral-300">1. Select Event *</label>
+                  <select
+                    value={inviteSelectedEventId}
+                    onChange={(e) => setInviteSelectedEventId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-[#1a1b22] border border-[#2e2e34] focus:border-amber-500/50 rounded-xl text-xs text-white focus:outline-none cursor-pointer"
+                    required
+                  >
+                    {events.length === 0 && <option value="">No events available</option>}
+                    {events.map((ev) => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.title} ({ev.startDate})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 2. Guest Name & Email Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-neutral-300">Guest / Speaker Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Dr. Sarah Jenkins"
+                      value={inviteGuestName}
+                      onChange={(e) => setInviteGuestName(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-[#1a1b22] border border-[#2e2e34] focus:border-amber-500/50 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-neutral-300">Guest Email *</label>
+                    <input
+                      type="email"
+                      placeholder="speaker@example.com"
+                      value={inviteGuestEmail}
+                      onChange={(e) => setInviteGuestEmail(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-[#1a1b22] border border-[#2e2e34] focus:border-amber-500/50 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Role / Designation */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-neutral-300">Invited Role / Title *</label>
+                  <select
+                    value={inviteGuestRole}
+                    onChange={(e) => setInviteGuestRole(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-[#1a1b22] border border-[#2e2e34] focus:border-amber-500/50 rounded-xl text-xs text-white focus:outline-none cursor-pointer"
+                  >
+                    <option value="Keynote Speaker">Keynote Speaker</option>
+                    <option value="Guest Speaker">Guest Speaker</option>
+                    <option value="Panelist">Panelist</option>
+                    <option value="VIP Guest">VIP Guest</option>
+                    <option value="Guest of Honor">Guest of Honor</option>
+                    <option value="Special Guest">Special Guest</option>
+                  </select>
+                </div>
+
+                {/* 4. Personal Message */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-neutral-300">Personal Note (Optional)</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Add a personal note to be included in the official invitation email..."
+                    value={invitePersonalMessage}
+                    onChange={(e) => setInvitePersonalMessage(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-[#1a1b22] border border-[#2e2e34] focus:border-amber-500/50 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none resize-none"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={inviteSending || !inviteSelectedEventId}
+                  className="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-black font-bold rounded-xl text-xs transition cursor-pointer shadow-md disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
+                >
+                  {inviteSending ? 'Sending Invitation & PDF Pass...' : 'Send Guest Invitation & Issue Free Pass'}
+                </button>
+              </form>
+            )}
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
