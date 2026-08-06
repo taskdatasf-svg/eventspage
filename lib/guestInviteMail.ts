@@ -1,10 +1,8 @@
 import { Resend } from 'resend';
 import puppeteer from 'puppeteer';
 import QRCode from 'qrcode';
-import fs from 'fs';
-import path from 'path';
 
-const LOGO_URL = 'https://ik.imagekit.io/dypkhqxip/eventssflo';
+const LOGO_URL = 'https://ik.imagekit.io/dypkhqxip/events%20loho';
 
 interface GuestInviteMailParams {
   to: string;
@@ -31,21 +29,7 @@ interface GuestInviteMailParams {
   originUrl: string;
 }
 
-// Helper to load logo buffer
-async function getLogoBuffer(): Promise<{ buffer: Buffer; contentType: string } | null> {
-  try {
-    const res = await fetch(LOGO_URL);
-    if (res.ok) {
-      const arrayBuf = await res.arrayBuffer();
-      return { buffer: Buffer.from(arrayBuf), contentType: 'image/png' };
-    }
-  } catch (err) {
-    console.error('Error fetching logo buffer:', err);
-  }
-  return null;
-}
-
-// Generate VIP / Speaker Ticket PDF Buffer
+// Generate VIP / Speaker Ticket PDF Buffer (for PDF attachment only)
 async function generateVipTicketPdfBuffer(event: any, registration: any, guestRole: string): Promise<Buffer | null> {
   try {
     const ticketCode = registration.ticketCode;
@@ -61,23 +45,23 @@ async function generateVipTicketPdfBuffer(event: any, registration: any, guestRo
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0c0d10; color: #ffffff; width: 840px; height: 440px; padding: 24px; display: flex; align-items: center; justify-content: center; }
     .ticket-card { width: 792px; height: 392px; background: #15161b; border: 2px solid #2a2c36; border-radius: 20px; display: flex; overflow: hidden; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-    .left-section { flex: 1; padding: 28px 32px; display: flex; flex-col; justify-content: space-between; position: relative; border-right: 2px dashed #2a2c36; }
+    .left-section { flex: 1; padding: 28px 32px; display: flex; flex-direction: column; justify-content: space-between; position: relative; border-right: 2px dashed #2a2c36; }
     .right-stub { width: 240px; background: #111216; padding: 28px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .logo-row { display: flex; items-center; justify-content: space-between; margin-bottom: 16px; }
-    .brand-logo { height: 28px; width: auto; filter: brightness(0) invert(1); }
-    .vip-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; background: #fbbf24; color: #000000; padding: 4px 10px; border-radius: 9999px; }
+    .logo-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .brand-logo { height: 32px; width: auto; filter: brightness(0) invert(1); }
+    .vip-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; background: #27272a; color: #f4f4f5; padding: 4px 12px; border-radius: 9999px; border: 1px solid #3f3f46; }
     .event-title { font-size: 22px; font-weight: 800; color: #ffffff; margin-bottom: 8px; line-height: 1.2; }
-    .role-badge { display: inline-block; font-size: 12px; font-weight: 700; color: #38bdf8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.3); padding: 3px 10px; border-radius: 6px; margin-bottom: 16px; }
+    .role-badge { display: inline-block; font-size: 12px; font-weight: 700; color: #e4e4e7; background: #27272a; border: 1px solid #3f3f46; padding: 4px 12px; border-radius: 6px; margin-bottom: 16px; }
     .meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; border-top: 1px solid #262833; padding-top: 16px; }
-    .meta-label { font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px; margin-bottom: 3px; }
-    .meta-value { font-size: 13px; font-weight: 700; color: #f1f5f9; }
-    .attendee-box { display: flex; items-center; gap: 12px; border-top: 1px solid #262833; padding-top: 16px; margin-top: 12px; }
-    .avatar { width: 36px; height: 36px; border-radius: 9999px; background: #fbbf24; color: #000; font-weight: 900; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+    .meta-label { font-size: 9px; text-transform: uppercase; color: #a1a1aa; font-weight: 700; letter-spacing: 1px; margin-bottom: 3px; }
+    .meta-value { font-size: 13px; font-weight: 700; color: #ffffff; }
+    .attendee-box { display: flex; align-items: center; gap: 12px; border-top: 1px solid #262833; padding-top: 16px; margin-top: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 9999px; background: #ffffff; color: #000; font-weight: 900; font-size: 14px; display: flex; align-items: center; justify-content: center; }
     .attendee-name { font-size: 14px; font-weight: 800; color: #ffffff; }
-    .attendee-email { font-size: 11px; color: #94a3b8; font-family: monospace; }
-    .qr-box { background: #ffffff; padding: 10px; border-radius: 14px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
-    .stub-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #fbbf24; letter-spacing: 1px; }
-    .stub-code { font-size: 11px; font-family: monospace; font-weight: 700; color: #94a3b8; margin-top: 4px; }
+    .attendee-email { font-size: 11px; color: #a1a1aa; font-family: monospace; }
+    .qr-box { background: #ffffff; padding: 8px; border-radius: 12px; margin-bottom: 12px; }
+    .stub-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #ffffff; letter-spacing: 1px; }
+    .stub-code { font-size: 11px; font-family: monospace; font-weight: 700; color: #a1a1aa; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -94,7 +78,7 @@ async function generateVipTicketPdfBuffer(event: any, registration: any, guestRo
       <div class="meta-grid">
         <div><div class="meta-label">Date & Time</div><div class="meta-value">${event.startDate} at ${event.startTime}</div></div>
         <div><div class="meta-label">Location</div><div class="meta-value">${event.location || 'Online'}</div></div>
-        <div><div class="meta-label">Ticket Type</div><div class="meta-value" style="color:#34d399">FREE VIP PASS</div></div>
+        <div><div class="meta-label">Ticket Type</div><div class="meta-value">FREE VIP PASS</div></div>
       </div>
       <div class="attendee-box">
         <div class="avatar">${name?.substring(0, 2).toUpperCase() || 'VIP'}</div>
@@ -142,107 +126,119 @@ export async function sendGuestInviteMail({
     const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const resend = new Resend(resendApiKey);
 
-    const attachments: { filename: string; content: Buffer; cid?: string }[] = [];
+    // 1. Generate Base64 QR Code Data URL directly for inline embedding (NO attachment file!)
+    const qrDataUrl = await QRCode.toDataURL(registration.ticketCode, { width: 320, margin: 1 });
 
-    // 1. Logo Buffer
-    const logoData = await getLogoBuffer();
-    let logoImgHtml = `<img src="${LOGO_URL}" alt="Student Forge" height="24" style="height:24px;width:auto;display:inline-block;vertical-align:middle;border:0;" />`;
-    if (logoData) {
-      attachments.push({ filename: 'logo.png', content: logoData.buffer, cid: 'sf-logo' });
-      logoImgHtml = `<img src="cid:sf-logo" alt="Student Forge" height="24" style="height:24px;width:auto;display:inline-block;vertical-align:middle;border:0;" />`;
-    }
-
-    // 2. Generate QR Code
-    try {
-      const qrBuffer = await QRCode.toBuffer(registration.ticketCode, { width: 300, margin: 1 });
-      attachments.push({ filename: 'qrcode.png', content: qrBuffer, cid: 'ticket-qrcode' });
-    } catch (e) {
-      console.error('QR code generation error:', e);
-    }
-
-    // 3. Generate PDF Pass
+    // 2. Generate PDF Pass (The ONLY attachment!)
     const pdfBuffer = await generateVipTicketPdfBuffer(event, registration, guestRole);
-    if (pdfBuffer) {
-      attachments.push({
-        filename: `VIP_Pass_${registration.ticketCode}.pdf`,
-        content: pdfBuffer,
-      });
-    }
+    const attachments = pdfBuffer
+      ? [
+          {
+            filename: `VIP_Pass_${registration.ticketCode}.pdf`,
+            content: pdfBuffer,
+          },
+        ]
+      : [];
 
     const regUrl = `${originUrl}/events/${event.id}/register?guestInvite=true&ticketCode=${registration.ticketCode}&role=${encodeURIComponent(guestRole)}`;
-
     const subject = `Official Guest & Speaker Invitation: ${event.title}`;
+
+    // Event Banner HTML
+    let bannerHtml = '';
+    if (event.coverImage && (event.coverImage.startsWith('http://') || event.coverImage.startsWith('https://'))) {
+      bannerHtml = `<div style="width:100%;text-align:center;background-color:#14151c;border-bottom:1px solid #272832;">
+        <img src="${event.coverImage}" alt="${event.title}" width="580" style="width:100%;max-width:580px;height:auto;display:block;margin:0 auto;border:0;" />
+      </div>`;
+    }
 
     const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
   <title>${subject}</title>
+  <style>
+    body, table, td, p, a, span { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; }
+    img { max-width: 100%; height: auto; }
+    @media only screen and (max-width: 600px) {
+      .container-table { width: 100% !important; border-radius: 0 !important; }
+      .content-padding { padding: 24px 16px !important; }
+      .header-padding { padding: 24px 16px !important; }
+      .big-logo { height: 40px !important; }
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#0f1015;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e2e8f0;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0f1015;width:100%;padding:40px 10px;">
+<body style="margin:0;padding:0;background-color:#0b0c10;color:#e4e4e7;-webkit-font-smoothing:antialiased;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0b0c10;width:100%;padding:30px 10px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:540px;background-color:#161720;border:1px solid #272936;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+        <table role="presentation" class="container-table" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:580px;background-color:#14151c;border:1px solid #272832;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
           
-          <!-- Header Banner -->
+          <!-- Top Header: BIG Logo -->
           <tr>
-            <td style="padding:28px 24px 20px 24px;background-color:#1a1c27;border-bottom:1px solid #272936;text-align:center;">
-              ${logoImgHtml}
-              <div style="margin-top:14px;display:inline-block;padding:4px 14px;border-radius:9999px;background-color:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">
-                VIP SPEAKER & GUEST INVITATION
+            <td class="header-padding" style="padding:32px 28px 24px 28px;background-color:#181922;border-bottom:1px solid #272832;text-align:center;">
+              <img src="${LOGO_URL}" alt="StudentForge" height="48" class="big-logo" style="height:48px;width:auto;display:inline-block;border:0;outline:none;" />
+              <div style="margin-top:16px;display:inline-block;padding:5px 14px;border-radius:9999px;background-color:#20222e;border:1px solid #333545;color:#e4e4e7;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">
+                VIP SPEAKER &amp; GUEST INVITATION
               </div>
             </td>
           </tr>
 
-          <!-- Main Content -->
-          <tr>
-            <td style="padding:32px 28px;">
-              <h2 style="margin:0 0 12px 0;font-size:22px;font-weight:800;color:#ffffff;line-height:1.3;">
-                Official Invitation to ${event.title}
-              </h2>
+          <!-- Event Cover Banner -->
+          ${bannerHtml ? `<tr><td style="padding:0;">${bannerHtml}</td></tr>` : ''}
 
-              <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#cbd5e1;">
-                Dear <strong>${guestName}</strong>,<br/><br/>
-                We are delighted to invite you as an honored <strong>${guestRole}</strong> for <strong>${event.title}</strong> organized by ${event.organizer || 'StudentForge'}.
+          <!-- Main Content Body -->
+          <tr>
+            <td class="content-padding" style="padding:32px 28px;">
+              <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;color:#ffffff;line-height:1.3;letter-spacing:-0.3px;">
+                Invitation to ${event.title}
+              </h1>
+
+              <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#a1a1aa;">
+                Dear <strong style="color:#ffffff;">${guestName}</strong>,<br/><br/>
+                You are cordially invited as an honored <strong style="color:#ffffff;">${guestRole}</strong> for <strong style="color:#ffffff;">${event.title}</strong> organized by ${event.organizer || 'StudentForge'}.
               </p>
 
               ${
                 personalMessage
                   ? `
               <!-- Host Personal Note Box -->
-              <div style="background-color:rgba(251,191,36,0.06);border-left:3px solid #fbbf24;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
-                <span style="display:block;font-size:11px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Message from the Host</span>
-                <p style="margin:0;font-size:13px;color:#f1f5f9;font-style:italic;line-height:1.5;">"${personalMessage}"</p>
+              <div style="background-color:#1c1d27;border-left:3px solid #71717a;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
+                <span style="display:block;font-size:10px;font-weight:700;color:#a1a1aa;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Message from Host</span>
+                <p style="margin:0;font-size:13px;color:#e4e4e7;font-style:italic;line-height:1.5;">"${personalMessage}"</p>
               </div>`
                   : ''
               }
 
-              <!-- VIP Event Info Box -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#1e202d;border:1px solid #2a2d3d;border-radius:12px;padding:20px;margin-bottom:24px;box-sizing:border-box;">
+              <!-- Event Details Table -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#1a1b24;border:1px solid #272832;border-radius:12px;padding:20px;margin-bottom:24px;box-sizing:border-box;">
                 <tr>
                   <td>
-                    <span style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px;">Event Details</span>
-                    <h3 style="margin:0 0 12px 0;font-size:16px;font-weight:700;color:#ffffff;">${event.title}</h3>
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:13px;color:#cbd5e1;">
-                      <tr><td style="padding:4px 0;color:#94a3b8;width:38%;">Invited Role:</td><td style="padding:4px 0;text-align:right;font-weight:700;color:#38bdf8;">${guestRole}</td></tr>
-                      <tr><td style="padding:4px 0;color:#94a3b8;">Date &amp; Time:</td><td style="padding:4px 0;text-align:right;font-weight:600;color:#ffffff;">${event.startDate} at ${event.startTime}</td></tr>
-                      <tr><td style="padding:4px 0;color:#94a3b8;">Venue / Location:</td><td style="padding:4px 0;text-align:right;font-weight:600;color:#ffffff;">${event.location || 'Online'}</td></tr>
-                      <tr><td style="padding:4px 0;color:#94a3b8;">Ticket Entry:</td><td style="padding:4px 0;text-align:right;font-weight:800;color:#34d399;">FREE VIP PASS</td></tr>
+                    <span style="font-size:10px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:10px;">Event Overview</span>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:13px;color:#e4e4e7;">
+                      <tr><td style="padding:5px 0;color:#a1a1aa;width:38%;">Invited Role:</td><td style="padding:5px 0;text-align:right;font-weight:700;color:#ffffff;">${guestRole}</td></tr>
+                      <tr><td style="padding:5px 0;color:#a1a1aa;">Date &amp; Time:</td><td style="padding:5px 0;text-align:right;font-weight:600;color:#ffffff;">${event.startDate} at ${event.startTime}</td></tr>
+                      <tr><td style="padding:5px 0;color:#a1a1aa;">Venue / Location:</td><td style="padding:5px 0;text-align:right;font-weight:600;color:#ffffff;">${event.location || 'Online'}</td></tr>
+                      <tr><td style="padding:5px 0;color:#a1a1aa;">Ticket Pass:</td><td style="padding:5px 0;text-align:right;font-weight:800;color:#ffffff;">FREE VIP PASS</td></tr>
                     </table>
                   </td>
                 </tr>
               </table>
 
-              <!-- QR Code & Ticket Pass Box -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#1e202d;border:1px dashed #38bdf8;border-radius:12px;padding:20px;text-align:center;margin-bottom:24px;">
+              <!-- Inline Base64 QR Code Ticket Pass Box -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#1a1b24;border:1px solid #272832;border-radius:12px;padding:24px;text-align:center;margin-bottom:28px;">
                 <tr>
                   <td align="center">
-                    <span style="font-size:10px;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:12px;">YOUR VIP ENTRY TICKET PASS</span>
-                    <img src="cid:ticket-qrcode" width="130" height="130" alt="VIP Pass QR Code" style="display:block;margin:0 auto 10px auto;border-radius:8px;background:#ffffff;padding:8px;" />
-                    <div style="font-family:monospace;font-size:14px;font-weight:800;color:#ffffff;letter-spacing:1px;">${registration.ticketCode}</div>
-                    <span style="font-size:11px;color:#94a3b8;display:block;margin-top:4px;">Attached as PDF: VIP_Pass_${registration.ticketCode}.pdf</span>
+                    <span style="font-size:10px;font-weight:800;color:#a1a1aa;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:14px;">YOUR VIP ENTRY PASS</span>
+                    
+                    <!-- Native Inline Base64 Image (No external attachment file!) -->
+                    <div style="display:inline-block;background:#ffffff;padding:10px;border-radius:12px;margin-bottom:12px;">
+                      <img src="${qrDataUrl}" width="140" height="140" alt="VIP Pass QR Code" style="display:block;margin:0 auto;border:0;width:140px;height:140px;" />
+                    </div>
+
+                    <div style="font-family:monospace;font-size:15px;font-weight:800;color:#ffffff;letter-spacing:1.5px;">${registration.ticketCode}</div>
+                    <span style="font-size:11px;color:#71717a;display:block;margin-top:6px;">Full Pass Attached as PDF Document</span>
                   </td>
                 </tr>
               </table>
@@ -251,14 +247,14 @@ export async function sendGuestInviteMail({
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align:center;margin-bottom:24px;">
                 <tr>
                   <td align="center">
-                    <a href="${regUrl}" target="_blank" style="display:inline-block;padding:14px 28px;background-color:#fbbf24;color:#000000;font-size:14px;font-weight:800;text-decoration:none;border-radius:10px;box-shadow:0 4px 14px rgba(251,191,36,0.3);">
+                    <a href="${regUrl}" target="_blank" style="display:inline-block;padding:14px 32px;background-color:#ffffff;color:#000000;font-size:14px;font-weight:800;text-decoration:none;border-radius:10px;box-shadow:0 4px 16px rgba(255,255,255,0.15);">
                       Open Registration &amp; View Ticket Pass
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin:0;font-size:12px;color:#64748b;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#71717a;text-align:center;">
                 If you have any questions, reply directly to this email or contact ${event.organizer || 'StudentForge'}.
               </p>
             </td>
@@ -266,8 +262,8 @@ export async function sendGuestInviteMail({
 
           <!-- Footer -->
           <tr>
-            <td style="padding:16px 24px;background-color:#111218;border-top:1px solid #272936;text-align:center;font-size:11px;color:#64748b;">
-              © ${new Date().getFullYear()} StudentForge Events. Official Speaker &amp; Guest Management Portal.
+            <td style="padding:20px 24px;background-color:#0f1015;border-top:1px solid #272832;text-align:center;font-size:11px;color:#71717a;">
+              © ${new Date().getFullYear()} StudentForge Events. Official Speaker &amp; Guest Portal.
             </td>
           </tr>
 
@@ -283,11 +279,7 @@ export async function sendGuestInviteMail({
       to: [to],
       subject,
       html: htmlBody,
-      attachments: attachments.map((att) => ({
-        filename: att.filename,
-        content: att.content,
-        cid: att.cid,
-      })),
+      attachments, // Contains ONLY the 1 PDF attachment file!
     });
 
     if (error) {
