@@ -1625,15 +1625,15 @@ export default function DashboardPage() {
                       </button>
                     </div>
                   </div>
-
                 </div>
               </div>
             )}
 
+            <div className="mt-12 pt-6">
+              <Footer />
+            </div>
           </div>
         </main>
-
-        <Footer />
       </div>
 
       {/* Invite Speaker / Guest Modal */}
