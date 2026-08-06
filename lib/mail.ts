@@ -38,9 +38,6 @@ async function generateTicketPdfBuffer(event: any, registration: any): Promise<B
     const ticketCode = registration.ticketCode;
     const name = registration.name;
     const email = registration.email;
-    const paymentTxnId = registration.paymentTxnId;
-    const paymentMethod = registration.paymentMethod;
-    const paymentAccountName = registration.paymentAccountName;
 
     const qrDataUrl = await QRCode.toDataURL(ticketCode, { width: 300, margin: 1 });
 
@@ -54,7 +51,7 @@ async function generateTicketPdfBuffer(event: any, registration: any): Promise<B
     .ticket-card { width: 792px; height: 392px; background: #15161b; border: 2px solid #2a2c36; border-radius: 20px; display: flex; overflow: hidden; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
     .left-stub { flex: 1; padding: 28px 32px; display: flex; flex-direction: column; justify-content: space-between; border-right: 2px dashed #2a2c36; }
     .right-stub { width: 240px; background: #111216; padding: 28px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .header-row { display: flex; items-center; justify-content: space-between; margin-bottom: 12px; }
+    .header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .brand-logo { height: 28px; width: auto; filter: brightness(0) invert(1); }
     .ticket-id { font-family: monospace; font-size: 13px; font-weight: 800; color: #a1a1aa; background: #22232c; border: 1px solid #333545; padding: 4px 10px; border-radius: 6px; }
     .event-title { font-size: 22px; font-weight: 800; color: #ffffff; margin-bottom: 12px; line-height: 1.2; }
@@ -149,11 +146,15 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       }
     }
 
-    // 3. Header Event Cover Banner HTML
-    let bannerHtml = '';
+    // 3. Header Event Cover Banner HTML (ONLY Event Banner in Header!)
+    let headerBannerHtml = '';
     if (event.coverImage && (event.coverImage.startsWith('http://') || event.coverImage.startsWith('https://'))) {
-      bannerHtml = `<div style="width:100%;text-align:center;background-color:#14151c;border-bottom:1px solid #272832;">
+      headerBannerHtml = `<div style="width:100%;text-align:center;background-color:#14151c;border-bottom:1px solid #272832;">
         <img src="${event.coverImage}" alt="${event.title}" width="580" style="width:100%;max-width:580px;height:auto;display:block;margin:0 auto;border:0;" />
+      </div>`;
+    } else {
+      headerBannerHtml = `<div style="width:100%;padding:28px 24px;background-color:#181922;border-bottom:1px solid #272832;text-align:center;">
+        <h2 style="margin:0;font-size:20px;font-weight:800;color:#ffffff;">${event.title}</h2>
       </div>`;
     }
 
@@ -207,8 +208,6 @@ export async function sendEventMail({ to, subject, event, registration, type, or
     @media only screen and (max-width: 600px) {
       .container-table { width: 100% !important; border-radius: 0 !important; }
       .content-padding { padding: 24px 16px !important; }
-      .header-padding { padding: 24px 16px !important; }
-      .big-logo { height: 40px !important; }
     }
   </style>
 </head>
@@ -218,18 +217,12 @@ export async function sendEventMail({ to, subject, event, registration, type, or
       <td align="center" valign="top">
         <table role="presentation" class="container-table" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:580px;background-color:#14151c;border:1px solid #272832;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
 
-          <!-- Top Header: BIG Brand Logo -->
+          <!-- Top Header: ONLY Event Banner (NO Logo or Tag in Header!) -->
           <tr>
-            <td class="header-padding" style="padding:32px 28px 24px 28px;background-color:#181922;border-bottom:1px solid #272832;text-align:center;">
-              <img src="${LOGO_URL}" alt="StudentForge" height="48" class="big-logo" style="height:48px;width:auto;display:inline-block;border:0;outline:none;" />
-              <div style="margin-top:14px;display:inline-block;padding:4px 12px;border-radius:9999px;background-color:#20222e;border:1px solid #333545;color:#e4e4e7;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
-                ${isPending ? 'REGISTRATION PENDING APPROVAL' : 'TICKET REGISTRATION CONFIRMED'}
-              </div>
+            <td style="padding:0;">
+              ${headerBannerHtml}
             </td>
           </tr>
-
-          <!-- Event Cover Banner -->
-          ${bannerHtml ? `<tr><td style="padding:0;">${bannerHtml}</td></tr>` : ''}
 
           <!-- Main Content Body -->
           <tr>
@@ -315,9 +308,12 @@ export async function sendEventMail({ to, subject, event, registration, type, or
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Bottom Footer (StudentForge Logo moved HERE to Bottom!) -->
           <tr>
-            <td style="padding:20px 24px;background-color:#0f1015;border-top:1px solid #272832;text-align:center;font-size:11px;color:#71717a;">
+            <td style="padding:24px 24px;background-color:#0f1015;border-top:1px solid #272832;text-align:center;font-size:11px;color:#71717a;">
+              <div style="margin-bottom:12px;">
+                <img src="${LOGO_URL}" alt="StudentForge" height="36" style="height:36px;width:auto;display:inline-block;border:0;" />
+              </div>
               © ${new Date().getFullYear()} Student Forge Technologies Private Limited. All rights reserved.
             </td>
           </tr>

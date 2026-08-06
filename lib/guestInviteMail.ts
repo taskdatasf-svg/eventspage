@@ -143,11 +143,15 @@ export async function sendGuestInviteMail({
     const regUrl = `${originUrl}/events/${event.id}/register?guestInvite=true&ticketCode=${registration.ticketCode}&role=${encodeURIComponent(guestRole)}`;
     const subject = `Official Guest & Speaker Invitation: ${event.title}`;
 
-    // Event Banner HTML
-    let bannerHtml = '';
+    // Header Event Banner HTML (ONLY Event Banner in Header!)
+    let headerBannerHtml = '';
     if (event.coverImage && (event.coverImage.startsWith('http://') || event.coverImage.startsWith('https://'))) {
-      bannerHtml = `<div style="width:100%;text-align:center;background-color:#14151c;border-bottom:1px solid #272832;">
+      headerBannerHtml = `<div style="width:100%;text-align:center;background-color:#14151c;border-bottom:1px solid #272832;">
         <img src="${event.coverImage}" alt="${event.title}" width="580" style="width:100%;max-width:580px;height:auto;display:block;margin:0 auto;border:0;" />
+      </div>`;
+    } else {
+      headerBannerHtml = `<div style="width:100%;padding:28px 24px;background-color:#181922;border-bottom:1px solid #272832;text-align:center;">
+        <h2 style="margin:0;font-size:20px;font-weight:800;color:#ffffff;">${event.title}</h2>
       </div>`;
     }
 
@@ -164,8 +168,6 @@ export async function sendGuestInviteMail({
     @media only screen and (max-width: 600px) {
       .container-table { width: 100% !important; border-radius: 0 !important; }
       .content-padding { padding: 24px 16px !important; }
-      .header-padding { padding: 24px 16px !important; }
-      .big-logo { height: 40px !important; }
     }
   </style>
 </head>
@@ -175,18 +177,12 @@ export async function sendGuestInviteMail({
       <td align="center">
         <table role="presentation" class="container-table" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:580px;background-color:#14151c;border:1px solid #272832;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
           
-          <!-- Top Header: BIG Logo -->
+          <!-- Top Header: ONLY Event Banner (NO Logo or Tag in Header!) -->
           <tr>
-            <td class="header-padding" style="padding:32px 28px 24px 28px;background-color:#181922;border-bottom:1px solid #272832;text-align:center;">
-              <img src="${LOGO_URL}" alt="StudentForge" height="48" class="big-logo" style="height:48px;width:auto;display:inline-block;border:0;outline:none;" />
-              <div style="margin-top:16px;display:inline-block;padding:5px 14px;border-radius:9999px;background-color:#20222e;border:1px solid #333545;color:#e4e4e7;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">
-                VIP SPEAKER &amp; GUEST INVITATION
-              </div>
+            <td style="padding:0;">
+              ${headerBannerHtml}
             </td>
           </tr>
-
-          <!-- Event Cover Banner -->
-          ${bannerHtml ? `<tr><td style="padding:0;">${bannerHtml}</td></tr>` : ''}
 
           <!-- Main Content Body -->
           <tr>
@@ -232,7 +228,7 @@ export async function sendGuestInviteMail({
                   <td align="center">
                     <span style="font-size:10px;font-weight:800;color:#a1a1aa;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:14px;">YOUR VIP ENTRY PASS</span>
                     
-                    <!-- Native Inline Base64 Image (No external attachment file!) -->
+                    <!-- Native Inline Base64 Image -->
                     <div style="display:inline-block;background:#ffffff;padding:10px;border-radius:12px;margin-bottom:12px;">
                       <img src="${qrDataUrl}" width="140" height="140" alt="VIP Pass QR Code" style="display:block;margin:0 auto;border:0;width:140px;height:140px;" />
                     </div>
@@ -260,9 +256,12 @@ export async function sendGuestInviteMail({
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Bottom Footer (StudentForge Logo moved HERE to Bottom!) -->
           <tr>
-            <td style="padding:20px 24px;background-color:#0f1015;border-top:1px solid #272832;text-align:center;font-size:11px;color:#71717a;">
+            <td style="padding:24px 24px;background-color:#0f1015;border-top:1px solid #272832;text-align:center;font-size:11px;color:#71717a;">
+              <div style="margin-bottom:12px;">
+                <img src="${LOGO_URL}" alt="StudentForge" height="36" style="height:36px;width:auto;display:inline-block;border:0;" />
+              </div>
               © ${new Date().getFullYear()} StudentForge Events. Official Speaker &amp; Guest Portal.
             </td>
           </tr>
