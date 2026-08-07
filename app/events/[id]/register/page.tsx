@@ -969,49 +969,86 @@ function RegisterPageInner() {
 
 
 
-                    {/* Coupon Code Section */}
+                    {/* Coupon Code Section - Styled with Event Dynamic Highlight Color */}
                     {!isEventFree(event.price) && (
-                      <div className="flex flex-col gap-2 p-3 bg-[#222228] border border-[#2e2e3a] rounded-xl w-full">
+                      <div className="flex flex-col gap-3 p-4 bg-[#1b1b20] border border-[#2a2a34] rounded-2xl w-full shadow-xl relative overflow-hidden transition-all duration-300">
+                        {/* Subtle top glowing highlight bar using event color */}
+                        <div 
+                          className="absolute top-0 left-0 right-0 h-[2px]" 
+                          style={{ background: 'linear-gradient(90deg, transparent, var(--event-highlight), transparent)' }}
+                        />
+
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] uppercase font-mono text-neutral-400 font-semibold flex items-center gap-1.5">
-                            <GoTag className="w-3.5 h-3.5 text-amber-400" /> Have a Coupon Code?
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-6 h-6 rounded-lg flex items-center justify-center border shrink-0"
+                              style={{ 
+                                backgroundColor: 'var(--event-highlight-bg)', 
+                                borderColor: 'var(--event-highlight)',
+                                color: 'var(--event-highlight)' 
+                              }}
+                            >
+                              <GoTag className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="text-xs uppercase font-mono tracking-wider font-bold text-white">
+                              Have a Coupon Code?
+                            </span>
+                          </div>
+
                           {appliedCoupon && (
-                            <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                            <span 
+                              className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md border"
+                              style={{ 
+                                backgroundColor: 'var(--event-highlight-bg)', 
+                                color: 'var(--event-highlight)',
+                                borderColor: 'var(--event-highlight)'
+                              }}
+                            >
                               -{appliedCoupon.discountType === 'PERCENTAGE' ? `${appliedCoupon.discountValue}%` : `₹${appliedCoupon.discountValue}`} OFF
                             </span>
                           )}
                         </div>
 
                         {appliedCoupon ? (
-                          <div className="flex items-center justify-between p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                            <div className="flex items-center gap-2 font-mono text-xs text-emerald-300">
-                              <GoCheck className="w-4 h-4 text-emerald-400" />
-                              <span className="font-bold">{appliedCoupon.code}</span>
-                              <span className="text-[10px] text-emerald-400/80 font-normal">(-₹{appliedCoupon.discountAmount} saved)</span>
+                          <div 
+                            className="flex items-center justify-between p-2.5 rounded-xl border transition-all animate-fade-in"
+                            style={{ 
+                              backgroundColor: 'var(--event-highlight-bg)', 
+                              borderColor: 'var(--event-highlight)' 
+                            }}
+                          >
+                            <div className="flex items-center gap-2 font-mono text-xs">
+                              <GoCheck className="w-4 h-4 font-bold" style={{ color: 'var(--event-highlight)' }} />
+                              <span className="font-bold text-white tracking-wider">{appliedCoupon.code}</span>
+                              <span className="text-[11px] font-medium opacity-90" style={{ color: 'var(--event-highlight)' }}>
+                                (-₹{appliedCoupon.discountAmount} saved)
+                              </span>
                             </div>
                             <button
                               type="button"
                               onClick={handleRemoveCoupon}
-                              className="text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-mono px-1.5 py-0.5 rounded hover:bg-white/10"
+                              className="text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-mono px-2 py-1 rounded-lg hover:bg-white/10"
                             >
                               Remove ✕
                             </button>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2.5">
                             <input
                               type="text"
                               value={inputCouponCode}
                               onChange={(e) => setInputCouponCode(e.target.value.toUpperCase())}
                               placeholder="Enter Code (e.g. INCEPT50)"
-                              className="flex-1 bg-[#1a1a1e] border border-[#33333e] rounded-lg px-3 py-1.5 text-xs text-white uppercase font-mono font-bold outline-none focus:border-amber-500 placeholder:text-neutral-500 placeholder:normal-case"
+                              className="flex-1 bg-[#141417] border border-[#2d2d38] focus:border-[var(--event-highlight)] rounded-xl px-3.5 py-2 text-xs text-white uppercase font-mono font-bold outline-none transition-all placeholder:text-neutral-500 placeholder:normal-case tracking-wider shadow-inner"
                             />
                             <button
                               type="button"
                               onClick={handleApplyCoupon}
                               disabled={couponLoading || !inputCouponCode.trim()}
-                              className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black text-xs font-bold font-mono rounded-lg transition-all cursor-pointer shrink-0"
+                              className="px-4 py-2 text-neutral-950 text-xs font-bold font-mono rounded-xl transition-all cursor-pointer shrink-0 shadow-md hover:brightness-110 active:scale-95 disabled:opacity-40"
+                              style={{ 
+                                backgroundColor: 'var(--event-highlight)' 
+                              }}
                             >
                               {couponLoading ? 'Applying...' : 'Apply'}
                             </button>
@@ -1019,7 +1056,9 @@ function RegisterPageInner() {
                         )}
 
                         {couponError && (
-                          <p className="text-[11px] text-rose-400 font-mono mt-0.5">{couponError}</p>
+                          <p className="text-[11px] text-rose-400 font-mono font-medium animate-fade-in flex items-center gap-1">
+                            ⚠️ {couponError}
+                          </p>
                         )}
                       </div>
                     )}
