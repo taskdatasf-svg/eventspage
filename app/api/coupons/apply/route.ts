@@ -9,34 +9,61 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Please enter a coupon code' }, { status: 400 });
     }
 
-    const cleanCode = code.trim().toUpperCase();
+    // Sanitize input code string (remove hidden unicode whitespace like \u202F, \u00A0, \u200B)
+    const sanitizedInput = code
+      .replace(/[\u200B-\u200D\uFEFF\u202F\u00A0\s]/g, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '')
+      .trim()
+      .toUpperCase();
 
-    // Find coupon by code
-    const coupon = await prisma.coupon.findUnique({
-      where: { code: cleanCode },
+    if (!sanitizedInput) {
+      return NextResponse.json({ error: 'Please enter a valid coupon code' }, { status: 400 });
+    }
+
+    // 1. Try finding coupon by exact / case-insensitive code
+    let coupon = await prisma.coupon.findFirst({
+      where: {
+        code: {
+          equals: sanitizedInput,
+          mode: 'insensitive',
+        },
+      },
     });
 
+    // 2. Fallback check: If database has legacy coupons with hidden unicode spaces, match by sanitizing both sides
     if (!coupon) {
-      return NextResponse.json({ error: `Invalid coupon code '${cleanCode}'` }, { status: 404 });
+      const allCoupons = await prisma.coupon.findMany();
+      coupon = allCoupons.find((c) => {
+        const dbSanitized = c.code
+          .replace(/[\u200B-\u200D\uFEFF\u202F\u00A0\s]/g, '')
+          .replace(/[^a-zA-Z0-9_-]/g, '')
+          .trim()
+          .toUpperCase();
+        return dbSanitized === sanitizedInput;
+      }) || null;
+    }
+
+    if (!coupon) {
+      return NextResponse.json({ error: `Invalid coupon code '${sanitizedInput}'` }, { status: 404 });
     }
 
     if (!coupon.isActive) {
-      return NextResponse.json({ error: `Coupon code '${cleanCode}' is currently inactive` }, { status: 400 });
+      return NextResponse.json({ error: `Coupon code '${coupon.code}' is currently inactive` }, { status: 400 });
     }
 
     // Check event constraint
     if (coupon.eventId && eventId && coupon.eventId !== eventId) {
-      return NextResponse.json({ error: `Coupon '${cleanCode}' is not applicable for this event` }, { status: 400 });
+      return NextResponse.json({ error: `Coupon '${coupon.code}' is not applicable for this event` }, { status: 400 });
     }
 
     // Check expiration date
     if (coupon.expiresAt && new Date(coupon.expiresAt).getTime() < Date.now()) {
-      return NextResponse.json({ error: `Coupon '${cleanCode}' has expired` }, { status: 400 });
+      return NextResponse.json({ error: `Coupon '${coupon.code}' has expired` }, { status: 400 });
     }
 
     // Check max usages limit
     if (coupon.maxUses !== null && coupon.maxUses !== undefined && coupon.usedCount >= coupon.maxUses) {
-      return NextResponse.json({ error: `Coupon '${cleanCode}' has reached its maximum redemption limit` }, { status: 400 });
+      return NextResponse.json({ error: `Coupon '${coupon.code}' has reached its maximum redemption limit` }, { status: 400 });
     }
 
     // Calculate numeric original price
@@ -46,7 +73,7 @@ export async function POST(request: Request) {
 
     if (coupon.minOrderAmount && basePrice < coupon.minOrderAmount) {
       return NextResponse.json({
-        error: `Coupon '${cleanCode}' requires a minimum order amount of ₹${coupon.minOrderAmount}`
+        error: `Coupon '${coupon.code}' requires a minimum order amount of ₹${coupon.minOrderAmount}`
       }, { status: 400 });
     }
 

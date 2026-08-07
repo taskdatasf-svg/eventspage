@@ -50,7 +50,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Coupon code is required' }, { status: 400 });
     }
 
-    const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+    // Strip invisible unicode whitespace & normalize
+    const cleanCode = code
+      .replace(/[\u200B-\u200D\uFEFF\u202F\u00A0\s]/g, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '')
+      .trim()
+      .toUpperCase();
+
     if (cleanCode.length < 3) {
       return NextResponse.json({ error: 'Coupon code must be at least 3 characters long' }, { status: 400 });
     }
@@ -64,9 +70,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Percentage discount cannot exceed 100%' }, { status: 400 });
     }
 
-    // Check if code already exists
-    const existing = await prisma.coupon.findUnique({
-      where: { code: cleanCode },
+    // Check if code already exists (case-insensitive & sanitized check)
+    const existing = await prisma.coupon.findFirst({
+      where: {
+        code: {
+          equals: cleanCode,
+          mode: 'insensitive',
+        },
+      },
     });
 
     if (existing) {
