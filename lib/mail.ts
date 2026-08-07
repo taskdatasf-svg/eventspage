@@ -32,8 +32,127 @@ export interface SendMailParams {
   originUrl: string;
 }
 
-// ─── Ticket PDF Pass Generator (for PDF attachment ONLY) ──────────────────────
+import { jsPDF } from 'jspdf';
+
+// ─── Ticket PDF Pass Generator (100% reliable jsPDF + Puppeteer Fallback) ──────
 async function generateTicketPdfBuffer(event: any, registration: any): Promise<Buffer | null> {
+  // 1. Primary: Pure JS PDF generation via jsPDF (Zero binary dependencies, 100% reliable everywhere)
+  try {
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: [140, 75]
+    });
+
+    // Dark sleek ticket theme background (#141419)
+    doc.setFillColor(20, 20, 25);
+    doc.rect(0, 0, 140, 75, 'F');
+
+    // Outer border & shadow effect
+    doc.setDrawColor(46, 46, 62);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(3, 3, 134, 69, 4, 4, 'S');
+
+    // Top Header Accent Line (amber #f59e0b)
+    doc.setFillColor(245, 158, 11);
+    doc.rect(3, 3, 134, 2, 'F');
+
+    // Brand Name Header
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('STUDENT FORGE', 8, 11);
+
+    // Ticket Code Badge (top right stub)
+    doc.setFillColor(34, 35, 44);
+    doc.roundedRect(88, 7, 46, 7, 2, 2, 'F');
+    doc.setDrawColor(60, 60, 75);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(88, 7, 46, 7, 2, 2, 'S');
+    doc.setTextColor(245, 158, 11);
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(8);
+    doc.text(registration.ticketCode || 'TKT-ENTRY', 111, 11.5, { align: 'center' });
+
+    // Event Title
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    const titleText = (event.title || 'Event Ticket Pass').substring(0, 36);
+    doc.text(titleText, 8, 20);
+
+    // Stub Vertical Divider
+    doc.setDrawColor(45, 45, 55);
+    doc.setLineWidth(0.4);
+    doc.line(95, 16, 95, 69);
+
+    // Attendee Name & Email
+    doc.setTextColor(161, 161, 170);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    doc.text('ATTENDEE NAME', 8, 27);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.text((registration.name || 'Guest').substring(0, 30), 8, 32);
+
+    doc.setTextColor(161, 161, 170);
+    doc.setFontSize(6.5);
+    doc.text('EMAIL ADDRESS', 8, 38);
+    doc.setTextColor(229, 229, 228);
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(7.5);
+    doc.text((registration.email || '').substring(0, 34), 8, 43);
+
+    // Event Date & Location
+    doc.setTextColor(161, 161, 170);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    doc.text('DATE & TIME', 8, 49);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(7.5);
+    doc.text(`${event.startDate || 'TBA'} ${event.startTime || ''}`.substring(0, 24), 8, 54);
+
+    doc.setTextColor(161, 161, 170);
+    doc.setFontSize(6.5);
+    doc.text('LOCATION / VENUE', 50, 49);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(7.5);
+    doc.text((event.location || 'Online').substring(0, 22), 50, 54);
+
+    // Entry Status Bar
+    doc.setFillColor(16, 185, 129); // Emerald Green
+    doc.roundedRect(8, 60, 80, 7, 2, 2, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.text('OFFICIAL ADMISSION TICKET PASS', 48, 64.5, { align: 'center' });
+
+    // Right Stub: High-Res QR Code
+    const qrDataUrl = await QRCode.toDataURL(registration.ticketCode || 'TKT-ENTRY', {
+      width: 160,
+      margin: 1,
+      color: { dark: '#000000', light: '#ffffff' }
+    });
+
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(100, 20, 32, 32, 2, 2, 'F');
+    doc.addImage(qrDataUrl, 'PNG', 101, 21, 30, 30);
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    doc.text('OFFICIAL PASS', 116, 57, { align: 'center' });
+    doc.setTextColor(161, 161, 170);
+    doc.setFontSize(5.5);
+    doc.text('Scan for Entry', 116, 61, { align: 'center' });
+
+    const arrayBuffer = doc.output('arraybuffer');
+    return Buffer.from(arrayBuffer);
+  } catch (jsPdfErr) {
+    console.warn('jsPDF generation failed, falling back to Puppeteer:', jsPdfErr);
+  }
+
+  // 2. Secondary Fallback: Puppeteer HTML-to-PDF
   try {
     const ticketCode = registration.ticketCode;
     const name = registration.name;
@@ -128,11 +247,9 @@ export async function sendEventMail({ to, subject, event, registration, type, or
 
     // Generate Ticket PDF Pass (The ONLY attachment file!)
     const attachments: { filename: string; content: Buffer }[] = [];
-    if (!isPending) {
-      const pdfBuffer = await generateTicketPdfBuffer(event, registration);
-      if (pdfBuffer) {
-        attachments.push({ filename: `ticket-${registration.ticketCode}.pdf`, content: pdfBuffer });
-      }
+    const pdfBuffer = await generateTicketPdfBuffer(event, registration);
+    if (pdfBuffer) {
+      attachments.push({ filename: `ticket-${registration.ticketCode || 'pass'}.pdf`, content: pdfBuffer });
     }
 
     // Header Event Cover Banner HTML (ONLY Event Banner in Header!)
