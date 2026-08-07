@@ -348,16 +348,14 @@ function RegisterPageInner() {
   // Coupon states
   const [inputCouponCode, setInputCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
-  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState('');
 
-  const handleApplyCoupon = async (overrideCode?: string) => {
-    const targetCode = typeof overrideCode === 'string' ? overrideCode : inputCouponCode;
-    if (!targetCode || !targetCode.trim() || !event) return;
+  const handleApplyCoupon = async () => {
+    if (!inputCouponCode || !inputCouponCode.trim() || !event) return;
 
     // Sanitize string locally before sending
-    const cleanCode = targetCode
+    const cleanCode = inputCouponCode
       .replace(/[\u200B-\u200D\uFEFF\u202F\u00A0\s]/g, '')
       .replace(/[^a-zA-Z0-9_-]/g, '')
       .trim()
@@ -440,13 +438,6 @@ function RegisterPageInner() {
                     setTicket(userReg);
                   }
                 }
-              })
-              .catch((err) => console.error(err));
-
-            fetch(`/api/coupons/public?eventId=${id}`)
-              .then((r) => r.json())
-              .then((cData) => {
-                if (cData.coupons) setAvailableCoupons(cData.coupons);
               })
               .catch((err) => console.error(err));
           }
@@ -1052,57 +1043,31 @@ function RegisterPageInner() {
                             </button>
                           </div>
                         ) : (
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2.5">
-                              <input
-                                type="text"
-                                value={inputCouponCode}
-                                onChange={(e) => setInputCouponCode(e.target.value.toUpperCase())}
-                                placeholder="Enter Code (e.g. INCEPT50)"
-                                className="flex-1 bg-[#141417] border border-[#2d2d38] focus:border-[var(--event-highlight)] rounded-xl px-3.5 py-2 text-xs text-white uppercase font-mono font-bold outline-none transition-all placeholder:text-neutral-500 placeholder:normal-case tracking-wider shadow-inner"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleApplyCoupon()}
-                                disabled={couponLoading || !inputCouponCode.trim()}
-                                className="px-4 py-2 text-neutral-950 text-xs font-bold font-mono rounded-xl transition-all cursor-pointer shrink-0 shadow-md hover:brightness-110 active:scale-95 disabled:opacity-40"
-                                style={{ 
-                                  backgroundColor: 'var(--event-highlight)' 
-                                }}
-                              >
-                                {couponLoading ? 'Applying...' : 'Apply'}
-                              </button>
-                            </div>
-
-                            {/* Suggested Available Coupons 1-Click Pills */}
-                            {availableCoupons.length > 0 && (
-                              <div className="flex flex-col gap-1.5 pt-1">
-                                <span className="text-[10px] uppercase font-mono text-neutral-400 font-semibold">
-                                  Available Coupon Codes:
-                                </span>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {availableCoupons.map((c) => (
-                                    <button
-                                      key={c.id}
-                                      type="button"
-                                      onClick={() => handleApplyCoupon(c.code)}
-                                      className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-sm"
-                                    >
-                                      <span>🏷️ {c.code}</span>
-                                      <span className="text-[10px] text-emerald-400 font-normal">
-                                        ({c.discountType === 'PERCENTAGE' ? `${c.discountValue}% OFF` : `₹${c.discountValue} OFF`})
-                                      </span>
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                          <div className="flex items-center gap-2.5">
+                            <input
+                              type="text"
+                              value={inputCouponCode}
+                              onChange={(e) => setInputCouponCode(e.target.value.toUpperCase())}
+                              placeholder="Enter Code (e.g. INCEPT50)"
+                              className="flex-1 bg-[#141417] border border-[#2d2d38] focus:border-[var(--event-highlight)] rounded-xl px-3.5 py-2 text-xs text-white uppercase font-mono font-bold outline-none transition-all placeholder:text-neutral-500 placeholder:normal-case tracking-wider shadow-inner"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleApplyCoupon()}
+                              disabled={couponLoading || !inputCouponCode.trim()}
+                              className="px-4 py-2 text-neutral-950 text-xs font-bold font-mono rounded-xl transition-all cursor-pointer shrink-0 shadow-md hover:brightness-110 active:scale-95 disabled:opacity-40"
+                              style={{ 
+                                backgroundColor: 'var(--event-highlight)' 
+                              }}
+                            >
+                              {couponLoading ? 'Applying...' : 'Apply'}
+                            </button>
                           </div>
                         )}
 
                         {couponError && (
-                          <p className="text-[11px] text-rose-400 font-mono font-medium animate-fade-in flex items-center gap-1">
-                            ⚠️ {couponError}
+                          <p className="text-[11px] text-rose-400 font-mono font-medium animate-fade-in">
+                            {couponError}
                           </p>
                         )}
                       </div>
