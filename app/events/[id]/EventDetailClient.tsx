@@ -262,7 +262,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
   const getDisplayRemaining = (actual: number | null): number | null => {
     if (actual === null) return null;
     if (actual <= 0) return 0;
-    return Math.max(1, 32 - registrationsCount);
+    return Math.max(1, 30 - registrationsCount);
   };
 
   const displayTicketsLeft = getDisplayRemaining(actualRemaining);
