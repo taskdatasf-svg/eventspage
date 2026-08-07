@@ -42,17 +42,30 @@ model Event {
 }
 
 model Registration {
-  id         String   @id @default(cuid())
-  eventId    String
-  eventTitle String
-  name       String
-  email      String
-  phone      String?
-  ticketCode String   @unique
+  id                 String   @id @default(cuid())
+  eventId            String
+  eventTitle         String
+  name               String
+  email              String
+  phone              String?
+  ticketCode         String   @unique
   answers            String?
   paymentAccountName String?
   paymentMethod      String?
   paymentTxnId       String?
-  status     String   @default("APPROVED")
+  status             String   @default("APPROVED")
+  attended           Boolean? @default(false)
   createdAt          DateTime @default(now())
 }
+
+
+model SupportQuery {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+}
+

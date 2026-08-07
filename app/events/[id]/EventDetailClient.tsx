@@ -883,6 +883,66 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
 
             </div>
 
+            {/* Standalone Official Event Partners Card (Positioned BELOW the metadata cards) */}
+            <div className="w-full bg-[#121218] border border-[#22222e] rounded-2xl p-5 shadow-xl flex flex-col gap-4 mt-4 font-sans">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Official Event Partners</h4>
+                </div>
+                <span className="text-[10px] font-mono text-neutral-300 bg-[#1c1c28] border border-[#2b2b3d] px-2 py-0.5 rounded-full">Collaborators</span>
+              </div>
+
+              {/* Networking Partner: Peopld */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] uppercase font-mono tracking-widest text-neutral-200 font-semibold flex items-center gap-1">
+                  Networking Partner
+                </span>
+                <div className="flex items-center gap-3.5 p-3.5 bg-white/95 border border-white rounded-xl shadow-md transition-transform hover:scale-[1.01]">
+                  <div className="h-14 min-w-[120px] px-2 py-0.5 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-inner overflow-hidden">
+                    <img
+                      src="https://ik.imagekit.io/dypkhqxip/peopld"
+                      alt="Peopld Networking Partner"
+                      className="h-14 w-auto object-contain max-w-[180px] sm:max-w-[220px] scale-140 transform-gpu"
+                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                    />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm font-bold text-neutral-900 leading-tight">Peopld</span>
+                    <span className="text-[11px] text-neutral-600 font-medium">Official Networking Partner</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Marketplace / Vendor Partners: Yem nest & Fitbasics (JUST LOGOS) */}
+              <div className="flex flex-col gap-2 pt-1">
+                <span className="text-[10px] uppercase font-mono tracking-widest text-neutral-200 font-semibold flex items-center gap-1">
+                  Marketplace Partners
+                </span>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Yem nest */}
+                  <div className="w-full h-14 bg-white/95 border border-white rounded-xl shadow-md p-2 flex items-center justify-center transition-transform hover:scale-[1.01]">
+                    <img
+                      src="https://ik.imagekit.io/dypkhqxip/yemnestnavbar.webp"
+                      alt="Yem nest Marketplace Partner"
+                      className="h-9 w-auto max-w-[110px] object-contain transform-gpu"
+                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                    />
+                  </div>
+
+                  {/* Fitbasics */}
+                  <div className="w-full h-14 bg-black border border-[#2a2a38] rounded-xl shadow-md p-2 flex items-center justify-center transition-transform hover:scale-[1.01]">
+                    <img
+                      src="https://ik.imagekit.io/dypkhqxip/ven1"
+                      alt="Fitbasics Marketplace Partner"
+                      className="h-9 w-auto max-w-[110px] object-contain transform-gpu"
+                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
         </div>

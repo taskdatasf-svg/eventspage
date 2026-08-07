@@ -29,23 +29,41 @@ export async function POST(req: NextRequest) {
     }
 
     // Determine target recipient emails from database
-    let registrations;
+    const recipientMap = new Map<string, { email: string; name?: string }>();
+
     if (eventId && eventId !== 'all') {
-      registrations = await prisma.registration.findMany({
+      // Event-specific target: Fetch all attendees registered for this specific event
+      const registrations = await prisma.registration.findMany({
         where: { eventId },
         select: { email: true, name: true },
       });
-    } else {
-      registrations = await prisma.registration.findMany({
-        select: { email: true, name: true },
-      });
-    }
 
-    // Deduplicate recipients by email
-    const recipientMap = new Map<string, { email: string; name?: string }>();
-    for (const reg of registrations) {
-      if (reg.email && !recipientMap.has(reg.email.toLowerCase())) {
-        recipientMap.set(reg.email.toLowerCase(), { email: reg.email, name: reg.name });
+      for (const reg of registrations) {
+        if (reg.email && !recipientMap.has(reg.email.trim().toLowerCase())) {
+          recipientMap.set(reg.email.trim().toLowerCase(), { email: reg.email.trim(), name: reg.name });
+        }
+      }
+    } else {
+      // All platform audience target: Fetch both registered users and event attendees
+      const [allUsers, allRegistrations] = await Promise.all([
+        prisma.user.findMany({
+          select: { email: true, name: true },
+        }),
+        prisma.registration.findMany({
+          select: { email: true, name: true },
+        }),
+      ]);
+
+      for (const u of allUsers) {
+        if (u.email && !recipientMap.has(u.email.trim().toLowerCase())) {
+          recipientMap.set(u.email.trim().toLowerCase(), { email: u.email.trim(), name: u.name });
+        }
+      }
+
+      for (const reg of allRegistrations) {
+        if (reg.email && !recipientMap.has(reg.email.trim().toLowerCase())) {
+          recipientMap.set(reg.email.trim().toLowerCase(), { email: reg.email.trim(), name: reg.name });
+        }
       }
     }
 

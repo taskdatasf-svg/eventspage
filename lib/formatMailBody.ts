@@ -18,13 +18,17 @@ export function formatBroadcastBodyHtml(rawHtml: string): string {
     html = html.replace(/<p>/gi, '<p style="margin:0 0 16px 0;line-height:1.7;color:#f4f4f5;">');
   }
 
-  // 2. Auto-detect raw plain URLs (http:// or https://) not inside <a> tags and wrap them in blue clickable links
+  // 2. Parse Markdown bold (**text**) and italic (*text*) tags
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong style="font-weight:700;color:#ffffff;">$1</strong>');
+  html = html.replace(/\*([^*]+)\*/g, '<em style="font-style:italic;">$1</em>');
+
+  // 3. Auto-detect raw plain URLs (http:// or https://) not inside <a> tags and wrap them in blue clickable links
   const urlRegex = /(?<!href="|href='|">)(https?:\/\/[^\s<"']+)/gi;
   html = html.replace(urlRegex, (url) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#3b82f6 !important;text-decoration:underline !important;font-weight:500;word-break:break-all;">${url}</a>`;
   });
 
-  // 3. Ensure all <a> tags have explicit inline blue color styling for email clients
+  // 4. Ensure all <a> tags have explicit inline blue color styling for email clients
   html = html.replace(/<a /gi, '<a target="_blank" rel="noopener noreferrer" style="color:#3b82f6 !important;text-decoration:underline !important;font-weight:500;word-break:break-all;" ');
 
   return html;

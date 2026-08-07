@@ -16,7 +16,15 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const totalAttendees = await prisma.registration.count();
+    const [users, registrations] = await Promise.all([
+      prisma.user.findMany({ select: { email: true } }),
+      prisma.registration.findMany({ select: { email: true } }),
+    ]);
+
+    const uniqueEmails = new Set<string>();
+    users.forEach((u) => u.email && uniqueEmails.add(u.email.trim().toLowerCase()));
+    registrations.forEach((r) => r.email && uniqueEmails.add(r.email.trim().toLowerCase()));
+    const totalAttendees = uniqueEmails.size;
 
     return NextResponse.json({
       dailyLimit: DAILY_LIMIT,

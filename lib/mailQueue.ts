@@ -176,7 +176,7 @@ try {
           status: 'DELAYED_FOR_NEXT_DAY_RESET',
           scheduledDelaySec: Math.round(delayUntilTomorrowMs / 1000),
           rescheduledForTomorrow: true,
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: new Date().toISOString(),
           error: `Quota limit of ${DAILY_LIMIT} reached today. Job delayed ${delayMinutes} min until tomorrow's reset. No emails lost!`,
         });
 
@@ -201,7 +201,7 @@ try {
           jobType: payload.type,
           status: 'COMPLETED',
           scheduledDelaySec: Math.round((job.delay || 0) / 1000),
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: new Date().toISOString(),
         });
       } else {
         recentMailLogs.unshift({
@@ -211,7 +211,7 @@ try {
           jobType: payload.type,
           status: 'FAILED',
           scheduledDelaySec: Math.round((job.delay || 0) / 1000),
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: new Date().toISOString(),
           error: result.error,
         });
         throw new Error(result.error || 'Mail sending failed');
@@ -270,7 +270,7 @@ export async function enqueueRegistrationMail(payload: Omit<RegistrationMailPayl
             status: 'DELAYED_FOR_NEXT_DAY_RESET',
             scheduledDelaySec: Math.round(delayMs / 1000),
             rescheduledForTomorrow: true,
-            timestamp: new Date().toLocaleTimeString(),
+            timestamp: new Date().toISOString(),
             error: `Daily limit reached. Email safely queued for tomorrow's reset.`,
           });
 
@@ -307,7 +307,7 @@ export async function enqueueRegistrationMail(payload: Omit<RegistrationMailPayl
             jobType: 'REGISTRATION',
             status: 'COMPLETED',
             scheduledDelaySec: 0,
-            timestamp: new Date().toLocaleTimeString(),
+            timestamp: new Date().toISOString(),
           });
         }
       } catch (err) {
@@ -403,7 +403,7 @@ export async function enqueueBroadcastBatch(
               status: 'DELAYED_FOR_NEXT_DAY_RESET',
               scheduledDelaySec: Math.round(extraDelay / 1000),
               rescheduledForTomorrow: true,
-              timestamp: new Date().toLocaleTimeString(),
+              timestamp: new Date().toISOString(),
               error: `Limit hit today. Mail safely held until tomorrow's reset.`,
             });
             setTimeout(async () => {
@@ -436,7 +436,7 @@ export async function enqueueBroadcastBatch(
               jobType: 'BROADCAST',
               status: 'COMPLETED',
               scheduledDelaySec: Math.round(delayMs / 1000),
-              timestamp: new Date().toLocaleTimeString(),
+              timestamp: new Date().toISOString(),
             });
           }
         } catch (e: any) {
@@ -453,7 +453,7 @@ export async function enqueueBroadcastBatch(
       status: isOverTodayLimit ? 'DELAYED_FOR_NEXT_DAY_RESET' : 'QUEUED',
       scheduledDelaySec: Math.round(delayMs / 1000),
       rescheduledForTomorrow: isOverTodayLimit,
-      timestamp: new Date().toLocaleTimeString(),
+      timestamp: new Date().toISOString(),
     };
 
     newLogs.push(logEntry);
