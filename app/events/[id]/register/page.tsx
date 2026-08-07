@@ -15,6 +15,7 @@ import {
   GoPlus, GoX, GoCopy
 } from 'react-icons/go';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
+import { isEventCompleted } from '@/lib/utils';
 
 const isEventFree = (price: string) => {
   const clean = price.trim().toLowerCase();
@@ -567,6 +568,33 @@ function RegisterPageInner() {
           <p className="text-sm text-neutral-400">Event details not found.</p>
           <a href="/events" className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] border border-[#2e2e34] rounded-md text-xs hover:bg-[#2c2c32] transition-colors">
             <GoArrowLeft className="w-3.5 h-3.5" /> Back to Events
+          </a>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
+
+  // BLOCK REGISTRATION IF EVENT IS COMPLETED
+  if (isEventCompleted(event)) {
+    return (
+      <main className="min-h-screen bg-[#161618] text-white flex flex-col justify-between antialiased font-sans">
+        <Navbar />
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 py-20 px-4 text-center max-w-md mx-auto">
+          <div className="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-500 shadow-xl">
+            <GoClock className="w-8 h-8 text-neutral-400" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-bold text-white tracking-tight">Registration Closed</h1>
+            <p className="text-sm text-neutral-400 leading-relaxed">
+              Registration for <strong className="text-white">{event.title}</strong> is closed because this event has already concluded.
+            </p>
+          </div>
+          <a
+            href={`/events/${event.id}`}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#222226] border border-[#2e2e34] rounded-xl text-xs font-semibold text-white hover:bg-[#2c2c32] transition-colors shadow-md"
+          >
+            <GoArrowLeft className="w-4 h-4" /> Return to Event Details
           </a>
         </div>
         <Footer />

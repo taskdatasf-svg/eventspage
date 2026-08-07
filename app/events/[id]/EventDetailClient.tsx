@@ -7,10 +7,11 @@ import Footer from '@/components/Footer';
 import PixelBlast from '@/components/PixelBlast';
 import Grainient from '@/components/Grainient';
 import { EventData } from '@/lib/eventsStore';
-import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck, GoChevronLeft, GoChevronRight, GoImage, GoVideo, GoArrowUpRight, GoTag } from 'react-icons/go';
+import { GoCalendar, GoLocation, GoPeople, GoArrowLeft, GoPerson, GoCheck, GoChevronLeft, GoChevronRight, GoImage, GoVideo, GoArrowUpRight, GoTag, GoClock } from 'react-icons/go';
 import { ShinyButton } from '@/components/ui/shiny-button';
 import { useViewerCount } from '@/lib/useViewerCount';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
+import { isEventCompleted } from '@/lib/utils';
 
 const GoogleDriveLogo = ({ className = "w-5 h-5" }: { className?: string }) => {
   const [hasError, setHasError] = useState(false);
@@ -689,7 +690,17 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
               <div className="w-full border-t border-dashed border-white/10" />
 
               <div className="flex flex-col gap-3">
-                {registered ? (
+                {isEventCompleted(event) ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="w-full py-3.5 bg-neutral-900 border border-neutral-800 text-neutral-400 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 cursor-not-allowed select-none shadow-inner">
+                      <GoClock className="w-4 h-4 text-neutral-500" />
+                      <span>Event Concluded · Registration Closed</span>
+                    </div>
+                    <p className="text-[10px] text-neutral-500 text-center leading-relaxed">
+                      This event has already taken place. Registration is closed for completed events.
+                    </p>
+                  </div>
+                ) : registered ? (
                   <div className="flex flex-col gap-2">
                     <div className="w-full py-3 bg-[#1c1c21] border border-[#232329] text-neutral-200 text-xs font-medium rounded-xl flex items-center justify-center gap-2">
                       <GoCheck className="w-3.5 h-3.5 text-neutral-400" />
@@ -732,7 +743,7 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   </ShinyButton>
                 )}
 
-                {!registered && (
+                {!registered && !isEventCompleted(event) && (
                   <p className="text-[10px] text-neutral-500 text-center leading-relaxed">
                     {isFull
                       ? `Capacity reached (${registrationsCount}/${maxCapacity} seats filled). Join waitlist to claim spots if tickets free up.`

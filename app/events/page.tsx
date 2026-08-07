@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { GoLocation, GoCalendar, GoPlus, GoSearch, GoArrowRight } from 'react-icons/go';
 import { EventData } from '@/lib/eventsStore';
+import { isEventCompleted } from '@/lib/utils';
 
 const themes = [
   { name: 'Minimal', bg: 'bg-[#f4f4f5]' },
@@ -212,6 +213,11 @@ export default function EventsPage() {
                   <span className="absolute top-3 left-3 text-[9px] font-mono bg-black/50 backdrop-blur-sm border border-white/10 px-2 py-1 rounded-md text-neutral-300 tracking-wide">
                     {event.ticketCode}
                   </span>
+                  {isEventCompleted(event) && (
+                    <span className="absolute top-3 right-3 text-[9px] font-mono uppercase bg-neutral-900/90 text-neutral-300 border border-neutral-700/80 px-2 py-1 rounded-md tracking-wider font-semibold shadow-md backdrop-blur-sm">
+                      Ended
+                    </span>
+                  )}
                 </div>
 
                 {/* Card body */}

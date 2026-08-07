@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { enqueueRegistrationMail } from '@/lib/mailQueue';
+import { isEventCompleted } from '@/lib/utils';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -37,6 +38,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const event = await prisma.event.findUnique({ where: { id: eventId } });
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+    }
+
+    // BLOCK REGISTRATIONS FOR COMPLETED EVENTS
+    if (isEventCompleted(event)) {
+      return NextResponse.json({ error: 'Registration is closed because this event has already concluded.' }, { status: 400 });
     }
 
     const cleanPrice = event.price.trim().toLowerCase();
