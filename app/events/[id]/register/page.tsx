@@ -16,6 +16,7 @@ import {
 } from 'react-icons/go';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 import { isEventCompleted } from '@/lib/utils';
+import { CopyCode } from '@/components/ui/copy-code-button';
 
 const isEventFree = (price: string) => {
   const clean = price.trim().toLowerCase();
@@ -1140,30 +1141,7 @@ function RegisterPageInner() {
                     </a>
 
                     {/* Copy UPI ID Bar */}
-                    <div className="flex items-center justify-between gap-2 p-3 bg-[#222228] border border-[#2e2e3a] rounded-xl w-full max-w-sm">
-                      <div className="flex items-center gap-2 text-xs font-mono min-w-0">
-                        <span className="text-neutral-400">UPI ID:</span>
-                        <strong className="text-white font-bold truncate select-all">6302933597@hdfc</strong>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleCopyUpi}
-                        className="px-2.5 py-1.5 bg-[#2d2d35] hover:bg-[#383842] border border-[#3f3f4d] rounded-lg text-neutral-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 shadow-sm"
-                        title="Copy UPI ID to Clipboard"
-                      >
-                        {copiedUpi ? (
-                          <>
-                            <GoCheck className="w-3.5 h-3.5 text-emerald-400" />
-                            <span className="text-[11px] font-bold text-emerald-400 font-mono">Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <GoCopy className="w-3.5 h-3.5 text-neutral-300" />
-                            <span className="text-[11px] font-medium text-neutral-200 font-mono">Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
+                    <CopyCode code="6302933597@hdfc" label="UPI ID" duration={3500} />
 
                     <p className="text-[10px] text-neutral-500 font-mono max-w-sm">
                       Once scanning and paying is done, click the button below to add payment transaction details for host approval.
