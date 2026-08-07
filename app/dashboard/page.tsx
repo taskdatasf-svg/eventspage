@@ -798,16 +798,23 @@ export default function DashboardPage() {
                     <p className="text-xs text-neutral-400 mt-0.5">Events you have published — view, edit, or delete.</p>
                   </div>
                   <div className="flex items-center gap-2">
+                    <a
+                      href="/dashboard/coupons"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold rounded-md border border-amber-500/30 transition-all cursor-pointer shadow-sm"
+                    >
+                      <GoTag className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Coupon Codes</span>
+                    </a>
                     <button
                       type="button"
                       onClick={() => {
                         if (events.length > 0) setInviteSelectedEventId(events[0].id);
                         setShowInviteGuestModal(true);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold rounded-md border border-amber-500/30 transition-all cursor-pointer shadow-sm"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-xs font-semibold rounded-md border border-indigo-500/30 transition-all cursor-pointer shadow-sm"
                     >
-                      <GoPerson className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Invite Guest / Speaker</span>
+                      <GoPerson className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Invite Guest</span>
                     </button>
                     <a href="/create-event" className="inline-flex items-center gap-2 px-4 py-2 bg-[#222226] hover:bg-[#2c2c32] text-white text-xs font-normal rounded-md border border-[#333339] transition-all cursor-pointer">
                       <GoPlus className="w-3.5 h-3.5 text-neutral-300" />New Event

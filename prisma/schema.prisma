@@ -53,6 +53,8 @@ model Registration {
   paymentAccountName String?
   paymentMethod      String?
   paymentTxnId       String?
+  couponCode         String?
+  discountApplied    Float?   @default(0)
   status             String   @default("APPROVED")
   attended           Boolean? @default(false)
   createdAt          DateTime @default(now())
@@ -68,4 +70,21 @@ model SupportQuery {
   status    String   @default("PENDING")
   createdAt DateTime @default(now())
 }
+
+model Coupon {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  eventId        String?
+  eventTitle     String?
+  discountType   String    @default("PERCENTAGE") // "PERCENTAGE" | "FIXED_AMOUNT"
+  discountValue  Float     // e.g. 50 (for 50%) or 100 (for ₹100 flat off)
+  maxUses        Int?      // null = unlimited
+  usedCount      Int       @default(0)
+  minOrderAmount Float?    @default(0)
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  organizerEmail String?
+  createdAt      DateTime  @default(now())
+}
+
 

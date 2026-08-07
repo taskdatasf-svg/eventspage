@@ -13,7 +13,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       answers,
       paymentAccountName,
       paymentMethod,
-      paymentTxnId
+      paymentTxnId,
+      couponCode,
+      discountApplied
     } = await request.json();
 
     if (!name || !email) {
@@ -45,8 +47,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Registration is closed because this event has already concluded.' }, { status: 400 });
     }
 
+    // Determine if price is free (either original free or coupon discounted to free)
+    const numericDiscount = discountApplied ? parseFloat(String(discountApplied)) : 0;
+    const basePriceNum = parseFloat(event.price.replace(/[^0-9.]/g, '')) || 0;
+    const effectivePrice = Math.max(0, basePriceNum - numericDiscount);
+
     const cleanPrice = event.price.trim().toLowerCase();
-    const isFree = cleanPrice === 'free' || cleanPrice === '0' || cleanPrice === '0.00' || cleanPrice === 'free entry';
+    const isFree = cleanPrice === 'free' || cleanPrice === '0' || cleanPrice === '0.00' || cleanPrice === 'free entry' || effectivePrice === 0;
 
     if (!isFree) {
       // Validate payment fields using regular expressions
@@ -97,9 +104,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         paymentAccountName: paymentAccountName || null,
         paymentMethod: paymentMethod || null,
         paymentTxnId: paymentTxnId || null,
+        couponCode: couponCode ? String(couponCode).toUpperCase() : null,
+        discountApplied: numericDiscount,
         status
       },
     });
+
+    // Increment coupon usedCount if coupon was applied
+    if (couponCode) {
+      try {
+        await prisma.coupon.update({
+          where: { code: String(couponCode).toUpperCase() },
+          data: { usedCount: { increment: 1 } },
+        });
+      } catch (couponErr) {
+        console.warn('Could not increment coupon usedCount:', couponErr);
+      }
+    }
 
     // Send registration email via BullMQ Queue (resilient against Resend daily quota limits)
     try {
