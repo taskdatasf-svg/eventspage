@@ -12,7 +12,7 @@ import { AntiMetalButton } from '@/components/ui/anti-metal-button';
 import { 
   GoArrowLeft, GoCalendar, GoLocation, GoCheck, 
   GoPerson, GoMail, GoDeviceMobile, GoTag, GoClock,
-  GoPlus, GoX
+  GoPlus, GoX, GoCopy
 } from 'react-icons/go';
 import { DotmSquare5 } from '@/components/ui/dotm-square-5';
 
@@ -330,7 +330,18 @@ function RegisterPageInner() {
   const [paymentAccountName, setPaymentAccountName] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [paymentTxnId, setPaymentTxnId] = useState('');
-  const [revealQr, setRevealQr] = useState(false);
+  const [revealQr, setRevealQr] = useState(true);
+  const [copiedUpi, setCopiedUpi] = useState(false);
+
+  const handleCopyUpi = () => {
+    try {
+      navigator.clipboard.writeText('6302933597@hdfc');
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 2500);
+    } catch (err) {
+      console.error('Copy failed', err);
+    }
+  };
 
   // Success states
   const [ticket, setTicket] = useState<any>(null);
@@ -910,55 +921,70 @@ function RegisterPageInner() {
                     <p className="text-xs text-neutral-400">Please complete the payment of <strong style={{ color: 'var(--event-highlight)' }}>{event.price}</strong> to register.</p>
                   </div>
 
-                  <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col items-center gap-6 shadow-sm animate-fade-in text-center">
+                  <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col items-center gap-5 shadow-sm animate-fade-in text-center">
                     
-                    {revealQr ? (
-                      /* ONLY THE QR IS SHOWN */
-                      <div className="flex flex-col items-center gap-4 w-full">
-                        <div className="p-4 bg-white rounded-xl shadow-xl flex items-center justify-center select-none animate-fade-in">
-                          <QRCodeSVG
-                            value={qrPaymentValue}
-                            size={180}
-                            bgColor="#ffffff"
-                            fgColor="#000000"
-                            level="Q"
-                            includeMargin={false}
-                          />
-                        </div>
-                        <button 
-                          onClick={() => setRevealQr(false)} 
-                          className="text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors font-mono cursor-pointer"
-                        >
-                          Hide QR Code
-                        </button>
+                    {/* Amount badge */}
+                    <div className="bg-[#222226] border border-[#2e2e34] px-5 py-2.5 rounded-xl flex flex-col gap-0.5 max-w-[200px] w-full">
+                      <span className="text-[10px] uppercase font-mono text-neutral-500">Amount Due</span>
+                      <span className="text-lg font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price}</span>
+                    </div>
+
+                    {/* QR Code Container (Always Visible & Optimized for All Mobile Browsers) */}
+                    <div className="flex flex-col items-center gap-3 w-full">
+                      <div className="p-4 bg-white border-4 border-white rounded-2xl shadow-xl flex items-center justify-center select-none animate-fade-in w-[200px] h-[200px] shrink-0">
+                        <QRCodeSVG
+                          value={qrPaymentValue}
+                          size={168}
+                          bgColor="#ffffff"
+                          fgColor="#000000"
+                          level="Q"
+                          includeMargin={false}
+                          className="w-full h-full object-contain"
+                        />
                       </div>
-                    ) : (
-                      /* BEFORE REVEAL (SHOWS PLACEHOLDER & DETAILS) */
-                      <>
-                        {/* Amount badge */}
-                        <div className="bg-[#222226] border border-[#2e2e34] px-5 py-2.5 rounded-xl flex flex-col gap-0.5 max-w-[200px] w-full">
-                          <span className="text-[10px] uppercase font-mono text-neutral-500">Amount Due</span>
-                          <span className="text-lg font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price}</span>
-                        </div>
+                      <span className="text-xs text-neutral-300 font-semibold">
+                        Scan QR using GPay, PhonePe, Paytm or Bank App
+                      </span>
+                    </div>
 
-                        {/* Blurred QR Placeholder */}
-                        <div className="relative w-[192px] h-[192px] bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden flex flex-col items-center justify-center gap-2 group shadow-inner">
-                          <div className="absolute inset-0 bg-[radial-gradient(#ffffff05_1px,transparent_1px)] [background-size:16px_16px] blur-[1px]" />
-                          <button
-                            onClick={() => setRevealQr(true)}
-                            className="z-10 px-4 py-2 bg-[#222226] border border-neutral-700 text-xs font-semibold text-white rounded-lg hover:bg-neutral-800 hover:border-neutral-600 active:scale-95 transition-all shadow-md cursor-pointer"
-                          >
-                            Reveal QR Code
-                          </button>
-                        </div>
+                    {/* Mobile Direct Pay Deep Link Button */}
+                    <a
+                      href={qrPaymentValue}
+                      className="w-full max-w-sm py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                    >
+                      <GoDeviceMobile className="w-4 h-4" />
+                      <span>Pay Directly via Mobile UPI App</span>
+                    </a>
 
-                        <div className="flex flex-col gap-1 max-w-sm">
-                          <p className="text-xs text-neutral-300 font-semibold">Scan QR using GPay, PhonePe, UPI or Bank App</p>
-                          <p className="text-xs text-neutral-400 font-mono">UPI ID: <strong className="text-white select-all">6302933597@hdfc</strong></p>
-                          <p className="text-[10px] text-neutral-500 font-mono mt-1">Once scanning and paying is done, click the button below to add payment transaction details for host approval.</p>
-                        </div>
-                      </>
-                    )}
+                    {/* Copy UPI ID Bar */}
+                    <div className="flex items-center justify-between gap-2 p-3 bg-[#222228] border border-[#2e2e3a] rounded-xl w-full max-w-sm">
+                      <div className="flex items-center gap-2 text-xs font-mono min-w-0">
+                        <span className="text-neutral-400">UPI ID:</span>
+                        <strong className="text-white font-bold truncate select-all">6302933597@hdfc</strong>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyUpi}
+                        className="px-2.5 py-1.5 bg-[#2d2d35] hover:bg-[#383842] border border-[#3f3f4d] rounded-lg text-neutral-200 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 shadow-sm"
+                        title="Copy UPI ID to Clipboard"
+                      >
+                        {copiedUpi ? (
+                          <>
+                            <GoCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-[11px] font-bold text-emerald-400 font-mono">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <GoCopy className="w-3.5 h-3.5 text-neutral-300" />
+                            <span className="text-[11px] font-medium text-neutral-200 font-mono">Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <p className="text-[10px] text-neutral-500 font-mono max-w-sm">
+                      Once scanning and paying is done, click the button below to add payment transaction details for host approval.
+                    </p>
 
                     <ShinyButton
                       onClick={() => setRsvpStep('confirm-txn')}
