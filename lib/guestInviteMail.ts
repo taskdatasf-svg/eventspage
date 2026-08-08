@@ -33,119 +33,129 @@ import { jsPDF } from 'jspdf';
 
 // Generate VIP / Speaker Ticket PDF Buffer (100% reliable jsPDF + Puppeteer Fallback)
 async function generateVipTicketPdfBuffer(event: any, registration: any, guestRole: string): Promise<Buffer | null> {
-  // 1. Primary: Ultra-Clean Minimalist VIP Pass via jsPDF
+  // 1. Primary: Ultra-Clean High-Definition VIP Pass via jsPDF
   try {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
-      format: [140, 75]
+      format: [150, 80]
     });
 
-    // Clean white background
+    // Crisp white background
     doc.setFillColor(255, 255, 255);
-    doc.rect(0, 0, 140, 75, 'F');
+    doc.rect(0, 0, 150, 80, 'F');
 
-    // Subtle outer border (thin gray #e4e4e7)
-    doc.setDrawColor(228, 228, 231);
+    // Subtle outer border (thin crisp gray #d4d4d8)
+    doc.setDrawColor(212, 212, 216);
     doc.setLineWidth(0.4);
-    doc.roundedRect(3, 3, 134, 69, 3, 3, 'S');
+    doc.roundedRect(3, 3, 144, 74, 3, 3, 'S');
 
     // Top Header: STUDENT FORGE
     doc.setTextColor(24, 24, 27);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.text('STUDENT FORGE', 8, 11);
+    doc.setFontSize(10);
+    doc.text('STUDENT FORGE', 8, 10.5);
 
-    // Right stub ticket code
+    // Right stub ticket code (courier monospace)
     doc.setTextColor(113, 113, 122);
-    doc.setFont('courier', 'normal');
-    doc.setFontSize(7.5);
-    doc.text(registration.ticketCode || 'VIP-PASS', 131, 11, { align: 'right' });
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(8);
+    doc.text(registration.ticketCode || 'VIP-PASS', 142, 10.5, { align: 'right' });
 
-    // Event Title (clean black font)
+    // Top hairline divider
+    doc.setDrawColor(228, 228, 231);
+    doc.setLineWidth(0.3);
+    doc.line(8, 13.5, 142, 13.5);
+
+    // Event Title (bold dark font)
     doc.setTextColor(24, 24, 27);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    const titleText = (event.title || 'VIP Event Pass').substring(0, 38);
-    doc.text(titleText, 8, 19);
+    doc.setFontSize(11.5);
+    const titleText = (event.title || 'VIP Event Pass').substring(0, 40);
+    doc.text(titleText, 8, 20.5);
 
-    // Guest Role Badge (Subtle gray text)
+    // Guest Role Subtitle
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
-    doc.text(`Role: ${(guestRole || 'VIP Guest').substring(0, 35)}`, 8, 24);
+    doc.text(`Role: ${(guestRole || 'VIP Guest').substring(0, 38)}`, 8, 25);
 
     // Thin separator line
     doc.setDrawColor(244, 244, 245);
     doc.setLineWidth(0.3);
-    doc.line(8, 26, 132, 26);
+    doc.line(8, 27.5, 100, 27.5);
 
     // Honored Guest Name
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
-    doc.text('HONORED GUEST', 8, 31);
+    doc.text('HONORED GUEST NAME', 8, 32.5);
     doc.setTextColor(24, 24, 27);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.text((registration.name || 'VIP Guest').substring(0, 32), 8, 36);
+    doc.setFontSize(9);
+    doc.text((registration.name || 'VIP Guest').substring(0, 34), 8, 37.5);
 
-    // Email
+    // Email Address
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
-    doc.text('EMAIL', 8, 42);
-    doc.setTextColor(82, 82, 91);
+    doc.text('EMAIL ADDRESS', 8, 43.5);
+    doc.setTextColor(63, 63, 70);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
-    doc.text((registration.email || '').substring(0, 34), 8, 47);
+    doc.text((registration.email || '').substring(0, 38), 8, 48.5);
 
-    // Date & Time
+    // Date & Time Column
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
-    doc.text('DATE & TIME', 8, 53);
+    doc.text('DATE & TIME', 8, 54.5);
     doc.setTextColor(24, 24, 27);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(7.5);
-    doc.text(`${event.startDate || 'TBA'} ${event.startTime || ''}`.substring(0, 26), 8, 58);
+    doc.text(`${event.startDate || 'TBA'} ${event.startTime || ''}`.substring(0, 26), 8, 59.5);
 
-    // Venue / Location
+    // Venue / Location Column
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
-    doc.text('LOCATION', 52, 53);
+    doc.text('LOCATION / VENUE', 58, 54.5);
     doc.setTextColor(24, 24, 27);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(7.5);
-    doc.text((event.location || 'Online').substring(0, 22), 52, 58);
+    doc.text((event.location || 'Online').substring(0, 24), 58, 59.5);
 
     // Bottom Pass Badge (Clean minimalist pill)
     doc.setFillColor(244, 244, 245);
-    doc.roundedRect(8, 62, 80, 6, 1.5, 1.5, 'F');
+    doc.roundedRect(8, 64.5, 88, 6.5, 1.5, 1.5, 'F');
     doc.setTextColor(82, 82, 91);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6.5);
-    doc.text('VIP GUEST PASS', 48, 66, { align: 'center' });
+    doc.text('COMPLIMENTARY VIP GUEST PASS', 52, 68.7, { align: 'center' });
 
-    // Right Divider line
-    doc.setDrawColor(228, 228, 231);
+    // Stub Vertical Divider
+    doc.setDrawColor(212, 212, 216);
     doc.setLineWidth(0.3);
-    doc.line(95, 26, 95, 69);
+    doc.line(104, 13.5, 104, 74);
 
-    // Right Stub: Clean QR Code
+    // Right Stub: Clean High-Res QR Code
     const qrDataUrl = await QRCode.toDataURL(registration.ticketCode || 'VIP-PASS', {
-      width: 140,
+      width: 160,
       margin: 0,
       color: { dark: '#18181b', light: '#ffffff' }
     });
 
-    doc.addImage(qrDataUrl, 'PNG', 101, 28, 30, 30);
+    doc.addImage(qrDataUrl, 'PNG', 109, 21, 30, 30);
 
     doc.setTextColor(113, 113, 122);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(5.5);
-    doc.text('Scan for VIP Entry', 116, 61, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.text('SCAN FOR ENTRY', 124, 56, { align: 'center' });
+
+    doc.setTextColor(24, 24, 27);
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(7);
+    doc.text(registration.ticketCode || 'VIP-PASS', 124, 61, { align: 'center' });
 
     const arrayBuffer = doc.output('arraybuffer');
     return Buffer.from(arrayBuffer);

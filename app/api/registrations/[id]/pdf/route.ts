@@ -1,17 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 import { prisma } from '@/lib/prisma';
-
-function getFallbackSoftColor(headerBg: string | null | undefined): string {
-  if (!headerBg) return '#ff6b6b';
-  const clean = headerBg.toLowerCase();
-  if (clean.includes('818cf8')) return '#ff6b6b';
-  if (clean.includes('fef08a') || clean.includes('ffe600')) return '#fde047';
-  if (clean.includes('6ee7b7')) return '#86efac';
-  if (clean.includes('fbcfe8')) return '#fbcfe8';
-  if (clean.includes('fed7aa')) return '#fdba74';
-  return '#ff6b6b';
-}
+import { jsPDF } from 'jspdf';
+import QRCode from 'qrcode';
 
 export async function GET(
   request: NextRequest,
@@ -36,8 +27,138 @@ export async function GET(
     }
 
     const { name, email, ticketCode, paymentMethod, paymentAccountName, paymentTxnId, status } = registration;
-    const extractedColor = getFallbackSoftColor(event.headerBg);
+    const isVip = ticketCode?.startsWith('TKT-VIP') || paymentMethod === 'VIP PASS';
 
+    // 1. Primary: Pure JS PDF generation via jsPDF (100% reliable everywhere)
+    try {
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: [150, 80]
+      });
+
+      // Crisp white background
+      doc.setFillColor(255, 255, 255);
+      doc.rect(0, 0, 150, 80, 'F');
+
+      // Subtle outer border (thin crisp gray #d4d4d8)
+      doc.setDrawColor(212, 212, 216);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(3, 3, 144, 74, 3, 3, 'S');
+
+      // Top Header: STUDENT FORGE
+      doc.setTextColor(24, 24, 27);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('STUDENT FORGE', 8, 10.5);
+
+      // Right stub ticket code (courier monospace)
+      doc.setTextColor(113, 113, 122);
+      doc.setFont('courier', 'bold');
+      doc.setFontSize(8);
+      doc.text(ticketCode || 'TKT-ENTRY', 142, 10.5, { align: 'right' });
+
+      // Top hairline divider
+      doc.setDrawColor(228, 228, 231);
+      doc.setLineWidth(0.3);
+      doc.line(8, 13.5, 142, 13.5);
+
+      // Event Title (bold dark font)
+      doc.setTextColor(24, 24, 27);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11.5);
+      const titleText = (event.title || 'Event Ticket Pass').substring(0, 40);
+      doc.text(titleText, 8, 20.5);
+
+      // Thin separator line
+      doc.setDrawColor(244, 244, 245);
+      doc.setLineWidth(0.3);
+      doc.line(8, 24, 100, 24);
+
+      // Attendee Name
+      doc.setTextColor(113, 113, 122);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.text(isVip ? 'HONORED GUEST NAME' : 'ATTENDEE NAME', 8, 29);
+      doc.setTextColor(24, 24, 27);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text((name || 'Guest').substring(0, 34), 8, 34);
+
+      // Email Address
+      doc.setTextColor(113, 113, 122);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.text('EMAIL ADDRESS', 8, 40);
+      doc.setTextColor(63, 63, 70);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.text((email || '').substring(0, 38), 8, 45);
+
+      // Date & Time Column
+      doc.setTextColor(113, 113, 122);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.text('DATE & TIME', 8, 51);
+      doc.setTextColor(24, 24, 27);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.text(`${event.startDate || 'TBA'} ${event.startTime || ''}`.substring(0, 26), 8, 56);
+
+      // Venue / Location Column
+      doc.setTextColor(113, 113, 122);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.text('LOCATION / VENUE', 58, 51);
+      doc.setTextColor(24, 24, 27);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.text((event.location || 'Online').substring(0, 24), 58, 56);
+
+      // Bottom Pass Badge (Clean minimalist pill)
+      doc.setFillColor(244, 244, 245);
+      doc.roundedRect(8, 63, 88, 6.5, 1.5, 1.5, 'F');
+      doc.setTextColor(82, 82, 91);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.text(isVip ? 'COMPLIMENTARY VIP GUEST PASS' : 'OFFICIAL ADMISSION TICKET PASS', 52, 67.2, { align: 'center' });
+
+      // Stub Vertical Divider
+      doc.setDrawColor(212, 212, 216);
+      doc.setLineWidth(0.3);
+      doc.line(104, 13.5, 104, 74);
+
+      // Right Stub: Clean High-Res QR Code
+      const qrDataUrl = await QRCode.toDataURL(ticketCode || 'TKT-ENTRY', {
+        width: 160,
+        margin: 0,
+        color: { dark: '#18181b', light: '#ffffff' }
+      });
+
+      doc.addImage(qrDataUrl, 'PNG', 109, 21, 30, 30);
+
+      doc.setTextColor(113, 113, 122);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6);
+      doc.text('SCAN FOR ENTRY', 124, 56, { align: 'center' });
+
+      doc.setTextColor(24, 24, 27);
+      doc.setFont('courier', 'bold');
+      doc.setFontSize(7);
+      doc.text(ticketCode || 'TKT-ENTRY', 124, 61, { align: 'center' });
+
+      const arrayBuffer = doc.output('arraybuffer');
+      return new NextResponse(Buffer.from(arrayBuffer), {
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="ticket-${ticketCode}.pdf"`
+        }
+      });
+    } catch (jsPdfErr) {
+      console.warn('jsPDF route export failed, falling back to Puppeteer:', jsPdfErr);
+    }
+
+    const extractedColor = '#ff6b6b';
     const htmlContent = `
       <!DOCTYPE html>
       <html>

@@ -36,114 +36,123 @@ import { jsPDF } from 'jspdf';
 
 // ─── Ticket PDF Pass Generator (100% reliable jsPDF + Puppeteer Fallback) ──────
 async function generateTicketPdfBuffer(event: any, registration: any): Promise<Buffer | null> {
-  // 1. Primary: Pure JS PDF generation via jsPDF (Zero binary dependencies, 100% reliable everywhere)
-  // 1. Primary: Ultra-Clean Minimalist PDF Pass via jsPDF
+  // 1. Primary: Ultra-Clean High-Definition Aligned PDF Pass via jsPDF
   try {
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
-      format: [140, 75]
+      format: [150, 80]
     });
 
-    // Clean white background
+    // Crisp white background
     doc.setFillColor(255, 255, 255);
-    doc.rect(0, 0, 140, 75, 'F');
+    doc.rect(0, 0, 150, 80, 'F');
 
-    // Subtle outer border (thin gray #e4e4e7)
-    doc.setDrawColor(228, 228, 231);
+    // Subtle outer border (thin crisp gray #d4d4d8)
+    doc.setDrawColor(212, 212, 216);
     doc.setLineWidth(0.4);
-    doc.roundedRect(3, 3, 134, 69, 3, 3, 'S');
+    doc.roundedRect(3, 3, 144, 74, 3, 3, 'S');
 
     // Top Header: STUDENT FORGE
     doc.setTextColor(24, 24, 27);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.text('STUDENT FORGE', 8, 11);
+    doc.setFontSize(10);
+    doc.text('STUDENT FORGE', 8, 10.5);
 
-    // Right stub ticket code (subtle clean font)
+    // Right stub ticket code (courier monospace)
     doc.setTextColor(113, 113, 122);
-    doc.setFont('courier', 'normal');
-    doc.setFontSize(7.5);
-    doc.text(registration.ticketCode || 'TKT-ENTRY', 131, 11, { align: 'right' });
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(8);
+    doc.text(registration.ticketCode || 'TKT-ENTRY', 142, 10.5, { align: 'right' });
 
-    // Event Title (clean black font)
+    // Top hairline divider
+    doc.setDrawColor(228, 228, 231);
+    doc.setLineWidth(0.3);
+    doc.line(8, 13.5, 142, 13.5);
+
+    // Event Title (bold dark font)
     doc.setTextColor(24, 24, 27);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    const titleText = (event.title || 'Event Ticket').substring(0, 38);
-    doc.text(titleText, 8, 19);
+    doc.setFontSize(11.5);
+    const titleText = (event.title || 'Event Ticket Pass').substring(0, 40);
+    doc.text(titleText, 8, 20.5);
 
     // Thin separator line
     doc.setDrawColor(244, 244, 245);
     doc.setLineWidth(0.3);
-    doc.line(8, 23, 132, 23);
+    doc.line(8, 24, 100, 24);
 
     // Attendee Name
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
-    doc.text('ATTENDEE', 8, 28);
+    doc.text('ATTENDEE NAME', 8, 29);
     doc.setTextColor(24, 24, 27);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.text((registration.name || 'Guest').substring(0, 32), 8, 33);
+    doc.setFontSize(9);
+    doc.text((registration.name || 'Guest').substring(0, 34), 8, 34);
 
-    // Email
+    // Email Address
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
-    doc.text('EMAIL', 8, 39);
-    doc.setTextColor(82, 82, 91);
+    doc.text('EMAIL ADDRESS', 8, 40);
+    doc.setTextColor(63, 63, 70);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
-    doc.text((registration.email || '').substring(0, 34), 8, 44);
+    doc.text((registration.email || '').substring(0, 38), 8, 45);
 
-    // Date & Time
+    // Date & Time Column
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
-    doc.text('DATE & TIME', 8, 50);
+    doc.text('DATE & TIME', 8, 51);
     doc.setTextColor(24, 24, 27);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(7.5);
-    doc.text(`${event.startDate || 'TBA'} ${event.startTime || ''}`.substring(0, 26), 8, 55);
+    doc.text(`${event.startDate || 'TBA'} ${event.startTime || ''}`.substring(0, 26), 8, 56);
 
-    // Venue / Location
+    // Venue / Location Column
     doc.setTextColor(113, 113, 122);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
-    doc.text('LOCATION', 52, 50);
+    doc.text('LOCATION / VENUE', 58, 51);
     doc.setTextColor(24, 24, 27);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(7.5);
-    doc.text((event.location || 'Online').substring(0, 22), 52, 55);
+    doc.text((event.location || 'Online').substring(0, 24), 58, 56);
 
     // Bottom Pass Badge (Clean minimalist pill)
     doc.setFillColor(244, 244, 245);
-    doc.roundedRect(8, 60, 80, 6, 1.5, 1.5, 'F');
+    doc.roundedRect(8, 63, 88, 6.5, 1.5, 1.5, 'F');
     doc.setTextColor(82, 82, 91);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6.5);
-    doc.text('ADMISSION PASS', 48, 64, { align: 'center' });
+    doc.text('OFFICIAL ADMISSION TICKET PASS', 52, 67.2, { align: 'center' });
 
-    // Right Divider line
-    doc.setDrawColor(228, 228, 231);
+    // Stub Vertical Divider
+    doc.setDrawColor(212, 212, 216);
     doc.setLineWidth(0.3);
-    doc.line(95, 23, 95, 69);
+    doc.line(104, 13.5, 104, 74);
 
-    // Right Stub: Clean QR Code
+    // Right Stub: Clean High-Res QR Code
     const qrDataUrl = await QRCode.toDataURL(registration.ticketCode || 'TKT-ENTRY', {
-      width: 140,
+      width: 160,
       margin: 0,
       color: { dark: '#18181b', light: '#ffffff' }
     });
 
-    doc.addImage(qrDataUrl, 'PNG', 101, 26, 30, 30);
+    doc.addImage(qrDataUrl, 'PNG', 109, 21, 30, 30);
 
     doc.setTextColor(113, 113, 122);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(5.5);
-    doc.text('Scan for Entry', 116, 61, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.text('SCAN FOR ENTRY', 124, 56, { align: 'center' });
+
+    doc.setTextColor(24, 24, 27);
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(7);
+    doc.text(registration.ticketCode || 'TKT-ENTRY', 124, 61, { align: 'center' });
 
     const arrayBuffer = doc.output('arraybuffer');
     return Buffer.from(arrayBuffer);
