@@ -380,13 +380,13 @@ export default function DashboardPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [user]);
+  }, [user?.email]);
 
   // Load user registrations (Tickets)
   useEffect(() => {
-    if (!user) return;
+    if (!user?.email) return;
     setTicketsLoading(true);
-    fetch(`/api/registrations?email=${user.email}`)
+    fetch(`/api/registrations?email=${encodeURIComponent(user.email)}`)
       .then((r) => r.json())
       .then((data) => {
         setMyTickets(data.registrations || []);
@@ -396,7 +396,7 @@ export default function DashboardPage() {
         console.error(err);
         setTicketsLoading(false);
       });
-  }, [user, activeTab]);
+  }, [user?.email, activeTab]);
 
   const handleSignOut = () => { localStorage.removeItem('student_forge_user'); router.push('/'); };
 

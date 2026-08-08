@@ -78,7 +78,7 @@ export default function CouponsDashboardPage() {
       // Fetch Organizer Events
       const evRes = await fetch('/api/events');
       if (evRes.ok) {
-        const evData = await evRes.ok ? await evRes.json() : {};
+        const evData = await evRes.json();
         if (evData.events) {
           setEvents(evData.events);
         }
