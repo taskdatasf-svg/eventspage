@@ -111,13 +111,55 @@ export interface MailJobLog {
 
 export const recentMailLogs: MailJobLog[] = [];
 
-let mailQueue: Queue<MailJobPayload> | null = null;
-let mailWorker: Worker<MailJobPayload> | null = null;
+// Global singleton pattern to prevent duplicate BullMQ worker instances across Next.js reloads
+const globalForMail = globalThis as unknown as {
+  _mailQueue?: Queue<MailJobPayload>;
+  _mailWorker?: Worker<MailJobPayload>;
+  _processedMailSet?: Set<string>;
+};
+
+const processedMailSet = globalForMail._processedMailSet || new Set<string>();
+if (!globalForMail._processedMailSet) {
+  globalForMail._processedMailSet = processedMailSet;
+}
 
 /**
- * Execute mail dispatch based on payload type
+ * Deduplication guard: returns true if an identical email was sent to recipient within last 2 minutes
+ */
+function checkAndMarkDuplicate(to: string, subject: string, extraKey: string = ''): boolean {
+  const cleanTo = (to || '').trim().toLowerCase();
+  const cleanSubj = (subject || '').trim().toLowerCase();
+  const dedupKey = `${cleanTo}:${cleanSubj}:${extraKey}`;
+
+  if (processedMailSet.has(dedupKey)) {
+    console.warn(`[Mail Deduplication] Blocked duplicate email send for: ${cleanTo} (${subject})`);
+    return true;
+  }
+
+  processedMailSet.add(dedupKey);
+  // Remove key after 2 minutes (120,000ms)
+  setTimeout(() => {
+    processedMailSet.delete(dedupKey);
+  }, 120000);
+
+  return false;
+}
+
+export let mailQueue: Queue<MailJobPayload> | null = globalForMail._mailQueue || null;
+export let mailWorker: Worker<MailJobPayload> | null = globalForMail._mailWorker || null;
+
+/**
+ * Execute mail dispatch based on payload type with strict deduplication
  */
 async function processMailPayload(payload: MailJobPayload): Promise<{ success: boolean; error?: string }> {
+  const extraKey = payload.type === 'REGISTRATION' 
+    ? (payload.registration?.id || payload.registration?.ticketCode || '') 
+    : (payload.batchId || '');
+
+  if (checkAndMarkDuplicate(payload.to, payload.subject, extraKey)) {
+    return { success: true };
+  }
+
   if (payload.type === 'REGISTRATION') {
     return await sendEventMail({
       to: payload.to,
@@ -138,102 +180,107 @@ async function processMailPayload(payload: MailJobPayload): Promise<{ success: b
   }
 }
 
-try {
-  const connection = createRedisConnection();
-  mailQueue = new Queue<MailJobPayload>(QUEUE_NAME, {
-    connection,
-    defaultJobOptions: {
-      removeOnComplete: 100,
-      removeOnFail: 100,
-      attempts: 5,
-      backoff: {
-        type: 'exponential',
-        delay: 5000,
-      },
-    },
-  });
-
-  // BullMQ Worker processing queue with rate limiting & automatic quota rollover delay
-  mailWorker = new Worker<MailJobPayload>(
-    QUEUE_NAME,
-    async (job: Job<MailJobPayload>) => {
-      const payload = job.data;
-      console.log(`[BullMQ Worker] Processing ${payload.type} mail for ${payload.to}...`);
-
-      const currentSent = await getTodaySentCount();
-      
-      // If Resend daily quota (90/day) is reached, DO NOT DISCARD JOB! Delay until tomorrow's reset.
-      if (currentSent >= DAILY_LIMIT) {
-        const delayUntilTomorrowMs = getMsUntilDailyReset();
-        const delayMinutes = Math.round(delayUntilTomorrowMs / 60000);
-        console.warn(`[BullMQ Worker] Resend daily limit (${DAILY_LIMIT}) reached. Delaying job for ${payload.to} by ${delayMinutes} minutes until daily reset.`);
-
-        recentMailLogs.unshift({
-          id: job.id || `job-${Date.now()}`,
-          to: payload.to,
-          subject: payload.subject,
-          jobType: payload.type,
-          status: 'DELAYED_FOR_NEXT_DAY_RESET',
-          scheduledDelaySec: Math.round(delayUntilTomorrowMs / 1000),
-          rescheduledForTomorrow: true,
-          timestamp: new Date().toISOString(),
-          error: `Quota limit of ${DAILY_LIMIT} reached today. Job delayed ${delayMinutes} min until tomorrow's reset. No emails lost!`,
-        });
-
-        // Re-enqueue job to BullMQ with delay until tomorrow's reset
-        if (mailQueue) {
-          await mailQueue.add(job.name, payload, {
-            delay: delayUntilTomorrowMs,
-            jobId: `delayed-quota-${job.id}-${Date.now()}`,
-          });
-        }
-        return { delayedUntilTomorrow: true, delayMs: delayUntilTomorrowMs };
-      }
-
-      const result = await processMailPayload(payload);
-
-      if (result.success) {
-        await incrementTodaySentCount();
-        recentMailLogs.unshift({
-          id: job.id || `job-${Date.now()}`,
-          to: payload.to,
-          subject: payload.subject,
-          jobType: payload.type,
-          status: 'COMPLETED',
-          scheduledDelaySec: Math.round((job.delay || 0) / 1000),
-          timestamp: new Date().toISOString(),
-        });
-      } else {
-        recentMailLogs.unshift({
-          id: job.id || `job-${Date.now()}`,
-          to: payload.to,
-          subject: payload.subject,
-          jobType: payload.type,
-          status: 'FAILED',
-          scheduledDelaySec: Math.round((job.delay || 0) / 1000),
-          timestamp: new Date().toISOString(),
-          error: result.error,
-        });
-        throw new Error(result.error || 'Mail sending failed');
-      }
-
-      return { sent: true, recipient: payload.to };
-    },
-    {
+if (!globalForMail._mailQueue && !globalForMail._mailWorker) {
+  try {
+    const connection = createRedisConnection();
+    mailQueue = new Queue<MailJobPayload>(QUEUE_NAME, {
       connection,
-      concurrency: 1, // Enforce 1-by-1 batch dispatching
-      limiter: {
-        max: 1,
-        duration: BATCH_DELAY_MS, // 3-second gap between mails
+      defaultJobOptions: {
+        removeOnComplete: 100,
+        removeOnFail: 100,
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
       },
-    }
-  );
+    });
 
-  mailWorker.on('error', (err) => {
-    console.warn('[BullMQ Worker Notice]:', err.message);
-  });
-} catch (err) {
-  console.warn('[BullMQ Initialization Notice]: Operating with resilient memory queue fallback.');
+    // BullMQ Worker processing queue with rate limiting & automatic quota rollover delay
+    mailWorker = new Worker<MailJobPayload>(
+      QUEUE_NAME,
+      async (job: Job<MailJobPayload>) => {
+        const payload = job.data;
+        console.log(`[BullMQ Worker] Processing ${payload.type} mail for ${payload.to}...`);
+
+        const currentSent = await getTodaySentCount();
+        
+        // If Resend daily quota (90/day) is reached, DO NOT DISCARD JOB! Delay until tomorrow's reset.
+        if (currentSent >= DAILY_LIMIT) {
+          const delayUntilTomorrowMs = getMsUntilDailyReset();
+          const delayMinutes = Math.round(delayUntilTomorrowMs / 60000);
+          console.warn(`[BullMQ Worker] Resend daily limit (${DAILY_LIMIT}) reached. Delaying job for ${payload.to} by ${delayMinutes} minutes until daily reset.`);
+
+          recentMailLogs.unshift({
+            id: job.id || `job-${Date.now()}`,
+            to: payload.to,
+            subject: payload.subject,
+            jobType: payload.type,
+            status: 'DELAYED_FOR_NEXT_DAY_RESET',
+            scheduledDelaySec: Math.round(delayUntilTomorrowMs / 1000),
+            rescheduledForTomorrow: true,
+            timestamp: new Date().toISOString(),
+            error: `Quota limit of ${DAILY_LIMIT} reached today. Job delayed ${delayMinutes} min until tomorrow's reset. No emails lost!`,
+          });
+
+          // Re-enqueue job to BullMQ with delay until tomorrow's reset
+          if (mailQueue) {
+            await mailQueue.add(job.name, payload, {
+              delay: delayUntilTomorrowMs,
+              jobId: `delayed-quota-${job.id}-${Date.now()}`,
+            });
+          }
+          return { delayedUntilTomorrow: true, delayMs: delayUntilTomorrowMs };
+        }
+
+        const result = await processMailPayload(payload);
+
+        if (result.success) {
+          await incrementTodaySentCount();
+          recentMailLogs.unshift({
+            id: job.id || `job-${Date.now()}`,
+            to: payload.to,
+            subject: payload.subject,
+            jobType: payload.type,
+            status: 'COMPLETED',
+            scheduledDelaySec: Math.round((job.delay || 0) / 1000),
+            timestamp: new Date().toISOString(),
+          });
+        } else {
+          recentMailLogs.unshift({
+            id: job.id || `job-${Date.now()}`,
+            to: payload.to,
+            subject: payload.subject,
+            jobType: payload.type,
+            status: 'FAILED',
+            scheduledDelaySec: Math.round((job.delay || 0) / 1000),
+            timestamp: new Date().toISOString(),
+            error: result.error,
+          });
+          throw new Error(result.error || 'Mail sending failed');
+        }
+
+        return { sent: true, recipient: payload.to };
+      },
+      {
+        connection,
+        concurrency: 1, // Enforce 1-by-1 batch dispatching
+        limiter: {
+          max: 1,
+          duration: BATCH_DELAY_MS, // 10-second gap between mails
+        },
+      }
+    );
+
+    mailWorker.on('error', (err) => {
+      console.warn('[BullMQ Worker Notice]:', err.message);
+    });
+
+    globalForMail._mailQueue = mailQueue;
+    globalForMail._mailWorker = mailWorker;
+  } catch (err) {
+    console.warn('[BullMQ Initialization Notice]: Operating with resilient memory queue fallback.');
+  }
 }
 
 /**
