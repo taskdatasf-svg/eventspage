@@ -244,9 +244,27 @@ async function generateTicketPdfBuffer(event: any, registration: any): Promise<B
   }
 }
 
+const globalEventMailTracker = (globalThis as any)._sentEventMailTracker || new Map<string, number>();
+if (!(globalThis as any)._sentEventMailTracker) {
+  (globalThis as any)._sentEventMailTracker = globalEventMailTracker;
+}
+
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export async function sendEventMail({ to, subject, event, registration, type, originUrl }: SendMailParams) {
   try {
+    const cleanTo = (to || '').trim().toLowerCase();
+    const cleanSubj = (subject || '').trim().toLowerCase();
+    const dedupKey = `${cleanTo}:${cleanSubj}`;
+
+    const now = Date.now();
+    const lastSent = globalEventMailTracker.get(dedupKey);
+    // 15-minute deduplication guard (900,000ms)
+    if (lastSent && now - lastSent < 900000) {
+      console.warn(`[Global Event Mail Guard] Blocked duplicate mail to ${cleanTo} ("${subject}")`);
+      return { success: true, messageId: 'dedup-blocked' };
+    }
+    globalEventMailTracker.set(dedupKey, now);
+
     const resendApiKey = process.env.RESEND_API_KEY || 're_xxxxxxxxx';
     const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const resend = new Resend(resendApiKey);

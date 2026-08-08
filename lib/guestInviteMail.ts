@@ -255,6 +255,11 @@ async function generateVipTicketPdfBuffer(event: any, registration: any, guestRo
   }
 }
 
+const globalGuestMailTracker = (globalThis as any)._sentGuestMailTracker || new Map<string, number>();
+if (!(globalThis as any)._sentGuestMailTracker) {
+  (globalThis as any)._sentGuestMailTracker = globalGuestMailTracker;
+}
+
 export async function sendGuestInviteMail({
   to,
   guestName,
@@ -265,6 +270,20 @@ export async function sendGuestInviteMail({
   originUrl,
 }: GuestInviteMailParams) {
   try {
+    const cleanTo = (to || '').trim().toLowerCase();
+    const subjectText = `Official Guest & Speaker Invitation: ${event.title}`;
+    const cleanSubj = subjectText.trim().toLowerCase();
+    const dedupKey = `${cleanTo}:${cleanSubj}`;
+
+    const now = Date.now();
+    const lastSent = globalGuestMailTracker.get(dedupKey);
+    // 15-minute deduplication guard (900,000ms)
+    if (lastSent && now - lastSent < 900000) {
+      console.warn(`[Global Guest Mail Guard] Blocked duplicate guest invite to ${cleanTo} ("${subjectText}")`);
+      return { success: true, messageId: 'dedup-blocked' };
+    }
+    globalGuestMailTracker.set(dedupKey, now);
+
     const resendApiKey = process.env.RESEND_API_KEY || 're_xxxxxxxxx';
     const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const resend = new Resend(resendApiKey);

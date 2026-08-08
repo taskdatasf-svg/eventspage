@@ -12,6 +12,11 @@ export interface BroadcastMailOptions {
   bodyHtml: string;
 }
 
+const globalBroadcastTracker = (globalThis as any)._sentBroadcastTracker || new Map<string, number>();
+if (!(globalThis as any)._sentBroadcastTracker) {
+  (globalThis as any)._sentBroadcastTracker = globalBroadcastTracker;
+}
+
 export async function sendBroadcastMail({
   to,
   recipientName,
@@ -20,6 +25,19 @@ export async function sendBroadcastMail({
   bodyHtml,
 }: BroadcastMailOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
+    const cleanTo = (to || '').trim().toLowerCase();
+    const cleanSubj = (subject || '').trim().toLowerCase();
+    const dedupKey = `${cleanTo}:${cleanSubj}`;
+
+    const now = Date.now();
+    const lastSent = globalBroadcastTracker.get(dedupKey);
+    // 15-minute deduplication guard (900,000ms)
+    if (lastSent && now - lastSent < 900000) {
+      console.warn(`[Global Broadcast Guard] Blocked duplicate broadcast mail to ${cleanTo} ("${subject}")`);
+      return { success: true, messageId: 'dedup-blocked' };
+    }
+    globalBroadcastTracker.set(dedupKey, now);
+
     const resendApiKey = process.env.RESEND_API_KEY;
     const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@events.studentforge.in';
 

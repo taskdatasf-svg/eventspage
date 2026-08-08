@@ -124,23 +124,23 @@ if (!globalForMail._processedMailSet) {
 }
 
 /**
- * Deduplication guard: returns true if an identical email was sent to recipient within last 2 minutes
+ * Deduplication guard: returns true if an identical email was sent to recipient within last 15 minutes
  */
-function checkAndMarkDuplicate(to: string, subject: string, extraKey: string = ''): boolean {
+function checkAndMarkDuplicate(to: string, subject: string): boolean {
   const cleanTo = (to || '').trim().toLowerCase();
   const cleanSubj = (subject || '').trim().toLowerCase();
-  const dedupKey = `${cleanTo}:${cleanSubj}:${extraKey}`;
+  const dedupKey = `${cleanTo}:${cleanSubj}`;
 
   if (processedMailSet.has(dedupKey)) {
-    console.warn(`[Mail Deduplication] Blocked duplicate email send for: ${cleanTo} (${subject})`);
+    console.warn(`[Mail Queue Deduplication] Suppressed duplicate mail attempt for ${cleanTo}: "${subject}"`);
     return true;
   }
 
   processedMailSet.add(dedupKey);
-  // Remove key after 2 minutes (120,000ms)
+  // Remove key after 15 minutes (900,000ms)
   setTimeout(() => {
     processedMailSet.delete(dedupKey);
-  }, 120000);
+  }, 900000);
 
   return false;
 }
@@ -152,11 +152,7 @@ export let mailWorker: Worker<MailJobPayload> | null = globalForMail._mailWorker
  * Execute mail dispatch based on payload type with strict deduplication
  */
 async function processMailPayload(payload: MailJobPayload): Promise<{ success: boolean; error?: string }> {
-  const extraKey = payload.type === 'REGISTRATION' 
-    ? (payload.registration?.id || payload.registration?.ticketCode || '') 
-    : (payload.batchId || '');
-
-  if (checkAndMarkDuplicate(payload.to, payload.subject, extraKey)) {
+  if (checkAndMarkDuplicate(payload.to, payload.subject)) {
     return { success: true };
   }
 
