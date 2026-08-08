@@ -364,14 +364,17 @@ function RegisterPageInner() {
     setCouponLoading(true);
     setCouponError('');
     try {
-      const basePriceNum = parseFloat(event.price.replace(/[^0-9.]/g, '')) || 0;
+      const perTicketNum = parseFloat(event.price.replace(/[^0-9.]/g, '')) || 0;
+      const memberCount = 1 + (friends ? friends.length : 0);
+      const totalOriginalPrice = perTicketNum * memberCount;
+
       const res = await fetch('/api/coupons/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code: cleanCode,
           eventId: event.id,
-          originalPrice: basePriceNum
+          originalPrice: totalOriginalPrice
         }),
       });
       const data = await res.json();
@@ -655,10 +658,13 @@ function RegisterPageInner() {
     );
   }
 
-  // Generate payment QR code with discount applied
-  const basePriceNum = parseFloat(event.price.replace(/[^0-9.]/g, '')) || 0;
+  // Generate payment QR code with total member count and discount applied
+  const totalAttendees = 1 + (friends ? friends.length : 0);
+  const perTicketPrice = parseFloat(event.price.replace(/[^0-9.]/g, '')) || 0;
+  const totalBasePrice = perTicketPrice * totalAttendees;
+
   const discountAmountNum = appliedCoupon ? appliedCoupon.discountAmount : 0;
-  const finalPriceNum = Math.max(0, basePriceNum - discountAmountNum);
+  const finalPriceNum = Math.max(0, totalBasePrice - discountAmountNum);
   const formattedDisplayPrice = isEventFree(event.price) || finalPriceNum === 0 ? 'Free' : `₹${finalPriceNum}`;
 
   const qrPaymentValue = `upi://pay?pa=6302933597@hdfc&pn=Student%20Forge%20Events&am=${finalPriceNum}&cu=INR&tn=Registration%20${encodeURIComponent(event.title.substring(0, 15))}`;
@@ -1103,18 +1109,30 @@ function RegisterPageInner() {
                   <div className="bg-[#1c1c1f] border border-[#2e2e34] rounded-2xl p-6 flex flex-col items-center gap-5 shadow-sm animate-fade-in text-center">
                     
                     {/* Amount badge */}
-                    <div className="bg-[#222226] border border-[#2e2e34] px-5 py-2.5 rounded-xl flex flex-col gap-0.5 max-w-[240px] w-full">
-                      <span className="text-[10px] uppercase font-mono text-neutral-500">Amount Due</span>
+                    <div className="bg-[#222226] border border-[#2e2e34] px-5 py-3 rounded-xl flex flex-col gap-1 max-w-[280px] w-full shadow-inner">
+                      <div className="flex items-center justify-between text-[10px] uppercase font-mono text-neutral-400">
+                        <span>Total Amount Due</span>
+                        {totalAttendees > 1 && (
+                          <span className="text-amber-400 font-bold font-mono">{totalAttendees} Members</span>
+                        )}
+                      </div>
                       <div className="flex items-baseline justify-center gap-2">
                         {appliedCoupon ? (
                           <>
-                            <span className="text-xs line-through text-neutral-500 font-mono">{event.price}</span>
-                            <span className="text-lg font-bold text-emerald-400">{formattedDisplayPrice}</span>
+                            <span className="text-xs line-through text-neutral-500 font-mono">₹{totalBasePrice}</span>
+                            <span className="text-xl font-bold text-emerald-400 font-mono">{formattedDisplayPrice}</span>
                           </>
                         ) : (
-                          <span className="text-lg font-bold" style={{ color: 'var(--event-highlight)' }}>{event.price}</span>
+                          <span className="text-xl font-bold font-mono" style={{ color: 'var(--event-highlight)' }}>
+                            {formattedDisplayPrice}
+                          </span>
                         )}
                       </div>
+                      {totalAttendees > 1 && !isEventFree(event.price) && (
+                        <span className="text-[10px] font-mono text-neutral-400">
+                          (₹{perTicketPrice} × {totalAttendees} attendees)
+                        </span>
+                      )}
                       {appliedCoupon && (
                         <span className="text-[10px] font-mono text-emerald-400 font-semibold">
                           Code '{appliedCoupon.code}' Applied! (-₹{appliedCoupon.discountAmount})
