@@ -149,19 +149,26 @@ export default function EventAttendeesPage() {
       const { default: autoTable } = await import('jspdf-autotable');
 
       const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-      // Header block
-      doc.setFillColor(22, 22, 24);
-      doc.rect(0, 0, doc.internal.pageSize.getWidth(), 60, 'F');
+      // Header block with sleek dark background
+      doc.setFillColor(18, 18, 22);
+      doc.rect(0, 0, pageWidth, 66, 'F');
+
+      // Title & Event Metadata
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
+      doc.setFontSize(15);
       doc.setFont('helvetica', 'bold');
-      doc.text('Event Attendees', 40, 30);
-      doc.setFontSize(9);
+      doc.text('EVENT ATTENDEES REPORT', 28, 26);
+
+      doc.setFontSize(10);
+      doc.setTextColor(245, 158, 11); // Amber highlight
+      doc.text(event?.title || 'Event Roster', 28, 42);
+
+      doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(160, 160, 160);
-      doc.text(event?.title || '', 40, 45);
-      doc.text(`Exported on ${new Date().toLocaleString()} · Total: ${registrations.length}`, 40, 55);
+      doc.setTextColor(160, 160, 168);
+      doc.text(`Exported on ${new Date().toLocaleString()}  ·  Total Registrations: ${registrations.length}`, 28, 55);
 
       const tableRows = registrations.map((reg, idx) => {
         let answers = '';
@@ -171,11 +178,11 @@ export default function EventAttendeesPage() {
         } catch {}
         return [
           idx + 1,
-          reg.name,
-          reg.email,
+          reg.name || '—',
+          reg.email || '—',
           reg.phone || '—',
-          reg.ticketCode,
-          reg.status,
+          reg.ticketCode || '—',
+          reg.status || 'APPROVED',
           reg.paymentMethod || '—',
           reg.paymentTxnId || '—',
           answers || '—',
@@ -184,45 +191,49 @@ export default function EventAttendeesPage() {
       });
 
       autoTable(doc, {
-        startY: 70,
+        startY: 76,
         head: [['#', 'Name', 'Email', 'Phone', 'Ticket Code', 'Status', 'Payment', 'Txn ID', 'Answers', 'Date']],
         body: tableRows,
         styles: {
           fontSize: 7.5,
-          cellPadding: 5,
-          textColor: [30, 30, 30],
+          cellPadding: 6,
+          textColor: [24, 24, 27],
+          valign: 'middle',
+          lineColor: [228, 228, 231],
+          lineWidth: 0.3,
         },
         headStyles: {
-          fillColor: [30, 30, 34],
-          textColor: [220, 220, 220],
+          fillColor: [24, 24, 28],
+          textColor: [255, 255, 255],
           fontStyle: 'bold',
-          fontSize: 7,
+          fontSize: 7.5,
+          halign: 'left',
         },
         alternateRowStyles: {
           fillColor: [248, 248, 250],
         },
         columnStyles: {
-          0: { cellWidth: 20 },
-          1: { cellWidth: 80 },
-          2: { cellWidth: 110 },
-          3: { cellWidth: 65 },
-          4: { cellWidth: 75 },
-          5: { cellWidth: 50 },
-          6: { cellWidth: 50 },
-          7: { cellWidth: 75 },
-          8: { cellWidth: 100 },
-          9: { cellWidth: 55 },
+          0: { cellWidth: 24, halign: 'center' },
+          1: { cellWidth: 96, fontStyle: 'bold' },
+          2: { cellWidth: 165 }, // Generous width for email addresses to stay on 1 clean line!
+          3: { cellWidth: 76 },
+          4: { cellWidth: 80, fontStyle: 'bold' },
+          5: { cellWidth: 65, halign: 'center', fontStyle: 'bold' }, // Prevents APPROVED from wrapping!
+          6: { cellWidth: 55, halign: 'center' },
+          7: { cellWidth: 105 }, // Generous width for transaction IDs!
+          8: { cellWidth: 70 },
+          9: { cellWidth: 49, halign: 'center' },
         },
-        margin: { left: 40, right: 40 },
+        margin: { left: 28, right: 28 },
         didDrawPage: (data) => {
           // Page footer
           const pageCount = (doc as unknown as { internal: { pages: unknown[] } }).internal.pages.length - 1;
           doc.setFontSize(7);
-          doc.setTextColor(150, 150, 150);
+          doc.setTextColor(140, 140, 148);
           doc.text(
             `Page ${data.pageNumber} of ${pageCount}  ·  StudentForge Events`,
-            40,
-            doc.internal.pageSize.getHeight() - 15
+            28,
+            doc.internal.pageSize.getHeight() - 14
           );
         },
       });
