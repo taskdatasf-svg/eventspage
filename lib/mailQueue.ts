@@ -29,7 +29,7 @@ export type MailJobPayload = BroadcastMailPayload | RegistrationMailPayload;
 
 export const QUEUE_NAME = 'mail-broadcast-queue';
 export const DAILY_LIMIT = 90; // 90 emails max per 24 hours (Resend Free Tier Limit)
-export const BATCH_DELAY_MS = 3000; // 3 seconds gap between mails
+export const BATCH_DELAY_MS = 10000; // 10 seconds gap between mails to ensure Inbox delivery & avoid Promotions/Spam tabs
 
 const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 
