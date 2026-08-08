@@ -126,12 +126,22 @@ async function generateVipTicketPdfBuffer(event: any, registration: any, guestRo
     doc.text((event.location || 'Online').substring(0, 24), 58, 59.5);
 
     // Bottom Pass Badge (Clean minimalist pill)
+    let badgeText = 'COMPLIMENTARY VIP GUEST PASS';
+    const cleanRole = (guestRole || '').toLowerCase();
+    if (cleanRole.includes('employee')) {
+      badgeText = 'OFFICIAL EMPLOYEE PASS';
+    } else if (cleanRole.includes('complimentary')) {
+      badgeText = 'COMPLIMENTARY ENTRY PASS';
+    } else if (cleanRole.includes('speaker')) {
+      badgeText = 'OFFICIAL SPEAKER PASS';
+    }
+
     doc.setFillColor(244, 244, 245);
     doc.roundedRect(8, 64.5, 88, 6.5, 1.5, 1.5, 'F');
     doc.setTextColor(82, 82, 91);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(6.5);
-    doc.text('COMPLIMENTARY VIP GUEST PASS', 52, 68.7, { align: 'center' });
+    doc.text(badgeText, 52, 68.7, { align: 'center' });
 
     // Stub Vertical Divider
     doc.setDrawColor(212, 212, 216);

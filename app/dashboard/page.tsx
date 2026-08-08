@@ -134,7 +134,7 @@ export default function DashboardPage() {
   const [inviteSelectedEventId, setInviteSelectedEventId] = useState('');
   const [inviteGuestName, setInviteGuestName] = useState('');
   const [inviteGuestEmail, setInviteGuestEmail] = useState('');
-  const [inviteGuestRole, setInviteGuestRole] = useState('Keynote Speaker');
+  const [inviteGuestRole, setInviteGuestRole] = useState('Complimentary Pass');
   const [invitePersonalMessage, setInvitePersonalMessage] = useState('');
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteSuccessData, setInviteSuccessData] = useState<{ ticketCode: string; inviteUrl: string; guestName: string } | null>(null);
@@ -1752,8 +1752,10 @@ export default function DashboardPage() {
                   <select
                     value={inviteGuestRole}
                     onChange={(e) => setInviteGuestRole(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-[#1a1b22] border border-[#2e2e34] focus:border-amber-500/50 rounded-xl text-xs text-white focus:outline-none cursor-pointer"
+                    className="w-full px-3.5 py-2 bg-[#1a1b22] border border-[#2e2e34] focus:border-amber-500/50 rounded-xl text-xs text-white focus:outline-none cursor-pointer font-medium"
                   >
+                    <option value="Employee Pass">Employee Pass (Free Entry for Staff)</option>
+                    <option value="Complimentary Pass">Complimentary Pass (Free Entry for Guests)</option>
                     <option value="Keynote Speaker">Keynote Speaker</option>
                     <option value="Guest Speaker">Guest Speaker</option>
                     <option value="Panelist">Panelist</option>
