@@ -151,24 +151,41 @@ export default function EventAttendeesPage() {
       const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
       const pageWidth = doc.internal.pageSize.getWidth();
 
-      // Header block with sleek dark background
-      doc.setFillColor(18, 18, 22);
-      doc.rect(0, 0, pageWidth, 66, 'F');
+      // Ultra-Clean Light Header (White background with crisp dark typography)
+      doc.setFillColor(255, 255, 255);
+      doc.rect(0, 0, pageWidth, 75, 'F');
 
-      // Title & Event Metadata
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(15);
-      doc.setFont('helvetica', 'bold');
-      doc.text('EVENT ATTENDEES REPORT', 28, 26);
-
+      // Top Brand Header
+      doc.setTextColor(24, 24, 27);
       doc.setFontSize(10);
-      doc.setTextColor(245, 158, 11); // Amber highlight
-      doc.text(event?.title || 'Event Roster', 28, 42);
+      doc.setFont('helvetica', 'bold');
+      doc.text('STUDENT FORGE', 28, 24);
 
+      // Report Sub-title
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(24, 24, 27);
+      doc.text('Event Attendees Report', 28, 42);
+
+      // Event Name
+      doc.setFontSize(9.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(82, 82, 91);
+      doc.text(event?.title || 'Event Roster', 28, 56);
+
+      // Right-aligned Export Metadata
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(160, 160, 168);
-      doc.text(`Exported on ${new Date().toLocaleString()}  ·  Total Registrations: ${registrations.length}`, 28, 55);
+      doc.setTextColor(113, 113, 122);
+      doc.text(`Exported: ${new Date().toLocaleString()}`, pageWidth - 28, 42, { align: 'right' });
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(24, 24, 27);
+      doc.text(`Total Registrations: ${registrations.length}`, pageWidth - 28, 56, { align: 'right' });
+
+      // Subtle Divider Hairline Line
+      doc.setDrawColor(228, 228, 231);
+      doc.setLineWidth(0.5);
+      doc.line(28, 64, pageWidth - 28, 64);
 
       const tableRows = registrations.map((reg, idx) => {
         let answers = '';
@@ -191,7 +208,7 @@ export default function EventAttendeesPage() {
       });
 
       autoTable(doc, {
-        startY: 76,
+        startY: 74,
         head: [['#', 'Name', 'Email', 'Phone', 'Ticket Code', 'Status', 'Payment', 'Txn ID', 'Answers', 'Date']],
         body: tableRows,
         styles: {
@@ -203,14 +220,16 @@ export default function EventAttendeesPage() {
           lineWidth: 0.3,
         },
         headStyles: {
-          fillColor: [24, 24, 28],
-          textColor: [255, 255, 255],
+          fillColor: [244, 244, 245], // Crisp soft light gray header bar
+          textColor: [24, 24, 27], // Dark crisp header text
           fontStyle: 'bold',
           fontSize: 7.5,
           halign: 'left',
+          lineColor: [228, 228, 231],
+          lineWidth: 0.4,
         },
         alternateRowStyles: {
-          fillColor: [248, 248, 250],
+          fillColor: [252, 252, 253],
         },
         columnStyles: {
           0: { cellWidth: 24, halign: 'center' },
