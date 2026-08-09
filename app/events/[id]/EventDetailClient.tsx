@@ -911,20 +911,31 @@ export default function EventDetailClient({ eventId, initialEvent }: EventDetail
                   <span className="text-[10px] uppercase font-mono tracking-widest text-neutral-200 font-semibold flex items-center gap-1">
                     Networking Partner
                   </span>
-                  <div className="flex items-center gap-3.5 p-3.5 bg-white/95 border border-white rounded-xl shadow-md transition-transform hover:scale-[1.01]">
-                    <div className="h-14 min-w-[120px] px-2 py-0.5 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-inner overflow-hidden">
-                      <img
-                        src="https://ik.imagekit.io/dypkhqxip/peopld"
-                        alt="Peopld Networking Partner"
-                        className="h-14 w-auto object-contain max-w-[180px] sm:max-w-[220px] scale-140 transform-gpu"
-                        onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                      />
+                  <a
+                    href="https://www.peopld.in/event/incept-edition-01-50ca84e6/register"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between gap-3.5 p-3.5 bg-white/95 hover:bg-white border border-white rounded-xl shadow-md transition-all hover:scale-[1.01] group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="h-14 min-w-[120px] px-2 py-0.5 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-inner overflow-hidden">
+                        <img
+                          src="https://ik.imagekit.io/dypkhqxip/peopld"
+                          alt="Peopld Networking Partner"
+                          className="h-14 w-auto object-contain max-w-[180px] sm:max-w-[220px] scale-140 transform-gpu"
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                        />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-bold text-neutral-900 leading-tight group-hover:text-amber-600 transition-colors">Peopld Pass Portal</span>
+                        <span className="text-[11px] text-neutral-600 font-medium truncate">Incept Edition - 01 Official Registration</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-bold text-neutral-900 leading-tight">Peopld</span>
-                      <span className="text-[11px] text-neutral-600 font-medium">Official Networking Partner</span>
+                    <div className="px-3 py-1.5 bg-amber-500 text-black text-xs font-bold rounded-lg flex items-center gap-1 shrink-0 group-hover:bg-amber-400 transition-colors shadow-sm">
+                      <span>Get Pass</span>
+                      <GoArrowUpRight className="w-3.5 h-3.5" />
                     </div>
-                  </div>
+                  </a>
                 </div>
 
                 {/* Marketplace / Vendor Partners: Yem nest & Fitbasics (JUST LOGOS) */}
